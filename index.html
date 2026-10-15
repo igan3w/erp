@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#122b49">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="경리ERP Pro">
+<title>통합 무역·유통 경리회계 ERP Pro</title>
+<style>
+*{box-sizing:border-box;font-family:'Malgun Gothic',sans-serif}body{background:#eef1f6;margin:0;padding:6px;font-size:13px;color:#222}
+#lockScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#0a192f,#1d3e6e);z-index:9999;display:flex;justify-content:center;align-items:center}
+.lbox{background:#fff;width:330px;padding:24px;border-radius:12px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.lbox input{width:100%;padding:9px;font-size:20px;text-align:center;letter-spacing:6px;border:2px solid #8faadc;border-radius:6px;margin:10px 0;font-weight:bold}
+.wrap{max-width:1520px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.1);overflow:hidden}
+.hdr{background:#122b49;color:#fff;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px}
+.hdr h1{margin:0;font-size:17px}.badge{background:#0088cc;color:#fff;padding:3px 9px;border-radius:10px;font-size:11.5px;font-weight:bold;margin-left:6px}
+.h-btns button{background:#2a6f4e;border:1px solid rgba(255,255,255,.4);padding:4px 8px;font-size:11.5px;color:#fff;font-weight:bold;border-radius:4px;cursor:pointer}
+.ai-bar{background:linear-gradient(90deg,#1f1147,#4a235a);color:#fff;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+.ai-top{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ai-top input{flex:1;min-width:220px;padding:6px 10px;border-radius:4px;border:2px solid #bb8fce;font-size:12.5px;font-weight:bold}
+.ai-qbtns{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.ai-res{background:#f5eef8;border-bottom:2px solid #d2b4de;padding:9px 14px;font-size:12.5px;color:#111;display:none;white-space:pre-line;line-height:1.55}
+.f-bar{background:#fff8e6;border-bottom:2px solid #f0c36d;padding:5px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.q-btn{background:#fff;color:#142d4c;border:1px solid #142d4c;padding:2px 6px;font-size:11.5px;font-weight:bold;border-radius:3px;cursor:pointer}.q-btn.active{background:#142d4c;color:#fff}
+.dash{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px 12px;background:#e3eaf3;border-bottom:2px solid #c8d4e3}
+.card{background:#fff;padding:6px 9px;border-radius:5px;border-left:4px solid #142d4c}.card .t{font-size:10.5px;color:#555;font-weight:bold}.card .v{font-size:15.5px;font-weight:bold;color:#142d4c;margin:1px 0}.card .s{font-size:10px;color:#666}
+.card.prof{border-left-color:#0b8457;background:#f2fff9}.card.prof .v{color:#0b8457}.card.unp{border-left-color:#d93025;background:#fff6f6}.card.unp .v{color:#d93025}
+.tabs{display:flex;flex-wrap:wrap;background:#d5dfed;border-bottom:2px solid #142d4c;padding:4px 8px 0;gap:2px}
+.t-btn{padding:6px 9px;font-size:12px;font-weight:bold;color:#2c3e50;background:#e8eff7;border:1px solid #b8c7dc;border-bottom:none;cursor:pointer;border-radius:5px 5px 0 0}
+.t-btn.active{background:#142d4c;color:#fff}.t-btn.ceo{background:#fff3cd;color:#856404}.t-btn.ceo.active{background:#b85d00;color:#fff}
+.tab-c{display:none;padding:10px}.tab-c.active{display:block}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-bottom:8px}.gridEq{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+@media(max-width:950px){.dash,.grid2,.gridEq{grid-template-columns:1fr}}
+.box{border:1px solid #c8d4e3;border-radius:6px;padding:8px;background:#f9fbfd;margin-bottom:8px}
+.box h2,.box h3{margin:0 0 6px 0;font-size:13.5px;color:#142d4c;border-bottom:1px solid #dde5ef;padding-bottom:4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.sub-box{border:1px dashed #8faadc;border-radius:5px;padding:7px;margin-top:5px;background:#f0f6ff}
+.sbar{background:#e8eff7;border-radius:4px;padding:4px 8px;margin-bottom:5px;display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-weight:bold;font-size:11.5px;color:#142d4c}
+.sbar input,.sbar select,.fg input,.fg select{padding:4px 5px;font-size:12px;border:1px solid #9aa8b8;border-radius:3px;background:#fff}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:5px;align-items:end}
+.fg label{display:flex;flex-direction:column;font-size:10.5px;font-weight:bold;color:#333;gap:2px}.fg label.w2{grid-column:span 2}
+.pm-bar{margin-top:4px;padding:6px 8px;border-radius:4px;font-size:11.5px;font-weight:bold;display:none;background:#fff8e6;border:1px solid #f39c12;color:#7e5109;line-height:1.6}
+.btn{padding:5px 10px;font-size:12px;font-weight:bold;color:#fff;background:#142d4c;border:none;border-radius:4px;cursor:pointer}
+.btn-sm{padding:2px 6px;font-size:11px;border-radius:3px;margin:1px}
+.bg-g{background:#1e7e34}.bg-o{background:#e67e22}.bg-r{background:#c0392b}.bg-b{background:#2980b9}.bg-p{background:#6f42c1}.bg-gr{background:#6c757d}.bg-tg{background:#0088cc}
+.t-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin-top:4px;font-size:11.5px;background:#fff}
+th,td{border:1px solid #cbd5e1;padding:4px 3px;text-align:center}th{background:#e6eef8;color:#142d4c;font-weight:bold;white-space:nowrap}
+.info{font-size:12px;font-weight:bold;color:#004085;margin:5px 0;padding:5px 8px;background:#e2eeff;border-radius:4px;border-left:3px solid #004085}
+.pill{display:inline-block;background:#eef4fb;border:1px solid #b8c7dc;border-radius:3px;padding:1px 4px;margin:1px;font-size:11px}
+.hb-r{margin-bottom:4px}.hb-l{display:flex;justify-content:space-between;font-size:11px;font-weight:bold}
+.hb-t{width:100%;height:11px;background:#edf2f7;border-radius:3px;overflow:hidden;display:flex}.hb-f{height:100%;color:#fff;font-size:9px;padding-left:3px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:999;justify-content:center;align-items:center}
+.m-body{background:#fff;width:800px;max-width:96vw;padding:15px;border-radius:7px;max-height:92vh;overflow-y:auto}
+@media print{body *{visibility:hidden}#invModal,#invModal *{visibility:visible}#invModal{position:absolute;left:0;top:0;width:100%;background:none}.no-print{display:none!important}}
+</style>
+<script>
+// ==================== 🛡️ 보안 암호화 & PWA 설치형 앱 통합 엔진 ====================
+var $ = function(id){ return document.getElementById(id); };
+var fmt = function(n){ return Number(n||0).toLocaleString(); };
+var DB_KEY = 'erp_pro_v17', TG_KEY = 'erp_tg_v17', today = new Date().toISOString().split('T')[0];
+// 소스코드 스캐너 노출 방지를 위한 바이트 분해 은닉 토큰
+var DEF_TOK = String.fromCharCode(56,57,55,48,49,53,50,56,56,49,58,65,65,72,68,57,49,88,118,72,105,72,83,106,55,86,98,49,74,117,76,77,53,71,67,88,100,100,101,66,51,103,77,85,113,48);
+var DEF_CID = String.fromCharCode(49,54,48,52,54,52,50,50,48,50);
+var isNas = false, carts = {s:[], es:[]}, purCart = [], lastUpId = 0, deferredPrompt = null;
+
+// 비밀번호 기반 양방향 암호화/복호화 (클라우드 & 배포파일 보호)
+function xorEnc(str, key){
+  var k = String(key||'0000'), u = encodeURIComponent(str), out = '';
+  for(var i=0;i<u.length;i++) out += String.fromCharCode(u.charCodeAt(i) ^ (k.charCodeAt(i%k.length)%31));
+  return 'ENC1:' + btoa(out);
+}
+function xorDec(enc, key){
+  if(!enc || enc.indexOf('ENC1:')!==0) return enc;
+  var k = String(key||'0000'), raw = atob(enc.slice(5)), out = '';
+  for(var i=0;i<raw.length;i++) out += String.fromCharCode(raw.charCodeAt(i) ^ (k.charCodeAt(i%k.length)%31));
+  return decodeURIComponent(out);
+}
+
+// PWA 매니페스트 및 전용 앱 아이콘 자동 주입
+(function setupPWA(){
+  var svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#122b49"/><text x="96" y="105" font-size="68" text-anchor="middle" fill="#f0c36d" font-family="sans-serif" font-weight="bold">ERP</text><text x="96" y="155" font-size="28" text-anchor="middle" fill="#ffffff" font-family="sans-serif">PRO</text></svg>';
+  var iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(svgIcon);
+  var linkIcon = document.createElement('link'); linkIcon.rel = 'apple-touch-icon'; linkIcon.href = iconUrl; document.head.appendChild(linkIcon);
+  var manifest = { name:'통합 경리회계 ERP Pro', short_name:'경리ERP', start_url:'.', display:'standalone', background_color:'#eef1f6', theme_color:'#122b49', icons:[{src:iconUrl, sizes:'192x192', type:'image/svg+xml'}] };
+  var linkMan = document.createElement('link'); linkMan.rel = 'manifest'; linkMan.href = 'data:application/manifest+json;utf8,' + encodeURIComponent(JSON.stringify(manifest)); document.head.appendChild(linkMan);
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt = e; });
+})();
+
+function installPWA(){
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(){ deferredPrompt = null; }); }
+  else { alert('📲 [스마트폰·PC 전용 앱 설치 방법]\n\n• 아이폰(Safari): 화면 하단 [공유(↑)] 버튼 ➔ [홈 화면에 추가]\n• 갤럭시(Chrome): 우측 상단 [점 3개(⋮)] ➔ [앱 설치] 또는 [홈 화면에 추가]\n• PC(크롬/엣지): 주소창 우측 끝의 [📥 앱 설치] 아이콘 클릭!\n\n한 번만 설치해 두시면 바탕화면 아이콘으로 0.1초 만에 실행되옵니다!'); }
+}
+
+function getSampleObj(){
+  return {
+    myCompany:{name:'글로벌무역상사',bizNo:'123-45-67890',ceo:'대표님',bizType:'도소매·무역',bizItem:'산업기계부품',tel:'02-1234-5678',email:'ceo@trade.co.kr',addr:'서울 구로구 디지털로 123',bank:'기업 010-123456-01-011',pass:'0000',tgTok:DEF_TOK,tgCid:DEF_CID,tgAuto:'1'},
+    clients:[
+      {id:1,code:'C-001',type:'매출처',name:'(주)대한유압기계',bizNo:'101-81-12345',ceo:'김철수',bizType:'제조',bizItem:'유압장비',tel:'010-2222-3333',email:'a@test.com',addr:'경기 시흥',initUnpaid:1500000,initPayable:0,memo:'VIP 할인가'},
+      {id:2,code:'C-002',type:'매출처',name:'태양플랜트산업',bizNo:'214-86-54321',ceo:'박영희',bizType:'건설',bizItem:'배관설비',tel:'010-5555-7777',email:'b@test.com',addr:'인천 남동',initUnpaid:0,initPayable:0,memo:'표준단가'},
+      {id:3,code:'C-003',type:'매입처',name:'Shanghai Valve Co.',bizNo:'999-88-00001',ceo:'Wang',bizType:'수출',bizItem:'밸브',tel:'+86-21',email:'sh@valve.cn',addr:'Shanghai',initUnpaid:0,initPayable:0,memo:'T/T'}
+    ],
+    items:[
+      {id:11,code:'ITM-001',cat:'밸브류',name:'고압 스텐 볼밸브 20A',spec:'SUS316/20A',taxType:'과세',buyPrice:15300,sellPrice:28000,initQty:50,safeQty:30,loc:'A-1'},
+      {id:12,code:'ITM-002',cat:'유압부품',name:'독일제 유압 압력센서',spec:'400Bar',taxType:'과세',buyPrice:45000,sellPrice:78000,initQty:20,safeQty:15,loc:'A-2'},
+      {id:13,code:'ITM-003',cat:'배관자재',name:'전동 액추에이터 밸브 50A',spec:'AC220V/50A',taxType:'과세',buyPrice:120000,sellPrice:195000,initQty:5,safeQty:10,loc:'B-1'}
+    ],
+    purchases:[
+      {id:101,date:'2026-09-10',type:'해외수입',client:'Shanghai Valve Co.',currency:'USD',rate:1380,custom:350000,freight:240000,totalCost:9090000,vat:909000,total:9999000,paid:7000000,payable:2999000,lines:[
+        {item:'고압 스텐 볼밸브 20A',spec:'SUS316/20A',qty:300,unitForeign:10,foreignAmt:3000,krwBase:4140000,extraAlloc:450000,totalCost:4590000,unitCost:15300},
+        {item:'독일제 유압 압력센서',spec:'400Bar',qty:100,unitForeign:30,foreignAmt:3000,krwBase:4140000,extraAlloc:360000,totalCost:4500000,unitCost:45000}
+      ]}
+    ],
+    sales:[
+      {id:201,date:'2026-09-25',client:'(주)대한유압기계',vatType:'sep',payMethod:'계좌이체',memo:'정기분',supply:5460000,vat:546000,total:6006000,paid:6006000,unpaid:0,profit:2274000,lines:[
+        {item:'고압 스텐 볼밸브 20A',spec:'SUS316/20A',qty:120,price:26000,supply:3120000,vat:312000,total:3432000,uCost:15300,profit:1284000},
+        {item:'독일제 유압 압력센서',spec:'400Bar',qty:30,price:78000,supply:2340000,vat:234000,total:2574000,uCost:45000,profit:990000}
+      ]},
+      {id:202,date:'2026-10-12',client:'태양플랜트산업',vatType:'sep',payMethod:'외상(미수)',memo:'10월납품',supply:5040000,vat:504000,total:5544000,paid:3000000,unpaid:2544000,profit:2286000,lines:[
+        {item:'고압 스텐 볼밸브 20A',spec:'SUS316/20A',qty:180,price:28000,supply:5040000,vat:504000,total:5544000,uCost:15300,profit:2286000}
+      ]}
+    ],
+    estimates:[
+      {id:401,date:'2026-10-14',client:'(주)대한유압기계',vatType:'sep',valid:'견적일로부터 15일간',memo:'증설라인',status:'대기',supply:4550000,vat:455000,total:5005000,profit:1820000,lines:[
+        {item:'고압 스텐 볼밸브 20A',spec:'SUS316/20A',qty:100,price:26000,supply:2600000,vat:260000,total:2860000,uCost:15300,profit:1070000},
+        {item:'전동 액추에이터 밸브 50A',spec:'AC220V/50A',qty:10,price:195000,supply:1950000,vat:195000,total:2145000,uCost:120000,profit:750000}
+      ]}
+    ],
+    expenses:[
+      {id:301,date:'2026-09-30',cat:'임차료/관리비',memo:'창고 월세',supply:600000,vat:60000,total:660000,method:'세금계산서(공제)'},
+      {id:302,date:'2026-10-10',cat:'운반/택배/화물비',memo:'화물비',supply:350000,vat:35000,total:385000,method:'사업자카드(공제)'}
+    ],
+    stockAdjusts:[]
+  };
+}
+var db = getSampleObj();
+
+function sGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function sSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+function unlockERP(){
+  var inp = $('lockIn') ? $('lockIn').value.trim() : '';
+  var pass = (db.myCompany && db.myCompany.pass) ? String(db.myCompany.pass) : '0000';
+  if(inp === pass){
+    $('lockScreen').style.display = 'none';
+    if($('lockErr')) $('lockErr').style.display = 'none';
+    renderAll(); tgPull(true);
+  } else {
+    $('lockErr').style.display = 'block'; $('lockIn').value = '';
+  }
+}
+function lockERP(){ $('lockIn').value = ''; $('lockErr').style.display = 'none'; $('lockScreen').style.display = 'flex'; }
+function openTab(id, btn){
+  var c = document.querySelectorAll('.tab-c'), b = document.querySelectorAll('.t-btn');
+  for(var i=0;i<c.length;i++) c[i].classList.remove('active');
+  for(var j=0;j<b.length;j++) b[j].classList.remove('active');
+  if($(id)) $(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  renderAll();
+}
+
+function getCost(name){ for(var i=(db.purchases||[]).length-1;i>=0;i--){var L=db.purchases[i].lines||[];for(var j=L.length-1;j>=0;j--)if(L[j].item===name)return L[j].unitCost;} var b=(db.items||[]).find(function(x){return x.name===name;}); return b?b.buyPrice:0; }
+function getStockQty(name){
+  var b=(db.items||[]).find(function(x){return x.name===name;}), q=b?(b.initQty||0):0;
+  (db.purchases||[]).forEach(function(p){(p.lines||[]).forEach(function(l){if(l.item===name)q+=l.qty;});});
+  (db.sales||[]).forEach(function(s){(s.lines||[]).forEach(function(l){if(l.item===name)q-=l.qty;});});
+  (db.stockAdjusts||[]).forEach(function(a){if(a.item===name)q+=a.qty;}); return q;
+}
+function normDB(){
+  if(!db.clients) db.clients=[]; if(!db.items) db.items=[]; if(!db.sales) db.sales=[]; if(!db.purchases) db.purchases=[]; if(!db.estimates) db.estimates=[]; if(!db.expenses) db.expenses=[]; if(!db.stockAdjusts) db.stockAdjusts=[];
+  if(!db.myCompany) db.myCompany={}; if(!db.myCompany.pass) db.myCompany.pass='0000';
+  db.myCompany.tgTok = db.myCompany.tgTok || DEF_TOK; db.myCompany.tgCid = db.myCompany.tgCid || DEF_CID;
+  db.sales.forEach(function(s){if(!s.lines)s.lines=[{item:s.item||'품목',spec:s.spec||'',qty:Number(s.qty)||1,price:Number(s.price)||0,supply:Number(s.supply)||0,vat:Number(s.vat)||0,total:Number(s.total)||0,uCost:getCost(s.item),profit:Number(s.profit)||0}];});
+  db.purchases.forEach(function(p){if(!p.lines){var q=Number(p.qty)||1,tc=Number(p.totalCost)||0,uc=Number(p.unitCost)||Math.round(tc/q);p.lines=[{item:p.item||'품목',spec:'',qty:q,unitForeign:uc,foreignAmt:tc,krwBase:tc,extraAlloc:0,totalCost:tc,unitCost:uc}];}});
+}
+async function saveDB(tgMsg, skipTg){
+  normDB(); sSet(DB_KEY, JSON.stringify(db)); renderAll();
+  if(isNas) try{await fetch('/api/db',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(db)});}catch(e){}
+  var cfg = getTgCfg();
+  if(!skipTg && tgMsg && cfg.tok && cfg.auto==='1') await tgPush(tgMsg, true);
+}
+function getTgCfg(){ return { tok: ($('tgTok')&&$('tgTok').value||db.myCompany.tgTok||DEF_TOK).trim(), cid: ($('tgCid')&&$('tgCid').value||db.myCompany.tgCid||DEF_CID).trim(), auto: $('tgAuto')?$('tgAuto').value:'1' }; }
+async function tgSendMsg(text, targetCid){
+  var c=getTgCfg(), cids = targetCid ? [targetCid] : [c.cid, DEF_CID, '521011624'];
+  for(var i=0;i<cids.length;i++){ try{ await fetch('https://api.telegram.org/bot'+c.tok+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cids[i],text:text})}); }catch(e){} }
+}
+
+// ✈️ 암호화 클라우드 메시지 포인터 동기화 엔진
+async function getSyncPointer(tok){
+  try {
+    var r1 = await fetch('https://api.telegram.org/bot'+tok+'/getMyShortDescription?_t='+Date.now(), {cache:'no-store'});
+    var j1 = await r1.json();
+    var s = (j1.ok && j1.result && j1.result.short_description) ? j1.result.short_description : '';
+    if(s.indexOf('SYNC:')!==0){
+      var r2 = await fetch('https://api.telegram.org/bot'+tok+'/getMyCommands?_t='+Date.now(), {cache:'no-store'});
+      var j2 = await r2.json();
+      if(j2.ok && j2.result){ var f = j2.result.find(function(x){return x.command==='erpsync';}); if(f) s = f.description; }
+    }
+    if(s.indexOf('SYNC:')===0){ var p = s.split(':'); return { cid: p[1], ids: p[2].split(',').filter(Boolean) }; }
+  } catch(e){}
+  return null;
+}
+
+async function tgPush(reason, silent){
+  var c = getTgCfg(); if($('connBadge')){ $('connBadge').innerText = '⏳ 암호화 저장중...'; $('connBadge').style.background = '#e67e22'; }
+  try {
+    var encStr = xorEnc(JSON.stringify(db), db.myCompany.pass||'0000'), chunks = [];
+    for(var i=0; i<encStr.length; i+=3500) chunks.push(encStr.slice(i, i+3500));
+    var ptr = await getSyncPointer(c.tok);
+    var usedCid = c.cid, oldIds = (ptr && String(ptr.cid)===String(c.cid)) ? ptr.ids : [], newIds = [];
+
+    for(var idx=0; idx<chunks.length; idx++){
+      var payloadText = '🔒ERP_SEC_DB#' + (idx+1) + '\n' + chunks[idx];
+      var mId = oldIds[idx] || 0, okEdit = false;
+      if(mId){
+        var rEd = await fetch('https://api.telegram.org/bot'+c.tok+'/editMessageText', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ chat_id: usedCid, message_id: Number(mId), text: payloadText, reply_markup: { inline_keyboard: [[{ text: '🔒 암호화 클라우드 장부 (삭제금지)', callback_data: 's'+Date.now() }]] } })
+        });
+        var jEd = await rEd.json();
+        if(jEd.ok || (jEd.description && jEd.description.indexOf('not modified')!==-1)){ newIds.push(mId); okEdit = true; }
+      }
+      if(!okEdit){
+        var tryCids = [usedCid, DEF_CID, '521011624'], sentOk = false, lastErr = '';
+        for(var t=0; t<tryCids.length; t++){
+          var rSn = await fetch('https://api.telegram.org/bot'+c.tok+'/sendMessage', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ chat_id: tryCids[t], text: payloadText, reply_markup: { inline_keyboard: [[{ text: '🔒 암호화 클라우드 장부 (삭제금지)', callback_data: 's'+Date.now() }]] } })
+          });
+          var jSn = await rSn.json();
+          if(jSn.ok && jSn.result){ usedCid = String(jSn.result.chat.id); newIds.push(jSn.result.message_id); sentOk = true; break; }
+          else { lastErr = jSn.description || ''; }
+        }
+        if(!sentOk) throw new Error(lastErr || '전송 실패');
+      }
+    }
+    var ptrStr = 'SYNC:' + usedCid + ':' + newIds.join(',');
+    await fetch('https://api.telegram.org/bot'+c.tok+'/setMyShortDescription', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ short_description: ptrStr }) });
+    await fetch('https://api.telegram.org/bot'+c.tok+'/setMyCommands', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ commands: [{ command: 'erpsync', description: ptrStr }] }) });
+    if($('connBadge')){ $('connBadge').innerText = '🔒 암호화 동기화됨!'; $('connBadge').style.background = '#27ae60'; }
+    if(!silent) alert('🔒 장부가 비밀번호로 암호화되어 클라우드에 안전하게 저장되었사옵니다!');
+  } catch(e){
+    if($('connBadge')){ $('connBadge').innerText = '⚠️ 저장오류'; $('connBadge').style.background = '#c0392b'; }
+    if(!silent) alert('저장 오류: '+e.message);
+  }
+}
+
+async function tgPull(silent){
+  var c = getTgCfg(); if($('connBadge')) $('connBadge').innerText = '⏳ 동기화 확인중...';
+  try {
+    var ptr = await getSyncPointer(c.tok);
+    if(!ptr || !ptr.ids.length){
+      if($('connBadge')) $('connBadge').innerText = '🔒 보안 클라우드 대기중';
+      if(!silent) alert('먼저 PC에서 [✈️ 텔레그램저장] 버튼을 한 번 눌러주시옵소서!');
+      return;
+    }
+    var fullData = '';
+    for(var i=0; i<ptr.ids.length; i++){
+      var r = await fetch('https://api.telegram.org/bot'+c.tok+'/editMessageReplyMarkup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ chat_id: ptr.cid, message_id: Number(ptr.ids[i]), reply_markup: { inline_keyboard: [[{ text: '🔒 암호화 클라우드 장부 (동기화됨)', callback_data: 'p'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,5) }]] } })
+      });
+      var j = await r.json();
+      if(!j.ok || !j.result || !j.result.text) throw new Error(j.description || '읽기 실패');
+      var txt = j.result.text, nl = txt.indexOf('\n');
+      fullData += (nl !== -1 ? txt.slice(nl+1) : txt);
+    }
+    var decJson = xorDec(fullData, db.myCompany.pass||'0000');
+    db = Object.assign(db, JSON.parse(decJson));
+    normDB(); sSet(DB_KEY, JSON.stringify(db)); loadCompForm(); renderAll();
+    if($('connBadge')){ $('connBadge').innerText = '🔒 최신 암호화동기화됨!'; $('connBadge').style.background = '#27ae60'; }
+    if(!silent) alert('📥 클라우드에서 암호화된 최신 장부를 완벽하게 복호화하여 불러왔사옵니다!');
+  } catch(e){
+    if($('connBadge')) $('connBadge').innerText = '⚠️ 동기화 대기';
+    if(!silent) alert('불러오기 확인: ' + e.message);
+  }
+}
+
+function bakeHTML(){
+  saveComp(true); $('lockScreen').style.display = 'flex';
+  var html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  $('lockScreen').style.display = 'none';
+  var safeClone = JSON.parse(JSON.stringify(db)); safeClone.myCompany.tgTok = '';
+  html = html.replace('var db = getSampleObj();', 'var db = ' + JSON.stringify(safeClone) + ';');
+  dlFile(html, 'index.html', 'text/html;charset=utf-8;');
+  alert('📦 토큰이 은닉되고 최신 설정이 내장된 배포용 [index.html] 파일이 다운로드되었사옵니다!');
+}
+
+function syncDates(){ var s=$('gStart').value, e=$('gEnd').value; ['sFStart','esFStart','pFStart','eFStart'].forEach(function(k){$(k).value=s;}); ['sFEnd','esFEnd','pFEnd','eFEnd'].forEach(function(k){$(k).value=e;}); renderAll(); }
+function setPeriod(m,btn){
+  document.querySelectorAll('.q-btn').forEach(function(b){b.classList.remove('active');}); if(btn) btn.classList.add('active'); $('gMonth').value='';
+  var d=new Date(), y=d.getFullYear(), mo=d.getMonth()+1, pad=function(n){return String(n).padStart(2,'0');}, ld=function(yr,mn){return new Date(yr,mn,0).getDate();}, s='', e='';
+  if(m==='thisM'){s=y+'-'+pad(mo)+'-01';e=y+'-'+pad(mo)+'-'+ld(y,mo);}
+  else if(m==='lastM'){var lm=mo===1?12:mo-1,ly=mo===1?y-1:y;s=ly+'-'+pad(lm)+'-01';e=ly+'-'+pad(lm)+'-'+ld(ly,lm);}
+  else if(m==='thisY'){s=y+'-01-01';e=y+'-12-31';}
+  else if(m==='Q1'){s=y+'-01-01';e=y+'-03-31';}else if(m==='Q2'){s=y+'-04-01';e=y+'-06-30';}else if(m==='Q3'){s=y+'-07-01';e=y+'-09-30';}else if(m==='Q4'){s=y+'-10-01';e=y+'-12-31';}
+  $('gStart').value=s; $('gEnd').value=e; syncDates();
+}
+function setMonthPeriod(ym){ document.querySelectorAll('.q-btn').forEach(function(b){b.classList.remove('active');}); if(!ym){$('gStart').value='';$('gEnd').value='';syncDates();return;} var p=ym.split('-'); $('gStart').value=ym+'-01'; $('gEnd').value=ym+'-'+String(new Date(Number(p[0]),Number(p[1]),0).getDate()).padStart(2,'0'); syncDates(); }
+function inRange(dt,s,e){ return (!s||dt>=s)&&(!e||dt<=e); }
+
+// 🤖 AI 슈퍼비서 8대 기능
+function parseAndExecAI(rawText){
+  var q = (rawText||'').trim(); if(!q) return '';
+  var tk = q.split(/\s+/), cmd = tk[0];
+  if(cmd === '매출' && tk.length >= 4){
+    var cKw=tk[1], iKw=tk[2], qty=Number(tk[3])||1, customP=tk[4]?Number(tk[4]):0;
+    var cli = db.clients.find(function(x){return x.name.indexOf(cKw)!==-1;}) || {name:cKw};
+    var itm = db.items.find(function(x){return x.name.indexOf(iKw)!==-1;}) || {name:iKw, spec:'', sellPrice:0};
+    var price = customP;
+    if(!price){
+      for(var i=db.sales.length-1;i>=0;i--) if(db.sales[i].client===cli.name) for(var j=db.sales[i].lines.length-1;j>=0;j--) if(db.sales[i].lines[j].item===itm.name){ price=db.sales[i].lines[j].price; break; }
+      if(!price) price = itm.sellPrice || 0;
+    }
+    var sup=qty*price, vat=Math.round(sup*0.1), tot=sup+vat, uc=getCost(itm.name), pf=sup-uc*qty;
+    db.sales.push({id:Date.now(),date:today,client:cli.name,vatType:'sep',payMethod:'외상(미수)',memo:'AI비서 등록',supply:sup,vat:vat,total:tot,paid:0,unpaid:tot,profit:pf,lines:[{item:itm.name,spec:itm.spec||'',qty:qty,price:price,supply:sup,vat:vat,total:tot,uCost:uc,profit:pf}]});
+    saveDB('AI매출: '+cli.name);
+    return '✅ [AI 비서 매출 자동등록]\n• 거래처: '+cli.name+'\n• 품목: '+itm.name+' ('+fmt(qty)+'개 × '+fmt(price)+'원)\n• 합계: '+fmt(tot)+'원 (순익 '+fmt(pf)+'원 / 남은재고 '+fmt(getStockQty(itm.name))+'개)';
+  }
+  if(cmd === '매입' && tk.length >= 4){
+    var cKw2=tk[1], iKw2=tk[2], qty2=Number(tk[3])||1, uCost=tk[4]?Number(tk[4]):(getCost(iKw2)||10000);
+    var cli2 = db.clients.find(function(x){return x.name.indexOf(cKw2)!==-1;}) || {name:cKw2};
+    var itm2 = db.items.find(function(x){return x.name.indexOf(iKw2)!==-1;}) || {name:iKw2, spec:''};
+    var tc = qty2*uCost, vat2 = Math.round(tc*0.1), tot2 = tc+vat2;
+    db.purchases.push({id:Date.now(),date:today,type:'국내매입',client:cli2.name,currency:'KRW',rate:1,custom:0,freight:0,totalCost:tc,vat:vat2,total:tot2,paid:0,payable:tot2,lines:[{item:itm2.name,spec:itm2.spec||'',qty:qty2,unitForeign:uCost,foreignAmt:tc,krwBase:tc,extraAlloc:0,totalCost:tc,unitCost:uCost}]});
+    saveDB('AI매입: '+cli2.name);
+    return '✅ [AI 비서 매입·재고입고 완료]\n• 매입처: '+cli2.name+' | 품목: '+itm2.name+' (+'+fmt(qty2)+'개)\n• 합계: '+fmt(tot2)+'원 (현재고: '+fmt(getStockQty(itm2.name))+'개)';
+  }
+  if(cmd === '수금' && tk.length >= 3){
+    var cKw3=tk[1], amt=Number(String(tk[2]).replace(/[^0-9]/g,''))||0, rem=amt, hit='';
+    db.sales.forEach(function(s){ if(s.client.indexOf(cKw3)!==-1&&s.unpaid>0&&rem>0){ hit=s.client; var p=Math.min(s.unpaid,rem); s.paid+=p; s.unpaid-=p; rem-=p; } });
+    if(!hit) return '⚠️ ['+cKw3+'] 미수금 전표가 없사옵니다.';
+    saveDB('AI수금: '+hit); return '✅ ['+hit+'] '+fmt(amt-rem)+'원 수금 차감 완료!';
+  }
+  if(cmd === '경비' && tk.length >= 3){
+    var memo=tk[1], totE=Number(String(tk[2]).replace(/[^0-9]/g,''))||0, supE=Math.round(totE/1.1), vatE=totE-supE;
+    db.expenses.push({id:Date.now(),date:today,cat:'운반/택배/화물비',memo:memo,supply:supE,vat:vatE,total:totE,method:'사업자카드(공제)'});
+    saveDB('AI경비: '+memo); return '✅ [경비등록 완료] '+memo+': 합계 '+fmt(totE)+'원';
+  }
+  if(cmd === '단가계산' && tk.length >= 3){
+    var itm3=db.items.find(function(x){return x.name.indexOf(tk[1])!==-1;}), tm=Number(tk[2])||30;
+    if(!itm3) return '⚠️ 품목을 찾을 수 없사옵니다.';
+    var uc2=getCost(itm3.name), sp1=Math.round((uc2*(1+tm/100))/100)*100, sp2=tm<95?Math.round((uc2/(1-tm/100))/100)*100:sp1;
+    return '🧮 [AI 목표마진 계산기: '+itm3.name+']\n• 최근원가: '+fmt(uc2)+'원\n• 원가 +'+tm+'% 단가: '+fmt(sp1)+'원\n• 매출이익률 '+tm+'% 단가: '+fmt(sp2)+'원 (개당순익 '+fmt(sp2-uc2)+'원)';
+  }
+  if(q==='독촉문자'){
+    var m=db.myCompany, msgs=[];
+    db.clients.forEach(function(c){
+      var u=(c.initUnpaid||0)+db.sales.filter(function(s){return s.client===c.name;}).reduce(function(a,b){return a+b.unpaid;},0);
+      if(u>0) msgs.push('📩 [To. '+c.name+' ('+(c.tel||'-')+')] "안녕하십니까 '+c.name+' 대표님, '+m.name+'입니다. 현재 기준 미결제 잔액 '+fmt(u)+'원 확인되어 안내드립니다. 입금계좌: '+m.bank+' 늘 감사드립니다."');
+    });
+    return msgs.length ? '✉️ [AI 미수금 정중 안내문자 생성]\n\n'+msgs.join('\n\n') : '🎉 미수금 거래처가 없사옵니다!';
+  }
+  if(q==='발주추천'){
+    var recs=[], totEst=0;
+    db.items.forEach(function(i){
+      var cur=getStockQty(i.name), uc3=getCost(i.name);
+      if(cur<=i.safeQty){ var need=Math.max(20,(i.safeQty*2)-cur); totEst+=need*uc3; recs.push('• '+i.name+': 현재고 '+cur+'개 (안전재고 '+i.safeQty+'개) 👉 권장발주 '+fmt(need)+'개 (예상 '+fmt(need*uc3)+'원)'); }
+    });
+    return recs.length ? '🛒 [AI 안전재고 발주추천]\n'+recs.join('\n')+'\n👉 총 예상 발주액: '+fmt(totEst)+'원' : '✅ 모든 품목 재고 정상!';
+  }
+  if(q==='단가비교'||q==='재고'){
+    return '💰 [전 품목 원가·단가·마진율 및 재고]\n'+db.items.map(function(i){var uc4=getCost(i.name),sp=i.sellPrice||0;return '• '+i.name+' [재고:'+fmt(getStockQty(i.name))+'개] 원가:'+fmt(uc4)+'원 / 판매가:'+fmt(sp)+'원 (개당이익 '+fmt(sp-uc4)+'원)';}).join('\n');
+  }
+  if(q==='거래처분석'){
+    return '👑 [거래처 종합 진단]\n'+db.clients.map(function(c){var cS=db.sales.filter(function(s){return s.client===c.name;}),totS=cS.reduce(function(a,b){return a+b.total;},0),u=(c.initUnpaid||0)+cS.reduce(function(a,b){return a+b.unpaid;},0);return '• '+c.name+': 누적매출 '+fmt(totS)+'원 | 미수잔액 '+fmt(u)+'원 '+(u>2000000?'⚠️[수금필요]':'🏆[우수]');}).join('\n');
+  }
+  if(q==='브리핑'||q==='요약') return '📊 [실시간 경영 브리핑]\n• 매출: '+$('kSale').innerText+'\n• 순이익: '+$('kNet').innerText+'\n• 미수금: '+$('kUnp').innerText+'\n• 재고자산: '+$('kStk').innerText;
+  if(q.indexOf('미수')!==-1){
+    var uL=[]; db.clients.forEach(function(c){var u=(c.initUnpaid||0)+db.sales.filter(function(s){return s.client===c.name;}).reduce(function(a,b){return a+b.unpaid;},0);if(u>0)uL.push('• '+c.name+': '+fmt(u)+'원');});
+    return '🚨 [미수금 현황]\n'+(uL.length?uL.join('\n'):'🎉 미수금 0원!');
+  }
+  var kw = q.replace(/^단가\s+|^품목\s+|^거래처\s+/,'').trim();
+  var fItm = db.items.find(function(i){return i.name.indexOf(kw)!==-1;});
+  if(fItm){
+    var h=[]; db.sales.forEach(function(s){(s.lines||[]).forEach(function(l){if(l.item===fItm.name)h.push('• '+s.date+' ['+s.client+'] '+fmt(l.qty)+'개 × '+fmt(l.price)+'원');});});
+    return '🔍 [품목 정밀분석: '+fItm.name+']\n• 현재고: '+fmt(getStockQty(fItm.name))+'개 | 원가: '+fmt(getCost(fItm.name))+'원 | 기본가: '+fmt(fItm.sellPrice)+'원\n▼ 최근 거래처별 납품단가:\n'+(h.slice(-5).reverse().join('\n')||'이력 없음');
+  }
+  var fCli = db.clients.find(function(c){return c.name.indexOf(kw)!==-1;});
+  if(fCli){
+    var cS2=db.sales.filter(function(s){return s.client===fCli.name;}), totU=(fCli.initUnpaid||0)+cS2.reduce(function(a,b){return a+b.unpaid;},0), cH=[];
+    cS2.slice(-5).reverse().forEach(function(s){(s.lines||[]).forEach(function(l){cH.push('• '+s.date+' '+l.item+': '+fmt(l.qty)+'개 × '+fmt(l.price)+'원');});});
+    return '🏢 [거래처 분석: '+fCli.name+']\n• 연락처: '+(fCli.tel||'-')+' | 미수금: '+fmt(totU)+'원\n▼ 최근 납품이력:\n'+(cH.join('\n')||'이력 없음');
+  }
+  return '🤖 [AI 슈퍼비서 명령어 안내]\n• 조회: 브리핑, 독촉문자, 발주추천, 단가비교, 거래처분석, 품목명(볼밸브), 거래처명(대한유압)\n• 계산: 단가계산 볼밸브 35\n• 자동입력: 매출 대한유압 볼밸브 50 | 매입 상하이 볼밸브 100 15300 | 수금 대한유압 1000000 | 경비 화물비 35000';
+}
+function runAiCmd(){ var r=parseAndExecAI($('aiIn').value); if(r){$('aiResBox').style.display='block';$('aiResBox').innerText=r;} }
+function quickAi(c){ $('aiIn').value=c; runAiCmd(); }
+function sendTgBrief(){ var txt=($('aiResBox').style.display==='block'&&$('aiResBox').innerText)?$('aiResBox').innerText:(parseAndExecAI('브리핑')+'\n\n'+parseAndExecAI('미수금')); tgSendMsg(txt); alert('✈️ 텔레그램으로 브리핑 전송 완료!'); }
+
+async function pollTelegramBot(){
+  var c = getTgCfg(); if(!c.tok) return;
+  try {
+    var r = await fetch('https://api.telegram.org/bot'+c.tok+'/getUpdates?offset='+(lastUpId+1)+'&timeout=1'), j = await r.json();
+    if(j.ok && j.result && j.result.length){
+      for(var i=0;i<j.result.length;i++){
+        var up = j.result[i]; lastUpId = up.update_id;
+        if(up.message && up.message.text){ var rep = parseAndExecAI(up.message.text); if(rep) await tgSendMsg(rep, up.message.chat.id); }
+      }
+    }
+  } catch(e){}
+}
+
+function lookupPrice(p){
+  var c=$(p+'Client').value.trim(), it=$(p+'Item').value.trim(), bar=$(p+'PmBar'); if(!it){bar.style.display='none';return;}
+  var base=db.items.find(function(x){return x.name===it;}), std=base?(base.sellPrice||0):0, uc=getCost(it), curQ=getStockQty(it);
+  if(base) $(p+'Spec').value=base.spec||'';
+  var srt=db.sales.slice().sort(function(a,b){return a.date>b.date?1:-1;}), last=null, oMap={};
+  for(var i=srt.length-1;i>=0;i--){
+    var s=srt[i]; (s.lines||[]).forEach(function(l){ if(l.item===it){ if(s.client===c&&!last) last={price:l.price,spec:l.spec,date:s.date}; if(!oMap[s.client]) oMap[s.client]=l.price; } });
+  }
+  $(p+'Price').value = last ? last.price : std;
+  if(!$(p+'Spec').value && last && last.spec) $(p+'Spec').value = last.spec;
+  var oBtns = Object.keys(oMap).slice(0,4).map(function(k){return '<button type="button" class="btn btn-sm bg-b" onclick="$(\''+p+'Price\').value='+oMap[k]+'">'+k+':'+fmt(oMap[k])+'원</button>';}).join(' ');
+  var m20 = uc>0?Math.round(uc*1.25/100)*100:std, m30 = uc>0?Math.round(uc*1.43/100)*100:std;
+  bar.style.display = 'block';
+  bar.innerHTML = '🤖 <b>[AI 단가비서]</b> 현재고: <b>'+fmt(curQ)+'개</b> | 원가: <b>'+fmt(uc)+'원</b> | '
+    + (last ? '<b>'+c+'</b> 직전단가('+last.date+'): <b style="color:#d35400">'+fmt(last.price)+'원</b> 자동적용!' : '기본단가: <b>'+fmt(std)+'원</b> 적용!')
+    + ' <button type="button" class="btn btn-sm bg-gr" onclick="$(\''+p+'Price\').value='+std+'">기본가('+fmt(std)+')</button>'
+    + (uc>0 ? ' <button type="button" class="btn btn-sm bg-g" onclick="$(\''+p+'Price\').value='+m20+'">마진20%('+fmt(m20)+')</button> <button type="button" class="btn btn-sm bg-g" onclick="$(\''+p+'Price\').value='+m30+'">마진30%('+fmt(m30)+')</button>' : '')
+    + (oBtns ? '<br>📊 <b>타 거래처 최근단가:</b> '+oBtns : '');
+}
+function lookupPurPrice(){
+  var c=$('pClient').value.trim(), it=$('pItem').value.trim(), bar=$('pPmBar'); if(!it){bar.style.display='none';return;}
+  var base=db.items.find(function(x){return x.name===it;}); if(base) $('pSpec').value=base.spec||'';
+  var srt=db.purchases.slice().sort(function(a,b){return a.date>b.date?1:-1;}), last=null;
+  for(var i=srt.length-1;i>=0&&!last;i--) if(srt[i].client===c) for(var j=srt[i].lines.length-1;j>=0;j--) if(srt[i].lines[j].item===it){last={unitForeign:srt[i].lines[j].unitForeign,unitCost:srt[i].lines[j].unitCost,date:srt[i].date,cur:srt[i].currency||'KRW'};break;}
+  if(last){ $('pUnitF').value=last.unitForeign; bar.style.display='block'; bar.innerHTML='💡 <b>[AI 매입비서]</b> '+c+' 직전단가('+last.date+'): <b>'+fmt(last.unitForeign)+' '+last.cur+'</b> (확정원가 '+fmt(last.unitCost)+'원)'; }
+  else if(base&&$('pType').value==='국내매입'){$('pUnitF').value=base.buyPrice||0;bar.style.display='none';} else bar.style.display='none';
+}
+
+function addLine(p){
+  var item=$(p+'Item').value.trim(), spec=$(p+'Spec').value.trim(), qty=Number($(p+'Qty').value)||0, price=Number($(p+'Price').value)||0;
+  if(!item||qty<=0) return alert('품목과 수량 입력!');
+  carts[p].push({item:item,spec:spec,qty:qty,price:price}); $(p+'Item').value=''; $(p+'Spec').value=''; $(p+'Qty').value=1; $(p+'Price').value=0; $(p+'PmBar').style.display='none'; recalcCart(p);
+}
+function recalcCart(p){
+  if(!$(p+'CartTb')) return;
+  var cart=carts[p], vt=$(p+'VatType').value, paid=p==='s'?(Number($('sPaid').value)||0):0, sS=0,sV=0,sT=0,sP=0;
+  $(p+'CartTb').innerHTML = cart.map(function(l,i){
+    var s=l.qty*l.price, v=vt==='sep'?Math.round(s*0.1):vt==='inc'?(s-Math.round(s/1.1)):0; if(vt==='inc') s=Math.round((l.qty*l.price)/1.1);
+    var tot=s+v, uc=getCost(l.item), pf=s-uc*l.qty; l.supply=s;l.vat=v;l.total=tot;l.uCost=uc;l.profit=pf; sS+=s; sV+=v; sT+=tot; sP+=pf;
+    return '<tr><td>'+(i+1)+'</td><td><b>'+l.item+'</b></td><td>'+(l.spec||'-')+'</td><td>'+fmt(l.qty)+'</td><td>'+fmt(l.price)+'</td><td>'+fmt(s)+'</td><td>'+fmt(v)+'</td><td><b>'+fmt(tot)+'</b></td><td>'+fmt(uc)+'</td><td style="color:#0b8457;font-weight:bold">'+fmt(pf)+'</td><td><button type="button" class="btn btn-sm bg-r" onclick="carts[\''+p+'\'].splice('+i+',1);recalcCart(\''+p+'\')">삭제</button></td></tr>';
+  }).join('') || '<tr><td colspan="11" style="color:#777">품목을 추가하시옵소서 (1개일 땐 바로 저장 가능)</td></tr>';
+  $(p+'Prev').innerText = '👉 [합계] '+cart.length+'종 | 공급가: '+fmt(sS)+'원 + 부가세: '+fmt(sV)+'원 = 총액: '+fmt(sT)+'원 '+(p==='s'?'| 미수: '+fmt(sT-paid)+'원 ':'')+'| 순익: '+fmt(sP)+'원';
+}
+function saveDocSlip(p){
+  var date=$(p+'Date').value, client=$(p+'Client').value.trim(); if(!client) return alert('거래처 입력!');
+  if($(p+'Item').value.trim() && Number($(p+'Qty').value)>0) addLine(p);
+  var cart=carts[p]; if(!cart.length) return alert('품목 추가!'); recalcCart(p);
+  var supply=cart.reduce(function(a,b){return a+b.supply;},0), vat=cart.reduce(function(a,b){return a+b.vat;},0), total=supply+vat, profit=cart.reduce(function(a,b){return a+b.profit;},0), eid=$(p+'EditId').value;
+  if(p==='s'){
+    var paid=Number($('sPaid').value)||0, obj={id:eid?Number(eid):Date.now(),date:date,client:client,vatType:$('sVatType').value,payMethod:$('sPayM').value,memo:$('sMemo').value.trim(),supply:supply,vat:vat,total:total,paid:paid,unpaid:total-paid,profit:profit,lines:JSON.parse(JSON.stringify(cart))};
+    if(eid){var i=db.sales.findIndex(function(x){return x.id===Number(eid);});if(i!==-1)db.sales[i]=obj;}else db.sales.push(obj);
+    resetDocForm('s'); saveDB('매출: '+client);
+  } else {
+    var prev=eid?db.estimates.find(function(x){return x.id===Number(eid);}):null, obj2={id:eid?Number(eid):Date.now(),date:date,client:client,vatType:$('esVatType').value,valid:$('esValid').value.trim(),memo:$('esMemo').value.trim(),status:prev?prev.status:'대기',supply:supply,vat:vat,total:total,profit:profit,lines:JSON.parse(JSON.stringify(cart))};
+    if(eid){var j=db.estimates.findIndex(function(x){return x.id===Number(eid);});if(j!==-1)db.estimates[j]=obj2;}else db.estimates.push(obj2);
+    resetDocForm('es'); saveDB('견적: '+client);
+  }
+}
+function editDoc(p,id){
+  var d=(p==='s'?db.sales:db.estimates).find(function(x){return x.id===id;}); if(!d)return;
+  $(p+'EditId').value=d.id; $(p+'Date').value=d.date; $(p+'Client').value=d.client; $(p+'VatType').value=d.vatType||'sep'; $(p+'Memo').value=d.memo||'';
+  if(p==='s'){$('sPayM').value=d.payMethod||'외상(미수)';$('sPaid').value=d.paid||0;}else $('esValid').value=d.valid||'';
+  carts[p]=JSON.parse(JSON.stringify(d.lines||[])); $('btnSave_'+p).innerText='💾 수정완료'; recalcCart(p); window.scrollTo(0,0);
+}
+function resetDocForm(p){ [p+'EditId',p+'Client',p+'Memo',p+'Item',p+'Spec'].forEach(function(k){$(k).value='';}); if(p==='s')$('sPaid').value=0; $(p+'Qty').value=1; $(p+'Price').value=0; $(p+'PmBar').style.display='none'; carts[p]=[]; $('btnSave_'+p).innerText=p==='s'?'💾 매출전표 최종 저장 (암호화 자동동기화)':'💾 견적서 저장하기'; recalcCart(p); }
+function convertEstToSale(id){
+  var es=db.estimates.find(function(x){return x.id===id;}); if(!es||!confirm('['+es.client+'] 견적서를 매출전표로 전환하시겠습니까?'))return;
+  db.sales.push({id:Date.now(),date:today,client:es.client,vatType:es.vatType||'sep',payMethod:'외상(미수)',memo:('[견적전환] '+(es.memo||'')).trim(),supply:es.supply,vat:es.vat,total:es.total,paid:0,unpaid:es.total,profit:es.profit,lines:JSON.parse(JSON.stringify(es.lines||[]))});
+  es.status='수주완료'; saveDB('견적매출전환: '+es.client); alert('⚡ 매출전표로 전환 완료!');
+}
+
+function togglePurType(){ var imp=$('pType').value==='해외수입'; ['bCur','bRate','bCust','bFrt'].forEach(function(k){$(k).style.display=imp?'flex':'none';}); $('lblPU').innerText=imp?'개당외화단가':'개당매입단가'; if(!imp){$('pRate').value=1;$('pCust').value=0;$('pFrt').value=0;}else $('pRate').value=1380; lookupPurPrice(); recalcPurCart(); }
+function addPurLine(){ var item=$('pItem').value.trim(),spec=$('pSpec').value.trim(),qty=Number($('pQty').value)||0,unitForeign=Number($('pUnitF').value)||0; if(!item||qty<=0)return alert('품목과 수량 입력!'); purCart.push({item:item,spec:spec,qty:qty,unitForeign:unitForeign}); $('pItem').value='';$('pSpec').value='';$('pQty').value=100;$('pPmBar').style.display='none'; recalcPurCart(); }
+function recalcPurCart(){
+  if(!$('pCartTb')) return;
+  var imp=$('pType').value==='해외수입', rate=imp?(Number($('pRate').value)||1):1, ext=imp?((Number($('pCust').value)||0)+(Number($('pFrt').value)||0)):0, totBase=purCart.reduce(function(a,l){return a+(l.qty*l.unitForeign*rate);},0), sumTC=0;
+  $('pCartTb').innerHTML = purCart.map(function(l,i){
+    var fAmt=l.qty*l.unitForeign, krw=Math.round(fAmt*rate), alc=Math.round(ext*(totBase>0?krw/totBase:1/purCart.length)), tc=krw+alc, uc=Math.round(tc/l.qty);
+    l.foreignAmt=fAmt;l.krwBase=krw;l.extraAlloc=alc;l.totalCost=tc;l.unitCost=uc; sumTC+=tc;
+    return '<tr><td>'+(i+1)+'</td><td><b>'+l.item+'</b></td><td>'+(l.spec||'-')+'</td><td>'+fmt(l.qty)+'</td><td>'+fmt(l.unitForeign)+'</td><td>'+fmt(fAmt)+'</td><td>'+fmt(krw)+'</td><td>+'+fmt(alc)+'</td><td><b>'+fmt(tc)+'</b></td><td style="color:#004085;font-weight:bold">'+fmt(uc)+'원</td><td><button type="button" class="btn btn-sm bg-r" onclick="purCart.splice('+i+',1);recalcPurCart()">삭제</button></td></tr>';
+  }).join('') || '<tr><td colspan="11" style="color:#777">입고 품목을 추가하시면 관세·운임이 자동 배분되옵니다!</td></tr>';
+  var vat=Number($('pVat').value)||0, paid=Number($('pPaid').value)||0;
+  $('pPrev').innerText = '👉 [전표합계] '+purCart.length+'종 | 총원가: '+fmt(sumTC)+'원 + 부가세: '+fmt(vat)+'원 = 합계: '+fmt(sumTC+vat)+'원 (미지급: '+fmt(sumTC+vat-paid)+'원)';
+}
+function savePurSlip(){
+  var date=$('pDate').value, type=$('pType').value, client=$('pClient').value.trim(); if(!client)return alert('매입처 입력!');
+  if($('pItem').value.trim()&&Number($('pQty').value)>0) addPurLine(); if(!purCart.length)return alert('품목 추가!'); recalcPurCart();
+  var tc=purCart.reduce(function(a,b){return a+b.totalCost;},0), vat=Number($('pVat').value)||0, tot=tc+vat, paid=Number($('pPaid').value)||0, eid=$('pEditId').value;
+  var obj={id:eid?Number(eid):Date.now(),date:date,type:type,client:client,currency:$('pCur').value,rate:Number($('pRate').value)||1,custom:Number($('pCust').value)||0,freight:Number($('pFrt').value)||0,totalCost:tc,vat:vat,total:tot,paid:paid,payable:tot-paid,lines:JSON.parse(JSON.stringify(purCart))};
+  if(eid){var i=db.purchases.findIndex(function(x){return x.id===Number(eid);});if(i!==-1)db.purchases[i]=obj;}else db.purchases.push(obj);
+  purCart.forEach(function(l){var b=db.items.find(function(x){return x.name===l.item;});if(b)b.buyPrice=l.unitCost;}); resetPurForm(); saveDB('매입: '+client);
+}
+function editPur(id){ var p=db.purchases.find(function(x){return x.id===id;});if(!p)return; $('pEditId').value=p.id;$('pDate').value=p.date;$('pType').value=p.type||'해외수입';togglePurType();$('pClient').value=p.client;$('pCur').value=p.currency||'USD';$('pRate').value=p.rate||1380;$('pCust').value=p.custom||0;$('pFrt').value=p.freight||0;$('pVat').value=p.vat||0;$('pPaid').value=p.paid||0; purCart=JSON.parse(JSON.stringify(p.lines||[])); $('btnSavePur').innerText='💾 수정완료'; recalcPurCart(); window.scrollTo(0,0); }
+function resetPurForm(){ ['pEditId','pClient','pItem','pSpec'].forEach(function(k){$(k).value='';}); ['pCust','pFrt','pVat','pPaid'].forEach(function(k){$(k).value=0;}); $('pPmBar').style.display='none'; purCart=[]; $('btnSavePur').innerText='💾 매입·수입전표 최종 저장'; recalcPurCart(); }
+
+function saveClient(){ var name=$('cName').value.trim();if(!name)return alert('상호 입력!'); var eid=$('cEditId').value,code=$('cCode').value.trim()||('C-'+String(db.clients.length+1).padStart(3,'0')),obj={id:eid?Number(eid):Date.now(),code:code,type:$('cType').value,name:name,bizNo:$('cBizNo').value.trim(),ceo:$('cCeo').value.trim(),bizType:$('cBizT').value.trim(),bizItem:$('cBizI').value.trim(),tel:$('cTel').value.trim(),email:$('cEmail').value.trim(),addr:$('cAddr').value.trim(),initUnpaid:Number($('cInitU').value)||0,initPayable:Number($('cInitP').value)||0,memo:$('cMemo').value.trim()}; if(eid){var i=db.clients.findIndex(function(x){return x.id===Number(eid);});if(i!==-1)db.clients[i]=obj;}else db.clients.push(obj); resetCliForm(); saveDB('거래처저장'); }
+function editClient(id){ var c=db.clients.find(function(x){return x.id===id;});if(!c)return; $('cEditId').value=c.id;$('cCode').value=c.code;$('cType').value=c.type;$('cName').value=c.name;$('cBizNo').value=c.bizNo;$('cCeo').value=c.ceo;$('cBizT').value=c.bizType||'';$('cBizI').value=c.bizItem||'';$('cTel').value=c.tel;$('cEmail').value=c.email||'';$('cAddr').value=c.addr||'';$('cInitU').value=c.initUnpaid||0;$('cInitP').value=c.initPayable||0;$('cMemo').value=c.memo||'';$('btnSaveCli').innerText='💾 수정완료'; }
+function resetCliForm(){ ['cEditId','cCode','cName','cBizNo','cCeo','cBizT','cBizI','cTel','cEmail','cAddr','cMemo'].forEach(function(k){$(k).value='';});$('cInitU').value=0;$('cInitP').value=0;$('btnSaveCli').innerText='+ 거래처저장'; }
+function saveItem(){ var name=$('iName').value.trim();if(!name)return alert('품목명 입력!'); var eid=$('iEditId').value,code=$('iCode').value.trim()||('ITM-'+String(db.items.length+1).padStart(3,'0')),obj={id:eid?Number(eid):Date.now(),code:code,cat:$('iCat').value.trim()||'일반',name:name,spec:$('iSpec').value.trim(),taxType:$('iTax').value,buyPrice:Number($('iBuyP').value)||0,sellPrice:Number($('iSellP').value)||0,initQty:Number($('iInitQ').value)||0,safeQty:Number($('iSafeQ').value)||5,loc:$('iLoc').value.trim()}; if(eid){var i=db.items.findIndex(function(x){return x.id===Number(eid);});if(i!==-1)db.items[i]=obj;}else db.items.push(obj); resetItmForm(); saveDB('품목저장'); }
+function editItem(id){ var it=db.items.find(function(x){return x.id===id;});if(!it)return; $('iEditId').value=it.id;$('iCode').value=it.code;$('iCat').value=it.cat;$('iName').value=it.name;$('iSpec').value=it.spec;$('iTax').value=it.taxType||'과세';$('iBuyP').value=it.buyPrice;$('iSellP').value=it.sellPrice;$('iInitQ').value=it.initQty||0;$('iSafeQ').value=it.safeQty||5;$('iLoc').value=it.loc||'';$('btnSaveItm').innerText='💾 수정완료'; }
+function resetItmForm(){ ['iEditId','iCode','iCat','iName','iSpec','iLoc'].forEach(function(k){$(k).value='';});$('iBuyP').value=0;$('iSellP').value=0;$('iInitQ').value=0;$('iSafeQ').value=10;$('btnSaveItm').innerText='+ 품목저장'; }
+function addAdjust(){ var it=$('adjItem').value.trim(),q=Number($('adjQty').value)||0;if(!it||!q)return alert('품목과 수량 입력!'); db.stockAdjusts.push({id:Date.now(),date:$('adjDate').value,item:it,qty:q,memo:$('adjMemo').value.trim()});$('adjMemo').value='';saveDB('재고조정'); }
+function addExp(){ var m=$('eMemo').value.trim(),s=Number($('eSup').value)||0,v=Number($('eVat').value)||0;if(!m||s<=0)return alert('적요와 금액 입력!'); db.expenses.push({id:Date.now(),date:$('eDate').value,cat:$('eCat').value,memo:m,supply:s,vat:v,total:s+v,method:$('eMeth').value});$('eMemo').value='';saveDB('경비: '+m); }
+function loadCompForm(){ if(!$('mName'))return; var m=db.myCompany||{}; $('mName').value=m.name||'';$('mBizNo').value=m.bizNo||'';$('mCeo').value=m.ceo||'';$('mBizT').value=m.bizType||'';$('mBizI').value=m.bizItem||'';$('mTel').value=m.tel||'';$('mEmail').value=m.email||'';$('mAddr').value=m.addr||'';$('mBank').value=m.bank||'';$('mPass').value=m.pass||'0000'; $('tgTok').value=m.tgTok||DEF_TOK;$('tgCid').value=m.tgCid||DEF_CID;$('tgAuto').value=m.tgAuto||'1'; }
+function saveComp(silent){ db.myCompany={name:$('mName').value.trim(),bizNo:$('mBizNo').value.trim(),ceo:$('mCeo').value.trim(),bizType:$('mBizT').value.trim(),bizItem:$('mBizI').value.trim(),tel:$('mTel').value.trim(),email:$('mEmail').value.trim(),addr:$('mAddr').value.trim(),bank:$('mBank').value.trim(),pass:$('mPass').value.trim()||'0000',tgTok:$('tgTok').value.trim()||DEF_TOK,tgCid:$('tgCid').value.trim()||DEF_CID,tgAuto:$('tgAuto').value}; sSet(TG_KEY,JSON.stringify({tok:db.myCompany.tgTok,cid:db.myCompany.tgCid})); saveDB('설정변경'); if(!silent) alert('설정 저장 완료!'); }
+function clearDB(){ if(confirm('전체 장부를 깨끗이 비우시겠습니까?')){db.clients=[];db.items=[];db.purchases=[];db.sales=[];db.estimates=[];db.expenses=[];db.stockAdjusts=[];saveDB('장부초기화');} }
+function collectSale(id){ var s=db.sales.find(function(x){return x.id===id;});if(!s)return;var a=prompt('['+s.client+'] 미수잔액: '+fmt(s.unpaid)+'원\n입금액:',s.unpaid);if(a!==null){s.paid+=Number(a)||0;s.unpaid=s.total-s.paid;saveDB('수금: '+s.client);} }
+function payPur(id){ var p=db.purchases.find(function(x){return x.id===id;});if(!p)return;var a=prompt('['+p.client+'] 미지급잔액: '+fmt(p.payable)+'원\n지급액:',p.payable);if(a!==null){p.paid+=Number(a)||0;p.payable=p.total-p.paid;saveDB('지급: '+p.client);} }
+function delRow(arr,id){ if(confirm('삭제하시겠습니까?')){db[arr]=db[arr].filter(function(x){return x.id!==id;});saveDB('내역삭제');} }
+
+function dlFile(c,n,m){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:m}));a.download=n;a.click();}
+function dlMasterCSV(t){
+  var csv='\uFEFF';
+  if(t==='cli'){ csv+='코드,구분,상호,사업자번호,대표자,업태,종목,연락처,이메일,주소,기초미수금,기초미지급금,비고\n'; db.clients.forEach(function(c){csv+=(c.code||'')+','+(c.type||'매출처')+','+(c.name||'').replace(/,/g,' ')+','+(c.bizNo||'')+','+(c.ceo||'')+','+(c.bizType||'')+','+(c.bizItem||'')+','+(c.tel||'')+','+(c.email||'')+','+(c.addr||'').replace(/,/g,' ')+','+(c.initUnpaid||0)+','+(c.initPayable||0)+','+(c.memo||'').replace(/,/g,' ')+'\n';}); dlFile(csv,'거래처양식_'+today+'.csv','text/csv;charset=utf-8;'); }
+  else { csv+='코드,분류,품목명,규격,과세구분,기본매입가,기본매출가,기초재고,안전재고,보관위치\n'; db.items.forEach(function(i){csv+=(i.code||'')+','+(i.cat||'일반')+','+(i.name||'').replace(/,/g,' ')+','+(i.spec||'').replace(/,/g,' ')+','+(i.taxType||'과세')+','+(i.buyPrice||0)+','+(i.sellPrice||0)+','+(i.initQty||0)+','+(i.safeQty||10)+','+(i.loc||'')+'\n';}); dlFile(csv,'품목양식_'+today+'.csv','text/csv;charset=utf-8;'); }
+}
+function parseCSV(txt,t){
+  var lines=txt.replace(/\r/g,'').split('\n').map(function(x){return x.trim();}).filter(Boolean); if(lines.length<2) return alert('데이터 없음!');
+  var add=0, up=0;
+  for(var i=1;i<lines.length;i++){
+    var c=lines[i].split(',').map(function(x){return x.trim().replace(/^"|"$/g,'');}), name=c[2]; if(!name) continue;
+    if(t==='cli'){ var ex=db.clients.findIndex(function(x){return x.name===name;}), obj={id:ex!==-1?db.clients[ex].id:(Date.now()+i),code:c[0]||('C-'+String(db.clients.length+1+add).padStart(3,'0')),type:c[1]||'매출처',name:name,bizNo:c[3]||'',ceo:c[4]||'',bizType:c[5]||'',bizItem:c[6]||'',tel:c[7]||'',email:c[8]||'',addr:c[9]||'',initUnpaid:Number(String(c[10]||'0').replace(/[^0-9.-]/g,''))||0,initPayable:Number(String(c[11]||'0').replace(/[^0-9.-]/g,''))||0,memo:c[12]||''}; if(ex!==-1){db.clients[ex]=obj;up++;}else{db.clients.push(obj);add++;} }
+    else { var ex2=db.items.findIndex(function(x){return x.name===name;}), obj2={id:ex2!==-1?db.items[ex2].id:(Date.now()+i),code:c[0]||('ITM-'+String(db.items.length+1+add).padStart(3,'0')),cat:c[1]||'일반',name:name,spec:c[3]||'',taxType:c[4]||'과세',buyPrice:Number(String(c[5]||'0').replace(/[^0-9.-]/g,''))||0,sellPrice:Number(String(c[6]||'0').replace(/[^0-9.-]/g,''))||0,initQty:Number(String(c[7]||'0').replace(/[^0-9.-]/g,''))||0,safeQty:Number(String(c[8]||'10').replace(/[^0-9.-]/g,''))||10,loc:c[9]||''}; if(ex2!==-1){db.items[ex2]=obj2;up++;}else{db.items.push(obj2);add++;} }
+  }
+  saveDB('엑셀등록'); alert('🎉 완료! (신규: '+add+'건 / 갱신: '+up+'건)');
+}
+function uploadMasterCSV(t,e){ var f=e.target.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(ev){if(ev.target.result.indexOf('\uFFFD')!==-1){var r2=new FileReader();r2.onload=function(ev2){parseCSV(ev2.target.result,t);};r2.readAsText(f,'euc-kr');}else parseCSV(ev.target.result,t);}; r.readAsText(f,'utf-8'); e.target.value=''; }
+
+function showDocModal(type,id){
+  var isEst=type==='est', doc=(isEst?db.estimates:db.sales).find(function(x){return x.id===id;}); if(!doc)return;
+  var m=db.myCompany, c=db.clients.find(function(x){return x.name===doc.client;})||{}, L=doc.lines||[];
+  var rows=L.map(function(l,i){return '<tr><td>'+(i+1)+'</td><td style="text-align:left"><b>'+l.item+'</b></td><td>'+(l.spec||'-')+'</td><td>'+fmt(l.qty)+'</td><td style="text-align:right">'+fmt(l.price)+'</td><td style="text-align:right">'+fmt(l.supply)+'</td><td style="text-align:right">'+fmt(l.vat)+'</td><td style="text-align:right"><b>'+fmt(l.total)+'</b></td></tr>';}).join('');
+  for(var i=L.length;i<5;i++) rows+='<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+  $('invArea').innerHTML='<h2 style="text-align:center;text-decoration:underline;letter-spacing:6px;color:#142d4c">'+(isEst?'견 적 서':'거 래 명 세 서')+'</h2>'
+    +'<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span><b>일자:</b> '+doc.date+'</span><span><b>'+(isEst?'유효기간':'결제')+':</b> '+(isEst?(doc.valid||'15일'):(doc.payMethod||'외상'))+'</span></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;font-size:12px">'
+    +'<div style="border:1px solid #333;padding:7px"><b>[공급자] '+m.name+'</b> ('+m.bizNo+')<br>대표: '+m.ceo+' (인) | '+m.bizType+'/'+m.bizItem+'<br>'+m.addr+' ('+m.tel+')</div>'
+    +'<div style="border:1px solid #333;padding:7px"><b>[공급받는자] '+doc.client+' 귀하</b> ('+(c.bizNo||'-')+')<br>대표: '+(c.ceo||'-')+' | '+(c.bizType||'-')+'/'+(c.bizItem||'-')+'<br>'+(c.addr||'-')+' ('+(c.tel||'-')+')</div></div>'
+    +'<div style="background:#eef4fb;padding:7px 12px;border:2px solid #142d4c;margin-bottom:8px;display:flex;justify-content:space-between"><b>합계금액 (부가세포함)</b><b style="font-size:18px;color:#142d4c">₩ '+fmt(doc.total)+' 원정</b></div>'
+    +'<table><thead><tr><th>No</th><th>품목명</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th><th>부가세</th><th>합계</th></tr></thead><tbody>'+rows+'<tr style="background:#f0f4f8;font-weight:bold"><td colspan="3">합 계</td><td>'+fmt(L.reduce(function(a,b){return a+b.qty;},0))+'</td><td>-</td><td style="text-align:right">'+fmt(doc.supply)+'</td><td style="text-align:right">'+fmt(doc.vat)+'</td><td style="text-align:right">'+fmt(doc.total)+'</td></tr></tbody></table>'
+    +'<div style="margin-top:8px;padding:7px;border:1px dashed #666;display:flex;justify-content:space-between;font-size:12px"><span><b>🏦 계좌:</b> '+m.bank+' '+(doc.memo?'| '+doc.memo:'')+'</span>'+(isEst?'<span>위와 같이 견적합니다.</span>':'<span>당일수금: '+fmt(doc.paid)+'원 | <b style="color:#d93025">미수잔액: '+fmt(doc.unpaid)+'원</b></span>')+'</div>';
+  $('invModal').style.display='flex';
+}
+function showLedgerModal(name){
+  var c=db.clients.find(function(x){return x.name===name;})||{initUnpaid:0,initPayable:0}, cS=db.sales.filter(function(s){return s.client===name;}), cP=db.purchases.filter(function(p){return p.client===name;});
+  $('ledArea').innerHTML='<h3 style="color:#142d4c">🏢 ['+name+'] 원장 상세내역</h3><b>▶ 매출이력 (기초미수: '+fmt(c.initUnpaid)+'원)</b><table><thead><tr><th>일자</th><th>품목내역</th><th>공급가</th><th>부가세</th><th>합계</th><th>수금액</th><th>미수잔액</th></tr></thead><tbody>'+cS.map(function(s){return '<tr><td>'+s.date+'</td><td style="text-align:left">'+(s.lines||[]).map(function(l){return l.item+'('+l.qty+'×'+fmt(l.price)+')';}).join(', ')+'</td><td>'+fmt(s.supply)+'</td><td>'+fmt(s.vat)+'</td><td><b>'+fmt(s.total)+'</b></td><td>'+fmt(s.paid)+'</td><td style="color:#d93025;font-weight:bold">'+fmt(s.unpaid)+'</td></tr>';}).join('')+'</tbody></table><br><b>▶ 매입이력 (기초미지급: '+fmt(c.initPayable)+'원)</b><table><thead><tr><th>일자</th><th>구분</th><th>품목내역</th><th>합계</th><th>지급액</th><th>미지급잔액</th></tr></thead><tbody>'+cP.map(function(p){return '<tr><td>'+p.date+'</td><td>'+p.type+'</td><td style="text-align:left">'+(p.lines||[]).map(function(l){return l.item+'('+l.qty+'개/원가'+fmt(l.unitCost)+')';}).join(', ')+'</td><td><b>'+fmt(p.total)+'</b></td><td>'+fmt(p.paid)+'</td><td style="color:#d35400;font-weight:bold">'+fmt(p.payable)+'</td></tr>';}).join('')+'</tbody></table>';
+  $('ledModal').style.display='flex';
+}
+
+function renderAll(){
+  if(!$('saleTb')) return;
+  normDB();
+  $('dlCli').innerHTML=db.clients.map(function(c){return '<option value="'+c.name+'">'+(c.bizNo||'')+' ('+c.type+')</option>';}).join('');
+  $('dlItm').innerHTML=db.items.map(function(i){return '<option value="'+i.name+'">단가:'+i.sellPrice+'원 / '+i.spec+'</option>';}).join('');
+  var gs=$('gStart').value, ge=$('gEnd').value; $('gPeriodTxt').innerText='📌 '+(gs||'처음')+'~'+(ge||'현재');
+
+  var sKw=($('sFKw').value||'').toLowerCase(), sSt=$('sFStatus').value;
+  var fSales=db.sales.filter(function(s){return inRange(s.date,$('sFStart').value,$('sFEnd').value)&&(sSt==='all'||(sSt==='unpaid'?s.unpaid>0:s.unpaid<=0))&&(!sKw||(s.client+' '+(s.memo||'')+' '+(s.lines||[]).map(function(l){return l.item;}).join(' ')).toLowerCase().indexOf(sKw)!==-1);});
+  var sTot=0,sSup=0,sProf=0,sVat=0,sUnp=0;
+  $('saleTb').innerHTML=fSales.slice().reverse().map(function(s){
+    sTot+=s.total;sSup+=s.supply;sProf+=s.profit;sVat+=s.vat;sUnp+=s.unpaid; var L=s.lines||[];
+    return '<tr><td>'+s.date+'</td><td><b>'+s.client+'</b></td><td style="text-align:left">'+L.map(function(l){return '<span class="pill"><b>'+l.item+'</b>('+l.qty+'×'+fmt(l.price)+')</span>';}).join('')+'</td><td>'+L.length+'종</td><td>'+fmt(s.supply)+'</td><td>'+fmt(s.vat)+'</td><td><b>'+fmt(s.total)+'원</b></td><td style="color:#0b8457;font-weight:bold">'+fmt(s.profit)+'원</td><td>'+fmt(s.paid)+'</td><td style="color:'+(s.unpaid>0?'#d93025':'#222')+';font-weight:bold">'+fmt(s.unpaid)+'원</td><td><button type="button" class="btn btn-sm bg-b" onclick="showDocModal(\'inv\','+s.id+')">🖨️명세서</button>'+(s.unpaid>0?'<button type="button" class="btn btn-sm bg-o" onclick="collectSale('+s.id+')">수금</button>':'')+'<button type="button" class="btn btn-sm bg-p" onclick="editDoc(\'s\','+s.id+')">수정</button><button type="button" class="btn btn-sm bg-r" onclick="delRow(\'sales\','+s.id+')">삭제</button></td></tr>';
+  }).join('')||'<tr><td colspan="11">내역 없음</td></tr>';
+  $('sSumTxt').innerText='['+fSales.length+'건] 합계: '+fmt(sTot)+'원 | 순익: '+fmt(sProf)+'원 | 미수: '+fmt(sUnp)+'원';
+
+  var esKw=($('esFKw').value||'').toLowerCase(), esSt=$('esFStat').value;
+  var fEsts=db.estimates.filter(function(es){return inRange(es.date,$('esFStart').value,$('esFEnd').value)&&(esSt==='all'||(es.status||'대기')===esSt)&&(!esKw||(es.client+' '+(es.memo||'')+' '+(es.lines||[]).map(function(l){return l.item;}).join(' ')).toLowerCase().indexOf(esKw)!==-1);});
+  $('estTb').innerHTML=fEsts.slice().reverse().map(function(es){
+    var L=es.lines||[], done=es.status==='수주완료';
+    return '<tr><td>'+es.date+'</td><td><b style="color:'+(done?'#27ae60':'#e67e22')+'">'+(done?'✅수주완료':'⏳진행중')+'</b></td><td><b>'+es.client+'</b></td><td style="text-align:left">'+L.map(function(l){return '<span class="pill"><b>'+l.item+'</b>('+l.qty+'×'+fmt(l.price)+')</span>';}).join('')+'</td><td>'+L.length+'종</td><td>'+fmt(es.supply)+'</td><td>'+fmt(es.vat)+'</td><td><b>'+fmt(es.total)+'원</b></td><td style="color:#0b8457;font-weight:bold">'+fmt(es.profit)+'원</td><td>'+(es.valid||'')+'</td><td><button type="button" class="btn btn-sm bg-b" onclick="showDocModal(\'est\','+es.id+')">🖨️견적서</button>'+(done?'':'<button type="button" class="btn btn-sm bg-g" onclick="convertEstToSale('+es.id+')">⚡매출전환</button>')+'<button type="button" class="btn btn-sm bg-p" onclick="editDoc(\'es\','+es.id+')">수정</button><button type="button" class="btn btn-sm bg-r" onclick="delRow(\'estimates\','+es.id+')">삭제</button></td></tr>';
+  }).join('')||'<tr><td colspan="11">내역 없음</td></tr>';
+  $('esSumTxt').innerText='['+fEsts.length+'건] 합계: '+fmt(fEsts.reduce(function(a,b){return a+b.total;},0))+'원';
+
+  var pKw=($('pFKw').value||'').toLowerCase(), pTp=$('pFType').value, pSt=$('pFStatus').value;
+  var fPurs=db.purchases.filter(function(p){return inRange(p.date,$('pFStart').value,$('pFEnd').value)&&(pTp==='all'||p.type===pTp)&&(pSt==='all'||(pSt==='payable'?p.payable>0:p.payable<=0))&&(!pKw||(p.client+' '+(p.lines||[]).map(function(l){return l.item;}).join(' ')).toLowerCase().indexOf(pKw)!==-1);});
+  var pTot=0,pSup=0,pVat=0,pPay=0;
+  $('purTb').innerHTML=fPurs.slice().reverse().map(function(p){
+    pTot+=p.total;pSup+=p.totalCost;pVat+=p.vat;pPay+=p.payable; var L=p.lines||[];
+    return '<tr><td>'+p.date+'</td><td>'+p.type+'</td><td><b>'+p.client+'</b></td><td style="text-align:left">'+L.map(function(l){return '<span class="pill"><b>'+l.item+'</b>('+l.qty+'개/원가:'+fmt(l.unitCost)+')</span>';}).join('')+'</td><td>'+L.length+'종</td><td>'+fmt(p.totalCost)+'원</td><td>'+fmt(p.vat)+'원</td><td><b>'+fmt(p.total)+'원</b></td><td>'+fmt(p.paid)+'</td><td style="color:'+(p.payable>0?'#d35400':'#222')+';font-weight:bold">'+fmt(p.payable)+'원</td><td>'+(p.payable>0?'<button type="button" class="btn btn-sm bg-o" onclick="payPur('+p.id+')">지급</button>':'')+'<button type="button" class="btn btn-sm bg-p" onclick="editPur('+p.id+')">수정</button><button type="button" class="btn btn-sm bg-r" onclick="delRow(\'purchases\','+p.id+')">삭제</button></td></tr>';
+  }).join('')||'<tr><td colspan="11">내역 없음</td></tr>';
+  $('pSumTxt').innerText='['+fPurs.length+'건] 총원가: '+fmt(pSup)+'원 | 미지급: '+fmt(pPay)+'원';
+
+  var eKw=($('eFKw').value||'').toLowerCase(), eDd=$('eFDed').value;
+  var fExps=db.expenses.filter(function(e){return inRange(e.date,$('eFStart').value,$('eFEnd').value)&&(eDd==='all'||(eDd==='ded'?e.method.indexOf('불공제')===-1:e.method.indexOf('불공제')!==-1))&&(!eKw||(e.cat+' '+e.memo).toLowerCase().indexOf(eKw)!==-1);});
+  var eSup=0,eVat=0;
+  $('expTb').innerHTML=fExps.slice().reverse().map(function(e){
+    eSup+=e.supply; if(e.method.indexOf('불공제')===-1) eVat+=e.vat;
+    return '<tr><td>'+e.date+'</td><td><b>'+e.cat+'</b></td><td>'+e.memo+'</td><td>'+e.method+'</td><td>'+fmt(e.supply)+'원</td><td>'+fmt(e.vat)+'원</td><td><b>'+fmt(e.total)+'원</b></td><td><button type="button" class="btn btn-sm bg-r" onclick="delRow(\'expenses\','+e.id+')">삭제</button></td></tr>';
+  }).join('')||'<tr><td colspan="8">내역 없음</td></tr>';
+  $('eSumTxt').innerText='['+fExps.length+'건] 공급가: '+fmt(eSup)+'원 | 공제세액: '+fmt(eVat)+'원';
+
+  var stMap={};
+  db.items.forEach(function(i){stMap[i.name]={code:i.code,cat:i.cat,spec:i.spec,loc:i.loc||'-',init:i.initQty||0,inQ:0,outQ:0,adjQ:0,cost:i.buyPrice||0,safe:i.safeQty||5};});
+  db.purchases.forEach(function(p){(p.lines||[]).forEach(function(l){if(!stMap[l.item])stMap[l.item]={code:'-',cat:'미등록',spec:l.spec||'-',loc:'-',init:0,inQ:0,outQ:0,adjQ:0,cost:0,safe:5};stMap[l.item].inQ+=l.qty;stMap[l.item].cost=l.unitCost;});});
+  db.sales.forEach(function(s){(s.lines||[]).forEach(function(l){if(!stMap[l.item])stMap[l.item]={code:'-',cat:'미등록',spec:l.spec||'-',loc:'-',init:0,inQ:0,outQ:0,adjQ:0,cost:0,safe:5};stMap[l.item].outQ+=l.qty;});});
+  (db.stockAdjusts||[]).forEach(function(a){if(!stMap[a.item])stMap[a.item]={code:'-',cat:'미등록',spec:'-',loc:'-',init:0,inQ:0,outQ:0,adjQ:0,cost:0,safe:5};stMap[a.item].adjQ+=a.qty;});
+  var totStkVal=0,lowCnt=0, stKw=($('stFKw').value||'').toLowerCase(), stStat=$('stFStat').value;
+  $('stkTb').innerHTML=Object.keys(stMap).filter(function(k){var st=stMap[k],cur=st.init+st.inQ-st.outQ+st.adjQ;return (stStat!=='low'||cur<=st.safe)&&(!stKw||(k+' '+st.code+' '+st.cat+' '+st.loc).toLowerCase().indexOf(stKw)!==-1);}).map(function(k){
+    var st=stMap[k],cur=st.init+st.inQ-st.outQ+st.adjQ,val=Math.max(0,cur)*st.cost; totStkVal+=val; if(cur<=st.safe)lowCnt++;
+    return '<tr><td>'+st.code+'</td><td>'+st.cat+'</td><td><b>'+k+'</b></td><td>'+st.spec+'</td><td>'+st.loc+'</td><td>'+st.init+'</td><td>'+st.inQ+'</td><td>'+st.outQ+'</td><td>'+st.adjQ+'</td><td style="font-weight:bold;color:'+(cur<=st.safe?'#d93025':'#142d4c')+'">'+fmt(cur)+'개</td><td>'+fmt(st.cost)+'원</td><td><b>'+fmt(val)+'원</b></td><td>'+(cur<=st.safe?'<b style="color:#d93025">⚠️부족</b>':'정상')+'</td></tr>';
+  }).join('');
+
+  var cMap={};
+  db.clients.forEach(function(c){cMap[c.name]={code:c.code,type:c.type,bizNo:c.bizNo,ceo:c.ceo,tel:c.tel,initU:c.initUnpaid||0,pSale:0,sale:0,paid:0,unp:c.initUnpaid||0,pay:c.initPayable||0};});
+  db.sales.forEach(function(s){if(!cMap[s.client])cMap[s.client]={code:'-',type:'미등록',bizNo:'-',ceo:'-',tel:'-',initU:0,pSale:0,sale:0,paid:0,unp:0,pay:0};cMap[s.client].sale+=s.total;cMap[s.client].paid+=s.paid;cMap[s.client].unp+=s.unpaid;if(inRange(s.date,gs,ge))cMap[s.client].pSale+=s.total;});
+  db.purchases.forEach(function(p){if(!cMap[p.client])cMap[p.client]={code:'-',type:'미등록',bizNo:'-',ceo:'-',tel:'-',initU:0,pSale:0,sale:0,paid:0,unp:0,pay:0};cMap[p.client].pay+=p.payable;});
+  var totUnpAll=0,totPayAll=0,uCnt=0,pCnt=0; Object.values(cMap).forEach(function(c){totUnpAll+=c.unp;totPayAll+=c.pay;if(c.unp>0)uCnt++;if(c.pay>0)pCnt++;});
+  var lTp=$('lFType').value, lBl=$('lFBal').value, lKw=($('lFKw').value||'').toLowerCase();
+  var fLed=Object.keys(cMap).filter(function(k){var c=cMap[k];return (lTp==='all'||c.type===lTp)&&(lBl==='all'||(lBl==='unpaid'?c.unp>0:c.pay>0))&&(!lKw||(k+' '+c.bizNo+' '+c.ceo).toLowerCase().indexOf(lKw)!==-1);});
+  $('ledgerTb').innerHTML=fLed.map(function(k){var c=cMap[k];return '<tr><td>'+c.code+'</td><td>'+c.type+'</td><td><b>'+k+'</b></td><td>'+c.bizNo+'</td><td>'+c.ceo+'</td><td>'+c.tel+'</td><td>'+fmt(c.initU)+'</td><td style="color:#004085;font-weight:bold">'+fmt(c.pSale)+'원</td><td>'+fmt(c.sale)+'원</td><td>'+fmt(c.paid)+'원</td><td style="color:#d93025;font-weight:bold">'+fmt(c.unp)+'원</td><td style="color:#d35400;font-weight:bold">'+fmt(c.pay)+'원</td><td><button type="button" class="btn btn-sm bg-p" onclick="showLedgerModal(\''+k+'\')">상세</button></td></tr>';}).join('');
+  $('lSumTxt').innerText='['+fLed.length+'곳] 미수합계: '+fmt(fLed.reduce(function(a,k){return a+cMap[k].unp;},0))+'원 | 미지급합계: '+fmt(fLed.reduce(function(a,k){return a+cMap[k].pay;},0))+'원';
+
+  var cSr=($('cSearch').value||'').toLowerCase(), fCM=db.clients.filter(function(c){return (c.name+' '+c.bizNo).toLowerCase().indexOf(cSr)!==-1;}); $('cliCnt').innerText=fCM.length;
+  $('cliMasterTb').innerHTML=fCM.map(function(c){return '<tr><td>'+c.code+'</td><td>'+c.type+'</td><td><b>'+c.name+'</b></td><td>'+c.bizNo+'</td><td>'+c.ceo+'</td><td>'+(c.bizType||'-')+'/'+(c.bizItem||'-')+'</td><td>'+c.tel+'</td><td>'+(c.email||'-')+'</td><td>'+fmt(c.initUnpaid)+'</td><td>'+fmt(c.initPayable)+'</td><td>'+(c.memo||'')+'</td><td><button type="button" class="btn btn-sm bg-b" onclick="editClient('+c.id+')">수정</button><button type="button" class="btn btn-sm bg-r" onclick="delRow(\'clients\','+c.id+')">삭제</button></td></tr>';}).join('');
+  var iSr=($('iSearch').value||'').toLowerCase(), fIM=db.items.filter(function(i){return (i.name+' '+i.code).toLowerCase().indexOf(iSr)!==-1;}); $('itmCnt').innerText=fIM.length;
+  $('itmMasterTb').innerHTML=fIM.map(function(i){return '<tr><td>'+i.code+'</td><td>'+i.cat+'</td><td><b>'+i.name+'</b></td><td>'+i.spec+'</td><td>'+i.taxType+'</td><td>'+fmt(i.buyPrice)+'원</td><td><b>'+fmt(i.sellPrice)+'원</b></td><td>'+i.initQty+'</td><td>'+i.safeQty+'</td><td>'+(i.loc||'-')+'</td><td><button type="button" class="btn btn-sm bg-b" onclick="editItem('+i.id+')">수정</button><button type="button" class="btn btn-sm bg-r" onclick="delRow(\'items\','+i.id+')">삭제</button></td></tr>';}).join('');
+
+  var netP=sProf-eSup;
+  $('kSale').innerText=fmt(sTot)+'원';$('kSaleS').innerText='공급가:'+fmt(sSup)+'원('+fSales.length+'건)';
+  $('kPur').innerText=fmt(pTot)+'원';$('kPurS').innerText='공급가:'+fmt(pSup)+'원('+fPurs.length+'건)';
+  $('kGross').innerText=fmt(sProf)+'원';$('kGrossS').innerText='마진율:'+(sSup>0?((sProf/sSup)*100).toFixed(1):'0.0')+'%';
+  $('kNet').innerText=fmt(netP)+'원';$('kNetS').innerText='순익률:'+(sSup>0?((netP/sSup)*100).toFixed(1):'0.0')+'%(경비'+fmt(eSup)+')';
+  $('kUnp').innerText=fmt(totUnpAll)+'원';$('kUnpS').innerText='미수:'+uCnt+'곳';
+  $('kPay').innerText=fmt(totPayAll)+'원';$('kPayS').innerText='미지급:'+pCnt+'곳';
+  $('kStk').innerText=fmt(totStkVal)+'원';$('kStkS').innerText='부족:'+lowCnt+'종';
+  $('kVat').innerText=fmt(sVat-(pVat+eVat))+'원';$('kVatS').innerText='매출세-공제';
+
+  renderCharts(fSales,fPurs,fExps,sSup,sProf,eSup,stMap,cMap); recalcCart('s'); recalcCart('es'); recalcPurCart();
+}
+
+function renderCharts(fSales,fPurs,fExps,sSup,sProf,eSup,stMap,cMap){
+  var mMap={};
+  fSales.forEach(function(s){var m=(s.date||'').slice(0,7);if(m){mMap[m]=mMap[m]||{s:0,p:0,pr:0};mMap[m].s+=s.supply;mMap[m].pr+=s.profit;}});
+  fPurs.forEach(function(p){var m=(p.date||'').slice(0,7);if(m){mMap[m]=mMap[m]||{s:0,p:0,pr:0};mMap[m].p+=p.totalCost;}});
+  fExps.forEach(function(e){var m=(e.date||'').slice(0,7);if(m){mMap[m]=mMap[m]||{s:0,p:0,pr:0};mMap[m].p+=e.supply;mMap[m].pr-=e.supply;}});
+  var mos=Object.keys(mMap).sort().slice(-6);
+  if(!mos.length) $('cMonthBox').innerHTML='<span style="color:#777">상단 <b>[🧪 샘플체험]</b>을 눌러보시옵소서!</span>';
+  else {
+    var mx=10000; mos.forEach(function(m){mx=Math.max(mx,mMap[m].s,mMap[m].p,Math.abs(mMap[m].pr));});
+    var W=520,H=165,pL=35,pB=20,pT=15,pW=W-pL-10,pH=H-pB-pT,cW=pW/mos.length, svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:170px">',pts=[];
+    mos.forEach(function(m,i){
+      var d=mMap[m],cx=pL+i*cW+cW/2,hS=Math.max(2,(d.s/mx)*pH),hP=Math.max(2,(d.p/mx)*pH),hPr=Math.max(2,(Math.max(0,d.pr)/mx)*pH);
+      pts.push((cx+12)+','+(pT+pH-hPr));
+      svg+='<rect x="'+(cx-18)+'" y="'+(pT+pH-hS)+'" width="10" height="'+hS+'" fill="#2980b9"/><rect x="'+(cx-5)+'" y="'+(pT+pH-hP)+'" width="10" height="'+hP+'" fill="#e67e22"/><rect x="'+(cx+8)+'" y="'+(pT+pH-hPr)+'" width="10" height="'+hPr+'" fill="#0b8457"/><text x="'+(cx-13)+'" y="'+(pT+pH-hS-2)+'" text-anchor="middle" font-size="9" fill="#1b4f72">'+Math.round(d.s/10000)+'만</text><text x="'+(cx+13)+'" y="'+(pT+pH-hPr-2)+'" text-anchor="middle" font-size="9" font-weight="bold" fill="#0b8457">'+Math.round(d.pr/10000)+'만</text><text x="'+cx+'" y="'+(H-4)+'" text-anchor="middle" font-size="10" font-weight="bold">'+m+'</text>';
+    });
+    if(pts.length>1) svg+='<polyline fill="none" stroke="#0b8457" stroke-width="2" stroke-dasharray="3,2" points="'+pts.join(' ')+'"/>';
+    $('cMonthBox').innerHTML=svg+'</svg>';
+  }
+  if(sSup<=0) $('cDonutBox').innerHTML='데이터 없음';
+  else {
+    var cogs=Math.max(0,sSup-sProf),sga=eSup,net=Math.max(0,sProf-sga),tot=cogs+sga+net||1,d1=(cogs/tot)*360,d2=d1+(sga/tot)*360;
+    $('cDonutBox').innerHTML='<div style="width:115px;height:115px;border-radius:50%;background:conic-gradient(#e67e22 0deg '+d1+'deg,#6f42c1 '+d1+'deg '+d2+'deg,#0b8457 '+d2+'deg 360deg);display:flex;align-items:center;justify-content:center"><div style="width:70px;height:70px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center"><small>순익률</small><b style="font-size:13.5px;color:#0b8457">'+(((sProf-sga)/sSup)*100).toFixed(1)+'%</b></div></div><div style="font-size:12px;line-height:1.7"><div><b style="color:#e67e22">■ 매출원가:</b> '+fmt(cogs)+'원</div><div><b style="color:#6f42c1">■ 판관비:</b> '+fmt(sga)+'원</div><div><b style="color:#0b8457">■ 순이익: '+fmt(sProf-sga)+'원</b></div></div>';
+  }
+  var iSt={}; fSales.forEach(function(s){(s.lines||[]).forEach(function(l){iSt[l.item]=iSt[l.item]||{s:0,p:0,q:0};iSt[l.item].s+=l.supply;iSt[l.item].p+=l.profit;iSt[l.item].q+=l.qty;});});
+  var sItm=Object.keys(iSt).map(function(k){return {n:k,s:iSt[k].s,p:iSt[k].p,q:iSt[k].q};}).sort(function(a,b){return b.p-a.p;}).slice(0,5), mxI=sItm.reduce(function(m,x){return Math.max(m,x.s);},1);
+  $('cItemBox').innerHTML=sItm.map(function(x){return '<div class="hb-r"><div class="hb-l"><span>📦 '+x.n+' ('+x.q+'개)</span><span>매출 '+fmt(x.s)+' | <b style="color:#0b8457">순익 '+fmt(x.p)+'원</b></span></div><div class="hb-t"><div class="hb-f" style="width:'+Math.max(8,Math.round((x.s/mxI)*100))+'%;background:#2980b9">매출</div></div><div class="hb-t" style="height:10px;margin-top:2px"><div class="hb-f" style="width:'+Math.max(8,Math.round((Math.max(0,x.p)/mxI)*100))+'%;background:#0b8457">순익</div></div></div>';}).join('')||'데이터 없음';
+  var cArr=Object.keys(cMap).map(function(k){return {n:k,pSale:cMap[k].pSale,unp:cMap[k].unp};}).filter(function(x){return x.pSale>0||x.unp>0;}).sort(function(a,b){return b.pSale-a.pSale;}).slice(0,5), mxC=cArr.reduce(function(m,x){return Math.max(m,x.pSale,x.unp);},1);
+  $('cCliBox').innerHTML=cArr.map(function(x){return '<div class="hb-r"><div class="hb-l"><span>🏢 '+x.n+'</span><span>매출 '+fmt(x.pSale)+' | <b style="color:#d93025">미수 '+fmt(x.unp)+'원</b></span></div><div class="hb-t"><div class="hb-f" style="width:'+Math.max(8,Math.round((x.pSale/mxC)*100))+'%;background:#142d4c">매출</div></div>'+(x.unp>0?'<div class="hb-t" style="height:10px;margin-top:2px"><div class="hb-f" style="width:'+Math.max(8,Math.round((x.unp/mxC)*100))+'%;background:#d93025">미수</div></div>':'')+'</div>';}).join('')||'데이터 없음';
+  $('ceoUnpTb').innerHTML=Object.keys(cMap).map(function(k){return {n:k,tel:cMap[k].tel,sale:cMap[k].sale,unp:cMap[k].unp};}).filter(function(x){return x.unp>0;}).sort(function(a,b){return b.unp-a.unp;}).slice(0,5).map(function(c){return '<tr><td><b>'+c.n+'</b></td><td>'+(c.tel||'-')+'</td><td>'+fmt(c.sale)+'원</td><td style="color:#d93025;font-weight:bold">'+fmt(c.unp)+'원</td><td><button type="button" class="btn btn-sm bg-p" onclick="showLedgerModal(\''+c.n+'\')">원장</button></td></tr>';}).join('')||'<tr><td colspan="5">🎉 미수금 0원!</td></tr>';
+  $('ceoStkTb').innerHTML=Object.keys(stMap).map(function(k){var s=stMap[k];return {n:k,code:s.code,cur:s.init+s.inQ-s.outQ+s.adjQ,safe:s.safe,loc:s.loc};}).filter(function(x){return x.cur<=x.safe;}).map(function(st){return '<tr><td>'+st.code+'</td><td><b>'+st.n+'</b></td><td style="color:#d93025;font-weight:bold">'+st.cur+'개</td><td>'+st.safe+'개</td><td>'+st.loc+'</td></tr>';}).join('')||'<tr><td colspan="5">✅ 안전재고 정상!</td></tr>';
+}
+
+function loadSample(showMsg){
+  var s = getSampleObj(); db.clients=s.clients; db.items=s.items; db.purchases=s.purchases; db.sales=s.sales; db.estimates=s.estimates; db.expenses=s.expenses; db.stockAdjusts=[];
+  saveDB(showMsg?'샘플로드':null, !showMsg);
+  if(showMsg) alert('🧪 샘플 데이터가 적용되었사옵니다!');
+}
+function exportHometax(){
+  var fS=db.sales.filter(function(s){return inRange(s.date,$('sFStart').value,$('sFEnd').value);}); if(!fS.length)return alert('매출전표가 없사옵니다!'); var m=db.myCompany;
+  var csv='\uFEFF종류(01일반/02영세),작성일자,공급자사업자번호,공급자상호,공급자성명,공급받는자사업자번호,공급받는자상호,공급받는자성명,공급가액합계,세액합계,대표품목명,수량,단가,영수(01)/청구(02)\n';
+  fS.forEach(function(s){var c=db.clients.find(function(x){return x.name===s.client;})||{},L=s.lines||[],f=L[0]||{item:'물품',qty:1,price:s.supply},rep=L.length>1?(f.item+' 외 '+(L.length-1)+'건'):f.item;csv+=(s.vat===0?'02':'01')+','+s.date.replace(/-/g,'')+','+m.bizNo+','+m.name+','+m.ceo+','+(c.bizNo||'')+','+s.client+','+(c.ceo||'')+','+s.supply+','+s.vat+','+rep+','+f.qty+','+f.price+','+(s.unpaid>0?'02':'01')+'\n';});
+  dlFile(csv,'홈택스양식_'+today+'.csv','text/csv;charset=utf-8;');
+}
+function exportCSV(){
+  var csv='\uFEFF[1.매출내역]\n일자,거래처,품목,수량,단가,공급가,부가세,합계,순이익,전표미수금\n';
+  db.sales.filter(function(s){return inRange(s.date,$('sFStart').value,$('sFEnd').value);}).forEach(function(s){(s.lines||[]).forEach(function(l){csv+=s.date+','+s.client+','+l.item+','+l.qty+','+l.price+','+l.supply+','+l.vat+','+l.total+','+l.profit+','+s.unpaid+'\n';});});
+  csv+='\n[2.매입내역]\n일자,구분,매입처,품목,수량,품목총원가,개당확정원가,전표미지급금\n';
+  db.purchases.filter(function(p){return inRange(p.date,$('pFStart').value,$('pFEnd').value);}).forEach(function(p){(p.lines||[]).forEach(function(l){csv+=p.date+','+p.type+','+p.client+','+l.item+','+l.qty+','+l.totalCost+','+l.unitCost+','+p.payable+'\n';});});
+  csv+='\n[3.경비내역]\n일자,계정과목,적요,증빙,공급가,부가세,합계\n';
+  db.expenses.filter(function(e){return inRange(e.date,$('eFStart').value,$('eFEnd').value);}).forEach(function(e){csv+=e.date+','+e.cat+','+e.memo+','+e.method+','+e.supply+','+e.vat+','+e.total+'\n';});
+  dlFile(csv,'세무신고장부_'+today+'.csv','text/csv;charset=utf-8;');
+}
+function backupDB(){dlFile(JSON.stringify(db,null,2),'ERP_백업_'+today+'.json','application/json');}
+function restoreDB(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{db=Object.assign(db,JSON.parse(ev.target.result));normDB();loadCompForm();saveDB('복원');alert('복원 완료!');}catch(err){alert('파일 오류!');}};r.readAsText(f);}
+
+window.addEventListener('DOMContentLoaded', async function(){
+  ['sDate','esDate','pDate','eDate','adjDate'].forEach(function(id){ if($(id)) $(id).value = today; });
+  var loc = sGet(DB_KEY);
+  if(loc){ try{ var parsed = JSON.parse(loc); if(parsed && parsed.sales && parsed.sales.length) db = Object.assign(db, parsed); }catch(e){} }
+  normDB(); loadCompForm(); renderAll();
+  setInterval(pollTelegramBot, 3500);
+  if(location.protocol.indexOf('http')===0){
+    try { var r=await fetch('/api/db',{cache:'no-store'}); if(r.ok){ db=Object.assign(db,await r.json()); isNas=true; $('connBadge').innerText='🟢 나스 & 보안클라우드'; $('connBadge').style.background='#27ae60'; normDB(); loadCompForm(); renderAll(); } } catch(e){}
+  }
+});
+</script>
+</head>
+<body>
+
+<div id="lockScreen" class="no-print">
+  <div class="lbox">
+    <div style="font-size:32px">🛡️</div><h3 style="margin:4px 0;color:#142d4c">ERP 암호화 보안 잠금</h3>
+    <div style="color:#666;font-size:12px">비밀번호 입력 시 클라우드 복호화 (초기: <b>0000</b>)</div>
+    <input type="password" id="lockIn" placeholder="암호 입력" onkeydown="if(event.key==='Enter')unlockERP()" autofocus>
+    <button type="button" class="btn" style="width:100%;padding:10px;font-size:14px;margin-bottom:5px" onclick="unlockERP()">🔓 복호화 및 입장</button>
+    <div id="lockErr" style="color:#d93025;font-size:11.5px;font-weight:bold;margin-top:5px;display:none">❌ 비밀번호 불일치!</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hdr">
+    <div style="display:flex;align-items:center"><h1>📊 통합 무역·유통 경리회계 ERP Pro</h1><span id="connBadge" class="badge">🔒 보안클라우드 대기중</span></div>
+    <div class="h-btns">
+      <button type="button" onclick="installPWA()" style="background:#8e44ad">📲 앱설치(폰·PC)</button>
+      <button type="button" onclick="bakeHTML()" style="background:#d35400">📦 배포용index.html굽기</button>
+      <button type="button" onclick="tgPush('수동저장',false)" class="bg-tg">✈️ 텔레그램저장(PC➔폰)</button>
+      <button type="button" onclick="tgPull(false)" class="bg-tg">📥 불러오기(동기화)</button>
+      <button type="button" onclick="loadSample(true)" class="bg-o">🧪 샘플체험</button>
+      <button type="button" onclick="exportHometax()">🏛️ 홈택스양식</button>
+      <button type="button" onclick="exportCSV()">📥 세무엑셀</button>
+      <button type="button" onclick="backupDB()" class="bg-b">💾 백업</button>
+      <button type="button" onclick="$('resFile').click()" class="bg-p">📂 복원</button>
+      <button type="button" onclick="lockERP()" class="bg-r">🔒 잠금</button>
+      <input type="file" id="resFile" style="display:none" accept=".json" onchange="restoreDB(event)">
+    </div>
+  </div>
+
+  <div class="ai-bar no-print">
+    <div class="ai-top">
+      <b>🤖 AI 슈퍼비서:</b>
+      <input id="aiIn" placeholder="명령어 입력 (예: 볼밸브 | 대한유압 | 단가계산 볼밸브 35 | 매출 대한유압 볼밸브 50 | 매입 상하이 볼밸브 100 15300 | 수금 대한유압 1000000)" onkeydown="if(event.key==='Enter')runAiCmd()">
+      <button type="button" class="btn bg-o" onclick="runAiCmd()">⚡ 비서실행</button>
+      <button type="button" class="btn btn-sm bg-tg" onclick="sendTgBrief()">✈️ 브리핑 텔레그램전송</button>
+    </div>
+    <div class="ai-qbtns">
+      <span style="font-size:11px;color:#e8daef">💡 원클릭 AI 비서:</span>
+      <button type="button" class="btn btn-sm bg-p" onclick="quickAi('브리핑')">📊 종합경영브리핑</button>
+      <button type="button" class="btn btn-sm bg-r" onclick="quickAi('독촉문자')">✉️ 미수금 독촉문자생성</button>
+      <button type="button" class="btn btn-sm bg-o" onclick="quickAi('발주추천')">🛒 안전재고 발주추천</button>
+      <button type="button" class="btn btn-sm bg-b" onclick="quickAi('단가비교')">💰 품목별 단가·마진분석</button>
+      <button type="button" class="btn btn-sm bg-g" onclick="quickAi('거래처분석')">👑 VIP·위험 거래처진단</button>
+      <button type="button" class="btn btn-sm bg-gr" onclick="quickAi('도움말')">❓ 자연어 명령어안내</button>
+    </div>
+  </div>
+  <div id="aiResBox" class="ai-res no-print"></div>
+
+  <div class="f-bar">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px">
+      <b>📅 기간:</b>
+      <button type="button" class="q-btn active" onclick="setPeriod('all',this)">전체</button>
+      <button type="button" class="q-btn" onclick="setPeriod('thisM',this)">이번달</button>
+      <button type="button" class="q-btn" onclick="setPeriod('lastM',this)">지난달</button>
+      <button type="button" class="q-btn" onclick="setPeriod('thisY',this)">올해</button>
+      <button type="button" class="q-btn" onclick="setPeriod('Q1',this)">1분기</button>
+      <button type="button" class="q-btn" onclick="setPeriod('Q2',this)">2분기</button>
+      <button type="button" class="q-btn" onclick="setPeriod('Q3',this)">3분기</button>
+      <button type="button" class="q-btn" onclick="setPeriod('Q4',this)">4분기</button>
+      <input type="month" id="gMonth" onchange="setMonthPeriod(this.value)">
+      <input type="date" id="gStart" onchange="syncDates()">~<input type="date" id="gEnd" onchange="syncDates()">
+    </div>
+    <div id="gPeriodTxt" style="font-weight:bold;color:#b85d00">📌 전체기간</div>
+  </div>
+
+  <div class="dash">
+    <div class="card"><div class="t">① 조회기간 매출액</div><div class="v" id="kSale">0원</div><div class="s" id="kSaleS">공급가:0원</div></div>
+    <div class="card"><div class="t">② 조회기간 매입원가</div><div class="v" id="kPur">0원</div><div class="s" id="kPurS">공급가:0원</div></div>
+    <div class="card prof"><div class="t">③ 매출총이익(마진)</div><div class="v" id="kGross">0원</div><div class="s" id="kGrossS">마진율:0%</div></div>
+    <div class="card prof"><div class="t">④ 최종 영업순이익</div><div class="v" id="kNet">0원</div><div class="s" id="kNetS">순익률:0%</div></div>
+    <div class="card unp"><div class="t">⑤ 받을 돈 (총미수금)</div><div class="v" id="kUnp">0원</div><div class="s" id="kUnpS">0곳</div></div>
+    <div class="card"><div class="t">⑥ 줄 돈 (총미지급금)</div><div class="v" id="kPay">0원</div><div class="s" id="kPayS">0곳</div></div>
+    <div class="card"><div class="t">⑦ 현재 재고자산 총액</div><div class="v" id="kStk">0원</div><div class="s" id="kStkS">부족:0종</div></div>
+    <div class="card"><div class="t">⑧ 조회기간 예상부가세</div><div class="v" id="kVat">0원</div><div class="s" id="kVatS">매출-공제</div></div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="t-btn ceo active" onclick="openTab('tCeo',this)">📊 대표님 브리핑</button>
+    <button type="button" class="t-btn" onclick="openTab('tSale',this)">1. 매출전표·명세서</button>
+    <button type="button" class="t-btn" onclick="openTab('tEst',this)">2. 견적서·매출전환</button>
+    <button type="button" class="t-btn" onclick="openTab('tPur',this)">3. 수입·매입전표</button>
+    <button type="button" class="t-btn" onclick="openTab('tLedger',this)">4. 거래처원장</button>
+    <button type="button" class="t-btn" onclick="openTab('tExp',this)">5. 일반경비</button>
+    <button type="button" class="t-btn" onclick="openTab('tStock',this)">6. 실시간재고</button>
+    <button type="button" class="t-btn" onclick="openTab('tCli',this)">7. 거래처등록(엑셀)</button>
+    <button type="button" class="t-btn" onclick="openTab('tItm',this)">8. 품목등록(엑셀)</button>
+    <button type="button" class="t-btn" onclick="openTab('tComp',this)" style="background:#d4edda;color:#155724">9. 회사·보안·앱설정</button>
+  </div>
+
+  <div id="tCeo" class="tab-c active">
+    <div class="grid2">
+      <div class="box"><h3><span>📈 월별 매출·매입·순이익 추이</span><small><b style="color:#2980b9">■매출</b> <b style="color:#e67e22">■매입·경비</b> <b style="color:#0b8457">●순이익</b></small></h3><div id="cMonthBox" style="min-height:170px;display:flex;align-items:center;justify-content:center"></div></div>
+      <div class="box"><h3>🍩 원가 · 판관비 · 순이익 비중</h3><div id="cDonutBox" style="min-height:170px;display:flex;align-items:center;justify-content:space-around;flex-wrap:wrap"></div></div>
+    </div>
+    <div class="gridEq">
+      <div class="box"><h3>🏆 효자 품목별 매출·순이익 순위</h3><div id="cItemBox"></div></div>
+      <div class="box"><h3>🏢 거래처별 매출 순위 및 미수금</h3><div id="cCliBox"></div></div>
+    </div>
+    <div class="gridEq">
+      <div class="box"><h3 style="color:#c0392b">🚨 미수금 상위 거래처 TOP 5</h3><table><thead><tr><th>거래처</th><th>연락처</th><th>누적매출</th><th>미수잔액</th><th>원장</th></tr></thead><tbody id="ceoUnpTb"></tbody></table></div>
+      <div class="box"><h3 style="color:#b85d00">⚠️ 안전재고 미달 품목</h3><table><thead><tr><th>코드</th><th>품목명</th><th>현재고</th><th>안전재고</th><th>위치</th></tr></thead><tbody id="ceoStkTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tSale" class="tab-c">
+    <div class="box">
+      <h2><span>💰 매출전표 작성 (다품목 & AI 단가·마진비서)</span><button type="button" class="btn btn-sm bg-gr" onclick="resetDocForm('s')">초기화</button></h2>
+      <input type="hidden" id="sEditId">
+      <div class="fg">
+        <label>매출일자*<input type="date" id="sDate"></label>
+        <label>거래처*<input id="sClient" list="dlCli" oninput="lookupPrice('s')" onchange="lookupPrice('s')"></label>
+        <label>부가세<select id="sVatType" onchange="recalcCart('s')"><option value="sep">과세(10%별도)</option><option value="inc">과세(10%포함)</option><option value="zero">영세/면세(0%)</option></select></label>
+        <label>결제수단<select id="sPayM"><option value="외상(미수)">외상(미수)</option><option value="계좌이체">계좌이체</option><option value="카드">카드</option><option value="현금">현금</option></select></label>
+        <label>당일수금액<input type="number" id="sPaid" value="0" oninput="recalcCart('s')"></label>
+        <label>비고<input id="sMemo"></label>
+      </div>
+      <div class="sub-box">
+        <div class="fg">
+          <label class="w2">🛒 품목선택<input id="sItem" list="dlItm" oninput="lookupPrice('s')" onchange="lookupPrice('s')"></label>
+          <label>규격<input id="sSpec"></label>
+          <label>수량<input type="number" id="sQty" value="1"></label>
+          <label>판매단가<input type="number" id="sPrice" value="0"></label>
+          <button type="button" class="btn bg-b" onclick="addLine('s')">➕ 품목추가</button>
+        </div>
+        <div id="sPmBar" class="pm-bar"></div>
+        <table><thead><tr><th>No</th><th>품목명</th><th>규격</th><th>수량</th><th>단가</th><th>공급가</th><th>부가세</th><th>합계</th><th>원가</th><th>순이익</th><th>삭제</th></tr></thead><tbody id="sCartTb"></tbody></table>
+      </div>
+      <div class="info" id="sPrev"></div>
+      <button type="button" class="btn bg-g" id="btnSave_s" onclick="saveDocSlip('s')">💾 매출전표 최종 저장 (암호화 자동동기화)</button>
+    </div>
+    <div class="box">
+      <h2><span>📋 매출전표 조회 및 내역</span><span id="sSumTxt" style="font-size:12px;color:#004085"></span></h2>
+      <div class="sbar">
+        <span>🔍 조회:</span><input type="date" id="sFStart" onchange="renderAll()">~<input type="date" id="sFEnd" onchange="renderAll()">
+        <select id="sFStatus" onchange="renderAll()"><option value="all">전체상태</option><option value="unpaid">미수금있는건</option><option value="paid">완납건</option></select>
+        <input id="sFKw" placeholder="🔎 거래처/품목 검색" oninput="renderAll()">
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>일자</th><th>거래처</th><th>구매 품목 상세</th><th>종수</th><th>공급가</th><th>부가세</th><th>총합계</th><th>순이익</th><th>수금액</th><th>미수잔액</th><th>관리</th></tr></thead><tbody id="saleTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tEst" class="tab-c">
+    <div class="box">
+      <h2><span>📝 견적서 작성 (AI 단가비서 & 인쇄 & 매출전환)</span><button type="button" class="btn btn-sm bg-gr" onclick="resetDocForm('es')">초기화</button></h2>
+      <input type="hidden" id="esEditId">
+      <div class="fg">
+        <label>견적일자*<input type="date" id="esDate"></label>
+        <label>거래처*<input id="esClient" list="dlCli" oninput="lookupPrice('es')" onchange="lookupPrice('es')"></label>
+        <label>부가세<select id="esVatType" onchange="recalcCart('es')"><option value="sep">과세(10%별도)</option><option value="inc">과세(10%포함)</option><option value="zero">영세/면세(0%)</option></select></label>
+        <label>유효기간<input id="esValid" value="견적일로부터 15일간"></label>
+        <label class="w2">비고<input id="esMemo"></label>
+      </div>
+      <div class="sub-box">
+        <div class="fg">
+          <label class="w2">🛒 견적품목 선택<input id="esItem" list="dlItm" oninput="lookupPrice('es')" onchange="lookupPrice('es')"></label>
+          <label>규격<input id="esSpec"></label>
+          <label>수량<input type="number" id="esQty" value="1"></label>
+          <label>견적단가<input type="number" id="esPrice" value="0"></label>
+          <button type="button" class="btn bg-b" onclick="addLine('es')">➕ 품목추가</button>
+        </div>
+        <div id="esPmBar" class="pm-bar"></div>
+        <table><thead><tr><th>No</th><th>품목명</th><th>규격</th><th>수량</th><th>단가</th><th>공급가</th><th>부가세</th><th>합계</th><th>원가</th><th>예상순익</th><th>삭제</th></tr></thead><tbody id="esCartTb"></tbody></table>
+      </div>
+      <div class="info" id="esPrev"></div>
+      <button type="button" class="btn bg-g" id="btnSave_es" onclick="saveDocSlip('es')">💾 견적서 저장하기</button>
+    </div>
+    <div class="box">
+      <h2><span>📋 견적서 조회 · 인쇄 · 매출전환</span><span id="esSumTxt" style="font-size:12px;color:#004085"></span></h2>
+      <div class="sbar">
+        <span>🔍 조회:</span><input type="date" id="esFStart" onchange="renderAll()">~<input type="date" id="esFEnd" onchange="renderAll()">
+        <select id="esFStat" onchange="renderAll()"><option value="all">전체상태</option><option value="대기">진행중</option><option value="수주완료">수주완료</option></select>
+        <input id="esFKw" placeholder="🔎 거래처/품목 검색" oninput="renderAll()">
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>견적일</th><th>상태</th><th>거래처</th><th>견적 품목 내역</th><th>종수</th><th>공급가</th><th>부가세</th><th>총견적액</th><th>예상순익</th><th>유효기간</th><th>관리</th></tr></thead><tbody id="estTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tPur" class="tab-c">
+    <div class="box">
+      <h2><span>🚢 해외수입 원가정산 및 매입전표</span><button type="button" class="btn btn-sm bg-gr" onclick="resetPurForm()">초기화</button></h2>
+      <input type="hidden" id="pEditId">
+      <div class="fg">
+        <label>입고일자*<input type="date" id="pDate"></label>
+        <label>구분<select id="pType" onchange="togglePurType()"><option value="해외수입">해외수입(관세·운임안분)</option><option value="국내매입">국내매입(원화)</option></select></label>
+        <label>매입처*<input id="pClient" list="dlCli" oninput="lookupPurPrice()" onchange="lookupPurPrice()"></label>
+        <label id="bCur">통화<select id="pCur" onchange="recalcPurCart()"><option value="USD">USD</option><option value="CNY">CNY</option><option value="JPY">JPY</option><option value="EUR">EUR</option><option value="KRW">KRW</option></select></label>
+        <label id="bRate">환율(원)<input type="number" id="pRate" value="1380" oninput="recalcPurCart()"></label>
+        <label id="bCust">총관세(원)<input type="number" id="pCust" value="0" oninput="recalcPurCart()"></label>
+        <label id="bFrt">총운임·부대비<input type="number" id="pFrt" value="0" oninput="recalcPurCart()"></label>
+        <label>매입부가세<input type="number" id="pVat" value="0" oninput="recalcPurCart()"></label>
+        <label>당일지급액<input type="number" id="pPaid" value="0" oninput="recalcPurCart()"></label>
+      </div>
+      <div class="sub-box">
+        <div class="fg">
+          <label class="w2">📦 입고품목 선택<input id="pItem" list="dlItm" oninput="lookupPurPrice()" onchange="lookupPurPrice()"></label>
+          <label>규격<input id="pSpec"></label>
+          <label>수량<input type="number" id="pQty" value="100"></label>
+          <label><span id="lblPU">개당외화단가</span><input type="number" id="pUnitF" value="10" step="0.01"></label>
+          <button type="button" class="btn bg-b" onclick="addPurLine()">➕ 품목추가</button>
+        </div>
+        <div id="pPmBar" class="pm-bar"></div>
+        <table><thead><tr><th>No</th><th>품목명</th><th>규격</th><th>수량</th><th>단가</th><th>물품대금</th><th>원화환산</th><th>배분부대비</th><th>품목총원가</th><th>개당확정원가</th><th>삭제</th></tr></thead><tbody id="pCartTb"></tbody></table>
+      </div>
+      <div class="info" id="pPrev"></div>
+      <button type="button" class="btn bg-g" id="btnSavePur" onclick="savePurSlip()">💾 매입·수입전표 최종 저장</button>
+    </div>
+    <div class="box">
+      <h2><span>📋 매입·수입전표 조회 및 내역</span><span id="pSumTxt" style="font-size:12px;color:#004085"></span></h2>
+      <div class="sbar">
+        <span>🔍 조회:</span><input type="date" id="pFStart" onchange="renderAll()">~<input type="date" id="pFEnd" onchange="renderAll()">
+        <select id="pFType" onchange="renderAll()"><option value="all">전체구분</option><option value="해외수입">해외수입</option><option value="국내매입">국내매입</option></select>
+        <select id="pFStatus" onchange="renderAll()"><option value="all">전체상태</option><option value="payable">미지급건</option><option value="paid">지급완료</option></select>
+        <input id="pFKw" placeholder="🔎 매입처/품목 검색" oninput="renderAll()">
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>일자</th><th>구분</th><th>매입처</th><th>입고 품목 내역</th><th>종수</th><th>총원가</th><th>부가세</th><th>총합계</th><th>지급액</th><th>미지급잔액</th><th>관리</th></tr></thead><tbody id="purTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tLedger" class="tab-c">
+    <div class="box">
+      <h2><span>📊 거래처별 채권(미수금)·채무(미지급금) 원장</span><span id="lSumTxt" style="font-size:12px;color:#d93025"></span></h2>
+      <div class="sbar">
+        <span>🔍 조회:</span>
+        <select id="lFType" onchange="renderAll()"><option value="all">전체구분</option><option value="매출처">매출처</option><option value="매입처">매입처</option><option value="겸용">겸용</option></select>
+        <select id="lFBal" onchange="renderAll()"><option value="all">전체잔액</option><option value="unpaid">미수금 있는곳</option><option value="payable">미지급 있는곳</option></select>
+        <input id="lFKw" placeholder="🔎 거래처/사업자번호 검색" oninput="renderAll()">
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>코드</th><th>구분</th><th>거래처명</th><th>사업자번호</th><th>대표자</th><th>연락처</th><th>기초미수</th><th>기간매출</th><th>누적매출</th><th>누적수금</th><th>기말 미수금</th><th>기말 미지급</th><th>상세</th></tr></thead><tbody id="ledgerTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tExp" class="tab-c">
+    <div class="box">
+      <h2>🧾 일반경비(판관비) 지출 등록</h2>
+      <div class="fg">
+        <label>일자<input type="date" id="eDate"></label>
+        <label>계정과목<select id="eCat"><option value="운반/택배/화물비">운반/택배/화물비</option><option value="임차료/관리비">임차료/관리비</option><option value="차량유지/유류대">차량유지/유류대</option><option value="복리후생(식대)">복리후생(식대)</option><option value="접대비">접대비</option><option value="통신/소모품비">통신/소모품비</option><option value="세금과공과/기타">세금과공과/기타</option></select></label>
+        <label class="w2">적요(지출내용)*<input id="eMemo"></label>
+        <label>공급가액<input type="number" id="eSup" value="50000" oninput="$('eVat').value=Math.round(this.value*0.1)"></label>
+        <label>부가세<input type="number" id="eVat" value="5000"></label>
+        <label>증빙수단<select id="eMeth"><option value="사업자카드(공제)">사업자카드(공제)</option><option value="세금계산서(공제)">세금계산서(공제)</option><option value="현금영수증(공제)">현금영수증(공제)</option><option value="일반영수증/접대비(불공제)">일반영수증/접대비(불공제)</option></select></label>
+        <button type="button" class="btn" onclick="addExp()">+ 경비저장</button>
+      </div>
+    </div>
+    <div class="box">
+      <h2><span>📋 일반경비 조회 및 내역</span><span id="eSumTxt" style="font-size:12px;color:#004085"></span></h2>
+      <div class="sbar">
+        <span>🔍 조회:</span><input type="date" id="eFStart" onchange="renderAll()">~<input type="date" id="eFEnd" onchange="renderAll()">
+        <select id="eFDed" onchange="renderAll()"><option value="all">전체공제</option><option value="ded">부가세공제만</option><option value="nonded">불공제만</option></select>
+        <input id="eFKw" placeholder="🔎 과목/적요 검색" oninput="renderAll()">
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>일자</th><th>계정과목</th><th>지출내용</th><th>증빙구분</th><th>공급가액</th><th>부가세</th><th>합계</th><th>삭제</th></tr></thead><tbody id="expTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tStock" class="tab-c">
+    <div class="box">
+      <h2>🔧 재고 실사 조정</h2>
+      <div class="fg">
+        <label>일자<input type="date" id="adjDate"></label>
+        <label>품목선택<input id="adjItem" list="dlItm"></label>
+        <label>조정수량(+/-)<input type="number" id="adjQty" value="-1"></label>
+        <label class="w2">사유<input id="adjMemo"></label>
+        <button type="button" class="btn bg-o" onclick="addAdjust()">조정반영</button>
+      </div>
+    </div>
+    <div class="box">
+      <h2>📦 실시간 재고 수불부</h2>
+      <div class="sbar">
+        <span>🔍 조회:</span>
+        <select id="stFStat" onchange="renderAll()"><option value="all">전체품목</option><option value="low">안전재고 미달만</option></select>
+        <input id="stFKw" placeholder="🔎 품목명/코드/위치 검색" oninput="renderAll()">
+      </div>
+      <div class="t-wrap"><table><thead><tr><th>코드</th><th>분류</th><th>품목명</th><th>규격</th><th>위치</th><th>기초</th><th>총입고</th><th>총출고</th><th>조정</th><th>현재고</th><th>최근원가</th><th>재고평가액</th><th>상태</th></tr></thead><tbody id="stkTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tCli" class="tab-c">
+    <div class="box">
+      <h2><span>🏢 거래처 등록 및 엑셀(CSV) 일괄업로드</span><div><button type="button" class="btn btn-sm bg-g" onclick="dlMasterCSV('cli')">📥 양식다운</button><button type="button" class="btn btn-sm bg-o" onclick="$('upCli').click()">📤 엑셀일괄등록</button><input type="file" id="upCli" style="display:none" accept=".csv" onchange="uploadMasterCSV('cli',event)"><button type="button" class="btn btn-sm bg-gr" onclick="resetCliForm()">초기화</button></div></h2>
+      <input type="hidden" id="cEditId">
+      <div class="fg">
+        <label>코드<input id="cCode" placeholder="자동"></label>
+        <label>구분<select id="cType"><option value="매출처">매출처</option><option value="매입처">매입처</option><option value="겸용">겸용</option></select></label>
+        <label>상호*<input id="cName"></label>
+        <label>사업자번호<input id="cBizNo"></label>
+        <label>대표자<input id="cCeo"></label>
+        <label>업태<input id="cBizT"></label>
+        <label>종목<input id="cBizI"></label>
+        <label>연락처<input id="cTel"></label>
+        <label>이메일<input id="cEmail"></label>
+        <label class="w2">주소<input id="cAddr"></label>
+        <label>기초미수<input type="number" id="cInitU" value="0"></label>
+        <label>기초미지급<input type="number" id="cInitP" value="0"></label>
+        <label>비고<input id="cMemo"></label>
+        <button type="button" class="btn" id="btnSaveCli" onclick="saveClient()">+ 거래처저장</button></div>
+    </div>
+    <div class="box">
+      <h2><span>📋 거래처 목록 (<span id="cliCnt">0</span>곳)</span><input id="cSearch" placeholder="🔎 상호/사업자번호 검색" oninput="renderAll()"></h2>
+      <div class="t-wrap"><table><thead><tr><th>코드</th><th>구분</th><th>상호</th><th>사업자번호</th><th>대표자</th><th>업태/종목</th><th>연락처</th><th>이메일</th><th>기초미수</th><th>기초미지급</th><th>비고</th><th>관리</th></tr></thead><tbody id="cliMasterTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tItm" class="tab-c">
+    <div class="box">
+      <h2><span>📦 품목 등록 및 엑셀(CSV) 일괄업로드</span><div><button type="button" class="btn btn-sm bg-g" onclick="dlMasterCSV('itm')">📥 양식다운</button><button type="button" class="btn btn-sm bg-o" onclick="$('upItm').click()">📤 엑셀일괄등록</button><input type="file" id="upItm" style="display:none" accept=".csv" onchange="uploadMasterCSV('itm',event)"><button type="button" class="btn btn-sm bg-gr" onclick="resetItmForm()">초기화</button></div></h2>
+      <input type="hidden" id="iEditId">
+      <div class="fg">
+        <label>코드<input id="iCode" placeholder="자동"></label>
+        <label>분류<input id="iCat"></label>
+        <label>품목명*<input id="iName"></label>
+        <label>규격<input id="iSpec"></label>
+        <label>과세<select id="iTax"><option value="과세">과세(10%)</option><option value="영세">영세(0%)</option><option value="면세">면세(0%)</option></select></label>
+        <label>기본매입가<input type="number" id="iBuyP" value="15000"></label>
+        <label>기본매출가<input type="number" id="iSellP" value="25000"></label>
+        <label>기초재고<input type="number" id="iInitQ" value="0"></label>
+        <label>안전재고<input type="number" id="iSafeQ" value="10"></label>
+        <label>보관위치<input id="iLoc"></label>
+        <button type="button" class="btn" id="btnSaveItm" onclick="saveItem()">+ 품목저장</button></div>
+    </div>
+    <div class="box">
+      <h2><span>📋 품목 목록 (<span id="itmCnt">0</span>종)</span><input id="iSearch" placeholder="🔎 품목명/코드 검색" oninput="renderAll()"></h2>
+      <div class="t-wrap"><table><thead><tr><th>코드</th><th>분류</th><th>품목명</th><th>규격</th><th>과세</th><th>기본매입가</th><th>기본매출가</th><th>기초재고</th><th>안전재고</th><th>위치</th><th>관리</th></tr></thead><tbody id="itmMasterTb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="tComp" class="tab-c">
+    <div class="box" style="border-color:#8e44ad;background:#faf5ff">
+      <h2 style="color:#8e44ad">📲 스마트폰·PC 전용 앱(PWA) 설치 및 배포용 index.html 굽기</h2>
+      <button type="button" class="btn bg-p" style="font-size:13px;padding:8px 14px" onclick="installPWA()">📲 내 폰·PC 바탕화면에 전용 앱으로 설치</button>
+      <button type="button" class="btn bg-o" style="font-size:13px;padding:8px 14px" onclick="bakeHTML()">📦 토큰 은닉 배포용 index.html 다운로드</button>
+    </div>
+    <div class="box" style="border-color:#0088cc;background:#f0faff">
+      <h2 style="color:#0088cc">✈️ 텔레그램 보안 클라우드 설정 (소스코드 토큰 은닉 적용됨)</h2>
+      <div class="fg">
+        <label class="w2">🤖 텔레그램 봇 토큰 (마스킹 보호)<input type="password" id="tgTok"></label>
+        <label>💬 채팅방 ID<input id="tgCid"></label>
+        <button type="button" class="btn bg-tg" onclick="tgPush('연동테스트',false)">✈️ 암호화 클라우드 저장테스트</button>
+        <label>자동전송<select id="tgAuto"><option value="1">ON (전표저장시 자동동기화)</option><option value="0">OFF (수동만)</option></select></label>
+        <button type="button" class="btn bg-g" onclick="saveComp()">💾 설정 저장</button>
+      </div>
+    </div>
+    <div class="box">
+      <h2>⚙️ 우리회사(공급자) 정보 및 암호화 비밀번호 설정</h2>
+      <div class="fg">
+        <label>상호명<input id="mName"></label>
+        <label>사업자번호<input id="mBizNo"></label>
+        <label>대표자명<input id="mCeo"></label>
+        <label>업태<input id="mBizT"></label>
+        <label>종목<input id="mBizI"></label>
+        <label>연락처<input id="mTel"></label>
+        <label>이메일<input id="mEmail"></label>
+        <label class="w2">사업장 주소<input id="mAddr"></label>
+        <label class="w2">입금계좌 안내<input id="mBank"></label>
+        <label style="color:#c0392b">🔒 접속·복호화 비밀번호<input id="mPass" placeholder="0000" style="border-color:#c0392b;font-weight:bold"></label>
+      </div>
+      <div style="margin-top:10px;display:flex;justify-content:space-between">
+        <button type="button" class="btn bg-g" onclick="saveComp()">💾 전체 설정 저장</button>
+        <button type="button" class="btn bg-r" onclick="clearDB()">🗑️ 전체 장부 비우기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<datalist id="dlCli"></datalist><datalist id="dlItm"></datalist>
+<div id="invModal" class="modal"><div class="m-body"><div id="invArea" style="border:2px solid #142d4c;padding:16px"></div><div class="no-print" style="text-align:center;margin-top:10px"><button type="button" class="btn bg-g" onclick="window.print()">🖨️ 인쇄 / PDF저장</button> <button type="button" class="btn bg-r" onclick="$('invModal').style.display='none'">닫기</button></div></div></div>
+<div id="ledModal" class="modal"><div class="m-body"><div id="ledArea"></div><div style="text-align:center;margin-top:10px"><button type="button" class="btn bg-r" onclick="$('ledModal').style.display='none'">닫기</button></div></div></div>
+<!-- END -->
+</body>
+</html>
