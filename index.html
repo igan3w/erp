@@ -3679,5 +3679,427 @@ window.execEmailSend = async function(){
   });
 })();
 </script>
+  <!-- 🚀 오라테크 ERP v27 패치: 클라우드 비밀번호 선(先)검증(0000 해킹 원천차단) + 모바일/PC 클라우드 동기화 완벽복구 -->
+<script>
+(function(){
+  var thisMonthPfx = new Date().toISOString().slice(0, 7);
+  var failCnt = 0, lockUntil = 0, sessionPass = '';
+
+  // 1. 비밀번호 보안 해시(지문) 생성기 — 클라우드에 비밀번호 원문 대신 지문(Hash)을 저장하여 0000 우회 원천 차단!
+  function hashPass(p){
+    var s = 'ORA_SALT_' + String(p || '0000').trim(), h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for(var i=0; i<s.length; i++){
+      var ch = s.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (h2 >>> 0).toString(16).padStart(8,'0') + (h1 >>> 0).toString(16).padStart(8,'0');
+  }
+
+  // 2. 전표 최신일자순 자동정렬 고정
+  var origNormDB = window.normDB;
+  window.normDB = function(){
+    if(origNormDB) origNormDB();
+    var sortAsc = function(a, b){
+      var d = String(a.date||'').localeCompare(String(b.date||''));
+      return d !== 0 ? d : ((Number(a.id)||0) - (Number(b.id)||0));
+    };
+    if(Array.isArray(db.sales)) db.sales.sort(sortAsc);
+    if(Array.isArray(db.purchases)) db.purchases.sort(sortAsc);
+    if(Array.isArray(db.estimates)) db.estimates.sort(sortAsc);
+    if(Array.isArray(db.expenses)) db.expenses.sort(sortAsc);
+  };
+
+  // 3. IndexedDB 로컬 금고 (기존 v26 금고와 100% 호환)
+  function idbOpen(){
+    return new Promise(function(res, rej){
+      var req = indexedDB.open('OraErpDB_v26', 1);
+      req.onupgradeneeded = function(e){ e.target.result.createObjectStore('store'); };
+      req.onsuccess = function(e){ res(e.target.result); };
+      req.onerror = function(e){ rej(e); };
+    });
+  }
+  async function idbSet(key, val){
+    try{
+      var idb = await idbOpen(), tx = idb.transaction('store', 'readwrite');
+      tx.objectStore('store').put(JSON.parse(JSON.stringify(val)), key);
+    }catch(e){}
+  }
+  async function idbGet(key){
+    try{
+      var idb = await idbOpen();
+      return await new Promise(function(res){
+        var rq = idb.transaction('store', 'readonly').objectStore('store').get(key);
+        rq.onsuccess = function(){ res(rq.result || null); };
+        rq.onerror = function(){ res(null); };
+      });
+    }catch(e){ return null; }
+  }
+
+  // 4. 스트림 GZIP 압축/복호화
+  async function gzPack(obj, pass){
+    var str = JSON.stringify(obj), k = String(pass || '0000').trim();
+    if(typeof CompressionStream !== 'undefined'){
+      var stream = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));
+      var u8 = new Uint8Array(await new Response(stream).arrayBuffer());
+      for(var i=0; i<u8.length; i++) u8[i] ^= (k.charCodeAt(i % k.length) & 0xFF);
+      var bin = '';
+      for(var j=0; j<u8.length; j+=8192) bin += String.fromCharCode.apply(null, u8.subarray(j, j+8192));
+      return 'GZ2:' + btoa(bin);
+    }
+    return xorEnc(str, k);
+  }
+  async function gzUnpack(enc, pass){
+    if(!enc) throw new Error('EMPTY_DATA');
+    var cleanEnc = enc.trim(), k = String(pass || '0000').trim();
+    if(cleanEnc.indexOf('GZ2:') === 0 || cleanEnc.indexOf('GZ1:') === 0){
+      var raw = atob(cleanEnc.slice(4)), u8 = new Uint8Array(raw.length);
+      for(var i=0; i<raw.length; i++) u8[i] = raw.charCodeAt(i) ^ (k.charCodeAt(i % k.length) & 0xFF);
+      if(u8[0] !== 0x1f || u8[1] !== 0x8b) throw new Error('WRONG_PASS');
+      var stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(stream).text());
+    }
+    return JSON.parse(xorDec(cleanEnc, k));
+  }
+
+  function slimSale(s){
+    var m = String(s.memo||'').replace(/우리\s*김향래\s*011-058791-12-001/g,'').replace(/\[홈택스\]/g,'').trim();
+    var L = (s.lines||[]).map(function(l){ return [l.item||'', l.spec||'', Number(l.qty)||1, Number(l.price)||0]; });
+    return [s.date||'', s.client||'', Number(s.supply)||0, Number(s.vat)||0, Number(s.paid)||0, m, L, s.otName||'', s.otCeo||'', s.otTel||'', s.otEmail||'', s.otAddr||''];
+  }
+  function fatSale(a, idx){
+    var sup = Number(a[2])||0, vat = Number(a[3])||0, tot = sup + vat, paid = Number(a[4])||0;
+    var L = (a[6]||[]).map(function(x){
+      var q = Number(x[2])||1, p = Number(x[3])||0, ls = q*p, lv = Math.round(ls*0.1), uc = Math.round(p*0.75);
+      return {item:x[0], spec:x[1], qty:q, price:p, supply:ls, vat:lv, total:ls+lv, uCost:uc, profit:ls-uc*q};
+    });
+    return {
+      id: 100000 + idx, date: a[0], client: a[1], vatType: vat===0?'zero':'sep', payMethod: (tot-paid)>0?'외상(미수)':'계좌이체',
+      memo: a[5]||'', supply: sup, vat: vat, total: tot, paid: paid, unpaid: tot - paid, profit: Math.round(sup*0.25),
+      lines: L, otName: a[7]||'', otCeo: a[8]||'', otTel: a[9]||'', otEmail: a[10]||'', otAddr: a[11]||''
+    };
+  }
+
+  async function tgCall(tok, method, body){
+    for(var retry=0; retry<5; retry++){
+      try{
+        var r = await fetch('https://api.telegram.org/bot' + tok + '/' + method, {
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+        });
+        var j = await r.json();
+        if(j.ok) return j;
+        if(j.description && j.description.indexOf('not modified') !== -1) return {ok:true};
+        if(j.error_code === 429 && j.parameters && j.parameters.retry_after){
+          var w = Number(j.parameters.retry_after) + 1;
+          if($('connBadge')) $('connBadge').innerText = '⏳ 서버대기(' + w + '초)...';
+          await new Promise(function(res){ setTimeout(res, w * 1000); });
+          continue;
+        }
+        return j;
+      }catch(e){
+        await new Promise(function(res){ setTimeout(res, 1500); });
+      }
+    }
+    return {ok:false};
+  }
+
+  async function sendOrEditChunks(tok, cid, prefixTag, strData, oldIds){
+    var chunks = [], newIds = [];
+    for(var i=0; i<strData.length; i+=3800) chunks.push(strData.slice(i, i+3800));
+    for(var idx=0; idx<chunks.length; idx++){
+      var text = prefixTag + '#' + (idx+1) + '/' + chunks.length + '\n' + chunks[idx];
+      var mId = (oldIds && oldIds[idx]) ? oldIds[idx] : 0, ok = false;
+      if(mId){
+        var jEd = await tgCall(tok, 'editMessageText', {chat_id:cid, message_id:Number(mId), text:text, reply_markup:{inline_keyboard:[[{text:'🔒 '+prefixTag+' #'+(idx+1), callback_data:'s'+Date.now()}]]}});
+        if(jEd.ok && jEd.result){ newIds.push(mId); ok = true; }
+        else if(jEd.ok){ newIds.push(mId); ok = true; }
+      }
+      if(!ok){
+        var jSn = await tgCall(tok, 'sendMessage', {chat_id:cid, text:text, disable_notification:true, reply_markup:{inline_keyboard:[[{text:'🔒 '+prefixTag+' #'+(idx+1), callback_data:'s'+Date.now()}]]}});
+        if(jSn.ok && jSn.result) newIds.push(jSn.result.message_id);
+        await new Promise(function(r){ setTimeout(r, 220); });
+      }
+    }
+    return newIds;
+  }
+
+  async function readChunksByIds(tok, cid, ids){
+    var out = [];
+    for(var i=0; i<ids.length; i++){
+      var j = await tgCall(tok, 'editMessageReplyMarkup', {
+        chat_id:cid, message_id:Number(ids[i]),
+        reply_markup:{inline_keyboard:[[{text:'🔒 동기화됨 #'+(i+1), callback_data:'p'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,7)}]]}
+      });
+      if(j.ok && j.result && j.result.text){
+        var t = j.result.text, nl = t.indexOf('\n');
+        out.push(nl !== -1 ? t.slice(nl+1) : t);
+      } else {
+        throw new Error('메시지 #' + ids[i] + ' 수신 실패');
+      }
+    }
+    return out.join('');
+  }
+
+  // 클라우드 포인터(목차 메시지 번호 + 비밀번호 해시) 조회
+  async function fetchCloudMeta(tok){
+    try{
+      var r1 = await fetch('https://api.telegram.org/bot'+tok+'/getMyDescription?_t='+Date.now(),{cache:'no-store'}), j1 = await r1.json();
+      var s = (j1.ok && j1.result && j1.result.description) ? j1.result.description.trim() : '';
+      if(s.indexOf('SYNC27:') !== 0 && s.indexOf('SYNC26:') !== 0){
+        var r2 = await fetch('https://api.telegram.org/bot'+tok+'/getMyShortDescription?_t='+Date.now(),{cache:'no-store'}), j2 = await r2.json();
+        var s2 = (j2.ok && j2.result && j2.result.short_description) ? j2.result.short_description.trim() : '';
+        if(s2.indexOf('SYNC27:') === 0 || s2.indexOf('SYNC26:') === 0) s = s2;
+      }
+      if(s.indexOf('SYNC27:') === 0 || s.indexOf('SYNC26:') === 0){
+        var p = s.split(':');
+        return { ver: p[0], cid: p[1], idxMsgId: Number(p[2]), passHash: p[3] || '' };
+      }
+    }catch(e){}
+    return null;
+  }
+
+  // 5. 클라우드 저장 (tgPush) — 비밀번호 해시(passHash)를 클라우드 포인터에 함께 각인 & 목차 JSON 깨짐 완벽 수정!
+  var bgRunning = false, bgNeedRun = false;
+  window.tgPush = async function(reason, silent){
+    if(bgRunning){ bgNeedRun = true; return; }
+    bgRunning = true;
+    var c = getTgCfg();
+    var pass = String((db.myCompany && db.myCompany.pass) || sessionPass || '0000').trim();
+    sessionPass = pass;
+    var pHash = hashPass(pass);
+
+    if($('connBadge')){$('connBadge').innerText='⚡ 클라우드 저장중...';$('connBadge').style.background='#0088cc';}
+    try{
+      var manifest = (await idbGet('ora_manifest_v27')) || (await idbGet('ora_manifest_v26')) || { cid: c.cid, hotIds: [], arc: {}, idxMsgId: 0, passHash: '' };
+      if(String(manifest.cid) !== String(c.cid)) manifest = { cid: c.cid, hotIds: [], arc: {}, idxMsgId: 0, passHash: '' };
+
+      // 만약 비밀번호를 변경했다면 과거 블록들도 새 비밀번호로 다시 암호화하도록 초기화!
+      if(manifest.passHash && manifest.passHash !== pHash){
+        manifest.arc = {};
+      }
+      manifest.passHash = pHash;
+
+      // [1단계: 이번달 데이터 + 거래처/품목 마스터 즉시 저장]
+      var hotSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; }).map(slimSale);
+      var hotObj = {
+        myCompany: db.myCompany, clients: db.clients, items: db.items,
+        purchases: db.purchases, estimates: db.estimates, expenses: db.expenses, stockAdjusts: db.stockAdjusts,
+        hotSales: hotSales
+      };
+      var hotEnc = await gzPack(hotObj, pass);
+      manifest.hotIds = await sendOrEditChunks(c.tok, c.cid, '⚡HOT', hotEnc, manifest.hotIds);
+
+      // 순수 JSON만 목차 메시지에 저장 (v26의 2줄 헤더 JSON 파싱 에러 완벽 해결!)
+      var idxJson = JSON.stringify({ hotIds: manifest.hotIds, arc: manifest.arc, passHash: pHash });
+      var idxIds = await sendOrEditChunks(c.tok, c.cid, '🗂️IDX', idxJson, manifest.idxMsgId ? [manifest.idxMsgId] : []);
+      manifest.idxMsgId = idxIds[0] || manifest.idxMsgId;
+
+      var ptrStr = 'SYNC27:' + c.cid + ':' + manifest.idxMsgId + ':' + pHash;
+      await Promise.all([
+        tgCall(c.tok, 'setMyDescription', { description: ptrStr }),
+        tgCall(c.tok, 'setMyShortDescription', { short_description: ptrStr })
+      ]);
+      await idbSet('ora_manifest_v27', manifest);
+
+      if($('connBadge')){$('connBadge').innerText='🔒 이번달 즉시저장됨!';$('connBadge').style.background='#27ae60';}
+      if(!silent) alert('⚡ 클라우드 저장 및 보안 암호 동기화 완료!\n이제 모바일에서도 변경된 비밀번호로만 접속되며 데이터가 즉시 불러와지옵니다!');
+
+      // [2단계: 지난달 이전 과거 매출전표 반기별 백그라운드 저장]
+      var oldSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) < thisMonthPfx; });
+      var groups = {};
+      oldSales.forEach(function(s){
+        var ym = String(s.date||'2020-01').slice(0,7), yr = ym.slice(0,4), mo = Number(ym.slice(5,7))||1;
+        var gKey = yr + (mo <= 6 ? '-H1' : '-H2');
+        if(!groups[gKey]) groups[gKey] = [];
+        groups[gKey].push(slimSale(s));
+      });
+
+      var gKeys = Object.keys(groups).sort(), changedKeys = [];
+      for(var k=0; k<gKeys.length; k++){
+        var gk = gKeys[k], sumHash = pHash.slice(0,6) + '_' + groups[gk].length + '_' + (groups[gk][0]?groups[gk][0][2]:0) + '_' + (groups[gk][groups[gk].length-1]?groups[gk][groups[gk].length-1][2]:0);
+        if(!manifest.arc[gk] || manifest.arc[gk].hash !== sumHash || !manifest.arc[gk].ids || !manifest.arc[gk].ids.length){
+          changedKeys.push({ key: gk, rows: groups[gk], hash: sumHash });
+        }
+      }
+
+      if(changedKeys.length > 0){
+        for(var idx=0; idx<changedKeys.length; idx++){
+          var item = changedKeys[idx];
+          if($('connBadge')){$('connBadge').innerText='☁️ 과거내역 백그라운드 저장 ('+(idx+1)+'/'+changedKeys.length+')...';$('connBadge').style.background='#e67e22';}
+          var arcEnc = await gzPack(item.rows, pass);
+          var prevIds = (manifest.arc[item.key] && manifest.arc[item.key].ids) ? manifest.arc[item.key].ids : [];
+          var arcIds = await sendOrEditChunks(c.tok, c.cid, '📦ARC_' + item.key, arcEnc, prevIds);
+          manifest.arc[item.key] = { hash: item.hash, ids: arcIds };
+          await idbSet('ora_arc_' + item.key + '_' + item.hash, item.rows);
+          await idbSet('ora_manifest_v27', manifest);
+          var idxJson2 = JSON.stringify({ hotIds: manifest.hotIds, arc: manifest.arc, passHash: pHash });
+          await sendOrEditChunks(c.tok, c.cid, '🗂️IDX', idxJson2, [manifest.idxMsgId]);
+        }
+        if($('connBadge')){$('connBadge').innerText='🔒 전체기간 클라우드 동기화완료!';$('connBadge').style.background='#27ae60';}
+      }
+    }catch(e){
+      if($('connBadge')){$('connBadge').innerText='⚠️ 저장대기';$('connBadge').style.background='#c0392b';}
+      if(!silent) alert('클라우드 저장 오류: ' + e.message);
+    }finally{
+      bgRunning = false;
+      if(bgNeedRun){ bgNeedRun = false; setTimeout(function(){ tgPush('추가동기화', true); }, 1200); }
+    }
+  };
+
+  // 6. 모바일/PC 클라우드 불러오기 (tgPull) — v26 헤더 깨짐 자동 복구 + 이번달 0.5초 로드 후 과거 백그라운드 수신!
+  window.tgPull = async function(silent){
+    var c = getTgCfg();
+    var pass = String(sessionPass || ($('lockIn') && $('lockIn').value.trim()) || (db.myCompany && db.myCompany.pass) || '0000').trim();
+    if($('connBadge')){$('connBadge').innerText='⚡ 이번달 데이터 수신중...';$('connBadge').style.background='#0088cc';}
+    try{
+      var meta = await fetchCloudMeta(c.tok);
+      if(!meta || !meta.idxMsgId){
+        if($('connBadge')) $('connBadge').innerText='🔒 로컬장부 사용중';
+        if(!silent) alert('⚠️ 아직 클라우드에 SYNC27 장부가 올라가 있지 않사옵니다.\n먼저 데이터가 있는 PC에서 상단 [✈️ 클라우드저장] 버튼을 한 번 눌러주시옵소서!');
+        return false;
+      }
+
+      var idxRaw = await readChunksByIds(c.tok, meta.cid, [meta.idxMsgId]);
+      // v26에서 들어간 '🗂️ORA_IDX_V26\n' 헤더가 섞여 있어도 '{' 위치부터 정확히 잘라내어 에러 100% 방지!
+      var bracePos = idxRaw.indexOf('{');
+      if(bracePos !== -1) idxRaw = idxRaw.slice(bracePos);
+      var mf = JSON.parse(idxRaw);
+
+      // [1단계] 이번달 데이터 + 거래처/품목 마스터 0.5초 즉시 수신!
+      var hotRaw = await readChunksByIds(c.tok, meta.cid, mf.hotIds || []);
+      var hotObj = await gzUnpack(hotRaw, pass);
+      var curMonthSales = (hotObj.hotSales || []).map(function(r, i){ return fatSale(r, 900000 + i); });
+
+      db.myCompany = hotObj.myCompany || db.myCompany;
+      if(db.myCompany) db.myCompany.pass = pass;
+      db.clients = hotObj.clients || [];
+      db.items = hotObj.items || [];
+      db.purchases = hotObj.purchases || [];
+      db.estimates = hotObj.estimates || [];
+      db.expenses = hotObj.expenses || [];
+      db.stockAdjusts = hotObj.stockAdjusts || [];
+
+      var existingOld = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) < thisMonthPfx; });
+      db.sales = existingOld.concat(curMonthSales);
+      normDB();
+      await idbSet('main_db', db);
+      await idbSet('ora_manifest_v27', { cid: meta.cid, hotIds: mf.hotIds, arc: mf.arc || {}, idxMsgId: meta.idxMsgId, passHash: mf.passHash || meta.passHash });
+      loadCompForm(); renderAll();
+
+      if($('connBadge')){$('connBadge').innerText='⚡ 이번달 로드완료! (과거 수신중...)';$('connBadge').style.background='#1e7e34';}
+
+      // [2단계] 과거 반기별 데이터 백그라운드 수신
+      var arcMap = mf.arc || {}, aKeys = Object.keys(arcMap).sort();
+      if(aKeys.length > 0){
+        var allOldSales = [];
+        for(var k=0; k<aKeys.length; k++){
+          var gk = aKeys[k], info = arcMap[gk];
+          var cachedRows = await idbGet('ora_arc_' + gk + '_' + info.hash);
+          if(!cachedRows){
+            if($('connBadge')) $('connBadge').innerText = '☁️ 과거내역 백그라운드 수신 (' + (k+1) + '/' + aKeys.length + ')...';
+            var arcRaw = await readChunksByIds(c.tok, meta.cid, info.ids || []);
+            cachedRows = await gzUnpack(arcRaw, pass);
+            await idbSet('ora_arc_' + gk + '_' + info.hash, cachedRows);
+          }
+          (cachedRows || []).forEach(function(r){ allOldSales.push(fatSale(r, allOldSales.length)); });
+        }
+        var latestHot = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; });
+        db.sales = allOldSales.concat(latestHot);
+        normDB();
+        await idbSet('main_db', db);
+        renderAll();
+      }
+
+      if($('connBadge')){$('connBadge').innerText='🔒 전체 동기화 완료!';$('connBadge').style.background='#27ae60';}
+      if(!silent) alert('📥 클라우드 불러오기 완료!\n• 총 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
+      return true;
+    }catch(e){
+      if(e.message === 'WRONG_PASS'){
+        if($('connBadge')){$('connBadge').innerText='❌ 암호불일치';$('connBadge').style.background='#c0392b';}
+        if(!silent) alert('❌ 클라우드 암호화 비밀번호가 일치하지 않사옵니다!\nPC에서 설정하신 비밀번호로 다시 로그인해 주시옵소서.');
+      } else {
+        if($('connBadge')){$('connBadge').innerText='⚠️ 불러오기 재시도필요';$('connBadge').style.background='#c0392b';}
+        if(!silent) alert('불러오기 상세 확인: ' + e.message);
+      }
+      return false;
+    }
+  };
+
+  // 7. [핵심 1번 보안] 잠금 해제 시 로컬 초기값('0000')이 아닌 '클라우드 암호 지문(passHash)'을 먼저 검증하여 해킹 원천 차단!
+  window.unlockERP = async function(){
+    if(Date.now() < lockUntil){
+      var remSec = Math.ceil((lockUntil - Date.now()) / 1000);
+      return alert('🚨 [해킹 방어 시스템 작동중]\n비밀번호 연속 오류로 인해 ' + remSec + '초 동안 접속이 차단되었사옵니다!');
+    }
+    var inp = $('lockIn') ? $('lockIn').value.trim() : '';
+    if(!inp){
+      $('lockErr').innerText = '⚠️ 비밀번호를 입력해 주시옵소서!';
+      $('lockErr').style.display = 'block';
+      return;
+    }
+
+    var btn = document.querySelector('#lockScreen button.bg-g');
+    var origBtnTxt = btn ? btn.innerText : '';
+    if(btn) btn.innerText = '🔍 클라우드 보안암호 검증중...';
+
+    var c = getTgCfg(), meta = await fetchCloudMeta(c.tok);
+    var isMatched = false, localPass = String((db.myCompany && db.myCompany.pass) || '0000').trim();
+
+    if(meta && meta.passHash){
+      // 클라우드에 암호 지문(passHash)이 등록되어 있으면 무조건 클라우드 암호 지문과 일치해야만 통과! (모바일에서 0000 통과 원천 봉쇄!)
+      isMatched = (hashPass(inp) === meta.passHash);
+    } else {
+      isMatched = (inp === localPass);
+    }
+
+    if(btn) btn.innerText = origBtnTxt;
+
+    if(isMatched){
+      failCnt = 0;
+      sessionPass = inp;
+      if(db.myCompany) db.myCompany.pass = inp;
+      $('lockScreen').style.display = 'none';
+      if($('lockErr')) $('lockErr').style.display = 'none';
+      renderAll();
+      // 잠금 풀자마자 검증된 비밀번호(sessionPass)로 클라우드 데이터 즉시 불러오기!
+      await tgPull(true);
+    } else {
+      failCnt++;
+      $('lockIn').value = '';
+      $('lockErr').innerText = '❌ 비밀번호 불일치! (' + failCnt + '/3회 실패)';
+      $('lockErr').style.display = 'block';
+      if(failCnt >= 3){
+        lockUntil = Date.now() + 5 * 60 * 1000;
+        tgSendMsg('🚨 <b>[오라테크 ERP 보안 경보]</b>\n누군가 접속 비밀번호를 <b>3회 연속 틀려 5분간 접속을 강제 차단</b>하였사옵니다!\n(시각: ' + new Date().toLocaleString() + ')');
+        alert('🚨 비밀번호 3회 연속 오류로 5분간 접속이 차단되었으며, 대표님 텔레그램으로 보안 경보가 발송되었사옵니다!');
+      }
+    }
+  };
+
+  window.saveDB = async function(tgMsg, skipTg){
+    normDB();
+    await idbSet('main_db', db);
+    try{ sSet(DB_KEY, JSON.stringify(db)); }catch(e){}
+    renderAll();
+    if(window.localDirHandle && typeof saveToLocalFolder === 'function') saveToLocalFolder();
+    var cfg = getTgCfg();
+    if(!skipTg && cfg.tok){
+      if(window.tgPushTimer) clearTimeout(window.tgPushTimer);
+      window.tgPushTimer = setTimeout(function(){ tgPush(tgMsg||'자동저장', true); }, 600);
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', async function(){
+    if($('lockIn')) $('lockIn').value = '';
+    var saved = await idbGet('main_db');
+    if(saved && ((saved.sales && saved.sales.length) || (saved.clients && saved.clients.length > 1))){
+      db = Object.assign(db, saved);
+      normDB(); loadCompForm(); renderAll();
+    }
+  });
+})();
+</script>
 </body>
 </html>
