@@ -2731,5 +2731,329 @@ window.execEmailSend = async function(){
   });
 })();
 </script>
+<!-- 🚀 오라테크 ERP v24 패치: 품목/거래처 엑셀업로드 완벽복구 + 대용량 계산서 '저장대기' 원천해결 -->
+<script>
+(function(){
+  // 1. 품목(6,307건) 및 거래처 엑셀(.csv / .xls / .xlsx) 일괄등록 기능 100% 완벽 복구!
+  ['upCli','upItm'].forEach(function(id){ if($(id)) $(id).setAttribute('accept', '.csv,.xls,.xlsx,.txt'); });
+
+  window.uploadMasterCSV = async function(t, e){
+    var f = e.target.files[0]; if(!f) return;
+    var buf = await f.arrayBuffer(), rows = [];
+
+    // 1) 엑셀(.xls/.xlsx) 또는 CSV 파싱
+    var isExcel = /\.(xls|xlsx)$/i.test(f.name);
+    if(isExcel && typeof XLSX !== 'undefined'){
+      try{
+        var wb = XLSX.read(buf, {type:'array'});
+        rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
+      }catch(err){}
+    }
+    if(!rows.length){
+      var txt = new TextDecoder('utf-8').decode(buf);
+      if(txt.indexOf('\uFFFD') !== -1) txt = new TextDecoder('euc-kr').decode(buf);
+      txt.replace(/\r/g,'').split('\n').forEach(function(line){
+        if(!line.trim()) return;
+        rows.push(line.split(',').map(function(x){ return x.trim().replace(/^"|"$/g,''); }));
+      });
+    }
+    e.target.value = '';
+    if(rows.length < 2) return alert('⚠️ 파일에 읽을 데이터가 없사옵니다!');
+
+    var add = 0, up = 0, existMap = {};
+    if(t === 'cli'){
+      db.clients.forEach(function(c, idx){ existMap[c.name] = idx; });
+      for(var i=1; i<rows.length; i++){
+        var c = rows[i], name = String(c[2]||'').trim(); if(!name) continue;
+        var ex = existMap[name];
+        var obj = {
+          id: ex !== undefined ? db.clients[ex].id : (Date.now() + i),
+          code: c[0] || ('C-' + String(db.clients.length + 1 + add).padStart(3,'0')),
+          type: c[1] || '매출처', name: name, bizNo: String(c[3]||'').trim(),
+          ceo: String(c[4]||'').trim(), bizType: String(c[5]||'').trim(), bizItem: String(c[6]||'').trim(),
+          tel: String(c[7]||'').trim(), email: String(c[8]||'').trim(), addr: String(c[9]||'').trim(),
+          initUnpaid: 0, initPayable: 0, memo: String(c[12]||'').trim()
+        };
+        if(ex !== undefined){ db.clients[ex] = obj; up++; }
+        else{ existMap[name] = db.clients.length; db.clients.push(obj); add++; }
+      }
+      saveDB('거래처엑셀등록');
+      alert('🏢 [거래처 엑셀 업로드 완료!]\n• 신규 등록: ' + fmt(add) + '곳 / 갱신: ' + fmt(up) + '곳');
+    } else {
+      db.items.forEach(function(it, idx){ existMap[it.name] = idx; });
+      for(var j=1; j<rows.length; j++){
+        var r = rows[j], iName = String(r[2]||'').trim(); if(!iName) continue;
+        var ex2 = existMap[iName];
+        var obj2 = {
+          id: ex2 !== undefined ? db.items[ex2].id : (Date.now() + j),
+          code: r[0] || ('ITM-' + String(db.items.length + 1 + add).padStart(4,'0')),
+          cat: String(r[1]||'일반').trim(), name: iName, spec: String(r[3]||'').trim(),
+          taxType: String(r[4]||'과세').trim(),
+          buyPrice: Number(String(r[5]||'0').replace(/[^0-9.-]/g,'')) || 0,
+          sellPrice: Number(String(r[6]||'0').replace(/[^0-9.-]/g,'')) || 0,
+          initQty: Number(String(r[7]||'10').replace(/[^0-9.-]/g,'')) || 10,
+          safeQty: Number(String(r[8]||'3').replace(/[^0-9.-]/g,'')) || 3,
+          loc: String(r[9]||'창고').trim()
+        };
+        if(ex2 !== undefined){ db.items[ex2] = obj2; up++; }
+        else{ existMap[iName] = db.items.length; db.items.push(obj2); add++; }
+      }
+      sSet(DB_KEY, JSON.stringify(db)); renderAll();
+      if(confirm('📦 [품목 파일 업로드 완료!]\n• 신규 추가: ' + fmt(add) + '종 / 갱신: ' + fmt(up) + '종 (현재 총 ' + fmt(db.items.length) + '종)\n\n지금 바로 [🪄 순수 제품코드(PCW-5000 등)만 남기기 & 중복제거]를 실행하시겠습니까?')){
+        autoCleanItems();
+      } else {
+        saveDB('품목엑셀등록');
+      }
+    }
+  };
+
+  // 2. 순수 제품코드(PCW-5000 등) 추출 및 [최근 3년 매출 품목] vs [업로드한 품목장 전체] 선택 정리!
+  var BAD_PFX = {
+    'HOIST':1,'WINCH':1,'BLOCK':1,'CHAIN':1,'LEVER':1,'TROLLY':1,'TROLLEY':1,'WIRE':1,'CABLE':1,'MOTOR':1,'MOTER':1,
+    'SWITCH':1,'SWICH':1,'HOOK':1,'DRUM':1,'GEAR':1,'BRAKE':1,'DISC':1,'LOAD':1,'HAND':1,'MINI':1,'TABLE':1,'AIR':1,
+    'PIPE':1,'BEAM':1,'HBEAM':1,'IBEAM':1,'NUT':1,'BOLT':1,'PIN':1,'RING':1,'SPRING':1,'JACK':1,'LIFT':1,'WHEEL':1,
+    'BATTERY':1,'CONTROL':1,'REMOTE':1,'SPEED':1,'PULLING':1,'ENGINE':1,'ELECTRIC':1,'HYDRAULIC':1,'CRANE':1,
+    'CARRIER':1,'CLAMP':1,'SHACKLE':1,'SLING':1,'BELT':1,'ROPE':1,'PART':1,'PARTS':1,'REPAIR':1,'RENTAL':1,'MODEL':1,
+    'TYPE':1,'SIZE':1,'SPEC':1,'LINE':1,'POWER':1,'PHASE':1,'VOLT':1,'AMP':1,'TON':1,'KG':1,'MM':1,'CM':1,'M':1,'HP':1,'KW':1,
+    'SET':1,'EA':1,'ASSY':1,'LOT':1,'PCS':1,'BOX':1,'ROLL':1,'COIL':1,'UNIT':1,'NO':1,'NEW':1,'OLD':1,'STD':1,'SUS':1,'STEEL':1,
+    'IRON':1,'AL':1,'AC':1,'DC':1,'LOADN':1,'CONTORL':1,'CONTRL':1,'PULLIG':1,'RINING':1,'BEM':1,'ELE':1,'TONX':1,'KGX':1,
+    'KX':1,'MX':1,'HPX':1,'KWX':1,'VX':1,'MMX':1,'SQX':1,'INCH':1,'FT':1,'LBS':1,'LB':1,'HZ':1,'PALLET':1,'PUMP':1,'VALVE':1,
+    'AADDLE':1,'ADDLLE':1,'BAG':1,'BISON':1,'BKOCK':1,'BLCOK':1,'CONSOL':1,'CONTOL':1,'CRIP':1,'FORMER':1,'IMPACT':1,
+    'INCHX':1,'JIYAMA':1,'LOOPER':1,'LOORER':1,'NCHSKY':1,'NXLOAD':1,'ONLOAD':1,'ONTROL':1,'ORWORM':1,'POINT':1,'RCABLE':1,
+    'SADDLE':1,'SHACLE':1,'SHAKLE':1,'SIMBLE':1,'SQ':1,'TESYS':1,'TOMY':1,'TONXL':1,'TOYO':1,'TRANS':1,'VCT':1,'WORM':1,'XLOAD':1,'AUTO':1,'GAS':1,'WINCHK':1
+  };
+  var UNIT_RX = /^\d+(\.\d+)?(M|MM|CM|TON|KG|VOLT|HZ|KW|HP|EA|SET|SQ|AMP|INCH|FT|LB|LBS|단|점식|종|건|개|대|식|조|각|극|호|형|롤|마력|볼트|톤|키로|메다|미터)$/i;
+
+  function extractPureCode(nameStr, specStr){
+    var srcs = [String(specStr||''), String(nameStr||'')];
+    for(var s=0; s<srcs.length; s++){
+      var cl = srcs[s].replace(/\d+(\.\d+)?\s*(ton|t|kg|k|m|mm|cm|hp|kw|v|volt|a|amp|sq|inch|p|hz|ea|set)\s*[xX*/]\s*\d+[A-Za-z0-9xX*/.-]*/gi, ' ');
+      var matches = cl.match(/[A-Za-z]{1,5}-\d{1,5}[A-Za-z0-9-]{0,6}/g) || [];
+      for(var i=0; i<matches.length; i++){
+        var up = matches[i].toUpperCase().replace(/^-+|-+$/g,'');
+        var pts = up.split('-'), pfx = pts[0], rest = pts.slice(1).join('-');
+        if(BAD_PFX[pfx] || pts.some(function(p){ return BAD_PFX[p]; })) continue;
+        rest = rest.replace(/(X\d+.*|XWIR.*|XLIFT.*|ROPE.*|DRUM.*|ASSY.*|MOTOR.*|WIRE.*|SWITCH.*|SWICH.*|HOOK.*|BRAKE.*|GEAR.*|TON.*|KG.*|MM.*|HP.*|KW.*|SET.*|EA.*|-12V|-24V|-12|-24)$/g, '').replace(/^-+|-+$/g,'');
+        rest = rest.replace(/(\d+[A-Z])\d+M$/, '$1');
+        if(!rest || !/\d/.test(rest) || UNIT_RX.test(rest)) continue;
+        if(pfx.length === 1){
+          if('FKYCGHPSTUVW'.indexOf(pfx) === -1) continue;
+          var dMatch = rest.match(/^\d+/);
+          if(dMatch && Number(dMatch[0]) < 100) continue;
+        }
+        if((pfx === 'F' || pfx === 'FF') && /^2\d-/.test(rest)) return 'F' + rest;
+        rest = rest.replace(/OOF/g,'00F').replace(/0OF/g,'00F');
+        return pfx + '-' + rest;
+      }
+    }
+    return null;
+  }
+
+  function guessCat(lowComb, code){
+    if(/(리모콘|리모트|remote|무선)/.test(lowComb) || /^F2\d-/.test(code)) return '무선리모콘';
+    if(/(트로리|트롤리|troll?y|trolley)/.test(lowComb) || /^(HC-|GT-|PT-)/.test(code)) return '트로리';
+    if(/(체인블럭|체인브럭|chain\s*block)/.test(lowComb) || /^(CB-|C-21|VS-|VP-|SHB)/.test(code)) return '체인블럭';
+    if(/(레버블럭|레바블럭|lever\s*block)/.test(lowComb) || /^(LB-|Y-0)/.test(code)) return '레버블럭';
+    if(/(유압윈치|hydraulic)/.test(lowComb) || /^(RKHN|RKHX|YAK|HV-|HWP)/.test(code)) return '유압윈치';
+    if(/(엔진윈치|engine)/.test(lowComb) || /^(PCW|PCH)/.test(code)) return '엔진윈치';
+    if(/(핸드윈치|수동윈치|hand\s*winch)/.test(lowComb) || /^(DLB|WB-|BHW|PNW|FD-|HWV|KDW)/.test(code)) return '핸드윈치';
+    if(/(미니윈치|mini\s*winch|스카이윈치)/.test(lowComb) || /^(SKY|TY-|YT-|RT-|AT-|SK-|FY-|PA-|SGW|KIO|BH-|DU-2|DU-3)/.test(code)) return '미니윈치';
+    if(/(차량용|dc\s*winch|12v|24v)/.test(lowComb) || /^(RKEX|RKEN|EWN|EWX|CWG|DW-|DR-)/.test(code)) return '차량용DC윈치';
+    if(/(단상호이스트)/.test(lowComb) || /^(DU-9|DU-10|DU-50|DH-)/.test(code)) return '단상호이스트';
+    if(/(호이스트|hoist)/.test(lowComb) || /^(LTH|LTM|LTS|LT-|DA-|DAM|KD-|DS-|DSS|SHK)/.test(code)) return '전동호이스트';
+    if(/(리프트|lift|파렛트)/.test(lowComb) || /^(SPN|DYC|JDYC|JPT|HIW|CBD|EPT|SEF|SYC)/.test(code)) return '리프트/운반하역';
+    return '전동윈치/장비';
+  }
+
+  window.autoCleanItems = function(){
+    var cutoff = new Date(Date.now() - 3 * 365 * 86400000).toISOString().split('T')[0];
+    var recentSales = (db.sales || []).filter(function(s){ return s.date >= cutoff && s.supply > 0; }).sort(function(a,b){ return a.date > b.date ? 1 : -1; });
+    var useOnly3Yr = false;
+    if(recentSales.length > 0 && db.items.length > 0){
+      useOnly3Yr = confirm('🪄 [정리 기준 선택]\n\n• [확인] 클릭: 최근 3년(' + cutoff + '~현재) 매출이 발생한 제품코드만 남기기\n• [취소] 클릭: 방금 올리신 품목목록(' + fmt(db.items.length) + '건) 전체에서 순수 제품코드(PCW-5000 등)만 추출하기');
+    } else if(recentSales.length > 0 && db.items.length === 0){
+      useOnly3Yr = true;
+    }
+    var beforeCnt = db.items.length, codeMap = {};
+
+    // A) 품목장(db.items)에서 추출할 때
+    if(!useOnly3Yr){
+      db.items.forEach(function(it){
+        var code = extractPureCode(it.name, it.spec); if(!code) return;
+        var low = (String(it.name||'') + ' ' + String(it.spec||'')).toLowerCase();
+        var isSub = /(부품|수리|교체|스위치|swich|와이어|모터|드럼|브레이크|라이닝|외)/.test(low);
+        var prc = Math.abs(Number(it.sellPrice) || 0);
+        if(!codeMap[code]){
+          codeMap[code] = { id:it.id, code:'ITM-0000', cat:guessCat(low,code), name:code, spec:code, taxType:'과세', buyPrice:Math.round(prc*0.75), sellPrice:prc, initQty:Number(it.initQty)||10, safeQty:3, loc:'창고', _m:!isSub };
+        }else if((!codeMap[code]._m && !isSub && prc>0) || (codeMap[code].sellPrice===0 && prc>0)){
+          codeMap[code].sellPrice = prc; codeMap[code].buyPrice = Math.round(prc*0.75); codeMap[code]._m = !isSub;
+        }
+      });
+    }
+
+    // B) 최근 3년 매출전표에서 추출 및 최신단가 반영
+    recentSales.forEach(function(s){
+      (s.lines || []).forEach(function(l){
+        var code = extractPureCode(l.item, l.spec); if(!code) return;
+        l.item = code; l.spec = code;
+        var low = (String(l.item||'') + ' ' + String(l.spec||'')).toLowerCase();
+        var isSub = /(부품|수리|교체|스위치|swich|와이어|모터|드럼|브레이크|라이닝)/.test(low);
+        var prc = Math.abs(Number(l.price) || 0);
+        if(useOnly3Yr && !codeMap[code]){
+          codeMap[code] = { id:Date.now()+Math.random(), code:'ITM-0000', cat:guessCat(low,code), name:code, spec:code, taxType:'과세', buyPrice:Math.round(prc*0.75), sellPrice:prc, initQty:10, safeQty:3, loc:'창고', _m:!isSub };
+        } else if(codeMap[code] && prc > 0 && (!isSub || !codeMap[code]._m)){
+          codeMap[code].sellPrice = prc; codeMap[code].buyPrice = Math.round(prc*0.75);
+        }
+      });
+    });
+
+    db.items = Object.keys(codeMap).sort().map(function(k, idx){
+      var o = codeMap[k]; delete o._m; o.code = 'ITM-' + String(idx+1).padStart(4,'0'); return o;
+    });
+    delete db.itemAliases; // 불필요한 용량 팽창 제거!
+    saveDB('제품코드정리완료');
+    alert('🎉 [순수 제품코드 대정리 완료!]\n• 정리 전: ' + fmt(beforeCnt) + '종 ➔ 정리 후: ' + fmt(db.items.length) + '종\n• 이제 클라우드에도 에러 없이 빠르게 자동 저장되옵니다!');
+  };
+
+  // 3. 대용량 계산서 '⚠️ 저장대기' 에러 원천 해결! (마스터 목차 메시지 방식 + 도배방지 순차전송 + 자동 재시도)
+  async function packDB(obj, pass){
+    // 용량 다이어트: 불필요한 거대 객체 제거 후 GZIP 최고압축
+    var cleanObj = Object.assign({}, obj);
+    delete cleanObj.itemAliases;
+    var json = JSON.stringify(cleanObj);
+    if(typeof CompressionStream !== 'undefined'){
+      var cs = new CompressionStream('gzip'), w = cs.writable.getWriter();
+      w.write(new TextEncoder().encode(json)); w.close();
+      var u8 = new Uint8Array(await new Response(cs.readable).arrayBuffer()), k = String(pass || '0000');
+      for(var i=0; i<u8.length; i++) u8[i] ^= (k.charCodeAt(i % k.length) & 0xFF);
+      var bin = '';
+      for(var j=0; j<u8.length; j+=8192) bin += String.fromCharCode.apply(null, u8.subarray(j, j+8192));
+      return 'GZ1:' + btoa(bin);
+    }
+    return xorEnc(json, pass);
+  }
+
+  async function unpackDB(encStr, pass){
+    if(encStr.indexOf('GZ1:') === 0){
+      var raw = atob(encStr.slice(4)), u8 = new Uint8Array(raw.length), k = String(pass || '0000');
+      for(var i=0; i<raw.length; i++) u8[i] = raw.charCodeAt(i) ^ (k.charCodeAt(i % k.length) & 0xFF);
+      if(u8[0] !== 0x1f || u8[1] !== 0x8b) throw new Error('WRONG_PASS');
+      var ds = new DecompressionStream('gzip'), w = ds.writable.getWriter();
+      w.write(u8); w.close();
+      return JSON.parse(await new Response(ds.readable).text());
+    }
+    return JSON.parse(xorDec(encStr, pass));
+  }
+
+  // 텔레그램 API 호출 시 429(속도제한)가 뜨면 자동으로 기다렸다가 재시도하는 무적 호출기!
+  async function tgSafePost(tok, method, bodyObj){
+    for(var retry=0; retry<4; retry++){
+      var r = await fetch('https://api.telegram.org/bot' + tok + '/' + method, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(bodyObj)
+      });
+      var j = await r.json();
+      if(j.ok) return j;
+      if(j.description && j.description.indexOf('not modified') !== -1) return {ok:true, notModified:true};
+      if(j.error_code === 429 && j.parameters && j.parameters.retry_after){
+        var waitSec = Number(j.parameters.retry_after) + 1;
+        if($('connBadge')) $('connBadge').innerText = '⏳ 텔레그램 대기(' + waitSec + '초)...';
+        await new Promise(function(res){ setTimeout(res, waitSec * 1000); });
+        continue;
+      }
+      return j;
+    }
+    return {ok:false, description:'재시도 초과'};
+  }
+
+  var isPushing = false, pushPending = false;
+  window.tgPush = async function(reason, silent){
+    if(isPushing){ pushPending = true; return; }
+    isPushing = true;
+    var c = getTgCfg();
+    if($('connBadge')){$('connBadge').innerText='⏳ 클라우드 저장중...';$('connBadge').style.background='#e67e22';}
+    try{
+      var pass = (db.myCompany && db.myCompany.pass) ? db.myCompany.pass : '0000';
+      var encStr = await packDB(db, pass), chunks = [];
+      for(var i=0; i<encStr.length; i+=3800) chunks.push(encStr.slice(i, i+3800));
+
+      // 로컬 캐시 및 텔레그램에서 기존 메시지 ID 목록 확인
+      var savedPtr = sGet('ora_ptr_v24'), oldIds = [], usedCid = c.cid;
+      if(savedPtr && savedPtr.indexOf(':') !== -1){
+        var sp = savedPtr.split(':'); if(sp[0] === String(c.cid)) oldIds = sp[1].split(',').filter(Boolean);
+      }
+      if(!oldIds.length){
+        var ptr = await getSyncPointer(c.tok);
+        if(ptr && String(ptr.cid) === String(c.cid)) oldIds = ptr.ids;
+      }
+
+      var newIds = [], chunkCache = {};
+      try{ chunkCache = JSON.parse(sGet('ora_chk_v24') || '{}'); }catch(e){}
+
+      // 도배 제한(429)에 걸리지 않도록 순차+변경분만 스마트 전송!
+      for(var idx=0; idx<chunks.length; idx++){
+        if($('connBadge')) $('connBadge').innerText = '⏳ 저장중 (' + (idx+1) + '/' + chunks.length + ')...';
+        var payload = '🔒ORA_DB#' + (idx+1) + '/' + chunks.length + '\n' + chunks[idx];
+        var mId = oldIds[idx] || 0, done = false;
+
+        if(mId && chunkCache[mId] === chunks[idx]){
+          newIds.push(mId); done = true; // 내용이 똑같은 블록은 전송 생략 (0.001초 통과!)
+        } else if(mId){
+          var jEd = await tgSafePost(c.tok, 'editMessageText', {chat_id:usedCid, message_id:Number(mId), text:payload, reply_markup:{inline_keyboard:[[{text:'🔒 오라테크 장부 #'+(idx+1), callback_data:'s'+Date.now()}]]}});
+          if(jEd.ok){ newIds.push(mId); chunkCache[mId] = chunks[idx]; done = true; }
+        }
+        if(!done){
+          var jSn = await tgSafePost(c.tok, 'sendMessage', {chat_id:usedCid, text:payload, disable_notification:true, reply_markup:{inline_keyboard:[[{text:'🔒 오라테크 장부 #'+(idx+1), callback_data:'s'+Date.now()}]]}});
+          if(jSn.ok && jSn.result){
+            var nid = jSn.result.message_id;
+            newIds.push(nid); chunkCache[nid] = chunks[idx];
+          } else throw new Error(jSn.description || '전송오류');
+          await new Promise(function(r){ setTimeout(r, 250); }); // 0.25초 간격으로 429 에러 원천 예방
+        }
+      }
+
+      sSet('ora_chk_v24', JSON.stringify(chunkCache));
+      sSet('ora_ptr_v24', usedCid + ':' + newIds.join(','));
+
+      // 512자 설명칸 + 봇 명령어(최대 25,000자 지원)에 포인터 이중 저장하여 길이 초과 에러 100% 방지!
+      var ptrStr = 'SYNC2:' + usedCid + ':' + newIds.join(',');
+      if(ptrStr.length <= 510){
+        await tgSafePost(c.tok, 'setMyDescription', {description: ptrStr});
+      }
+      var cmdList = [];
+      for(var k=0; k<ptrStr.length; k+=240){
+        cmdList.push({command: 'sync' + cmdList.length, description: ptrStr.slice(k, k+240)});
+      }
+      await tgSafePost(c.tok, 'setMyCommands', {commands: cmdList});
+
+      if($('connBadge')){$('connBadge').innerText='🔒 클라우드 저장완료!';$('connBadge').style.background='#27ae60';}
+      if(!silent) alert('✅ 클라우드 암호화 저장 완료! (총 ' + chunks.length + '블록)');
+    }catch(e){
+      if($('connBadge')){$('connBadge').innerText='⚠️ 저장대기(재시도클릭)';$('connBadge').style.background='#c0392b';}
+      if(!silent) alert('저장 확인: ' + e.message);
+    }finally{
+      isPushing = false;
+      if(pushPending){ pushPending = false; setTimeout(function(){ tgPush('추가저장', true); }, 800); }
+    }
+  };
+
+  window.getSyncPointer = async function(tok){
+    try{
+      var rC = await fetch('https://api.telegram.org/bot'+tok+'/getMyCommands?_t='+Date.now(),{cache:'no-store'}), jC = await rC.json();
+      if(jC.ok && jC.result && jC.result.length){
+        var joined = jC.result.filter(function(x){ return x.command.indexOf('sync')===0; }).map(function(x){ return x.description; }).join('');
+        if(joined.indexOf('SYNC2:') === 0){
+          var p = joined.split(':'); return {ver:p[0], cid:p[1], ids:p[2].split(',').filter(Boolean)};
+        }
+      }
+      var r1 = await fetch('https://api.telegram.org/bot'+tok+'/getMyDescription?_t='+Date.now(),{cache:'no-store'}), j1 = await r1.json();
+      var s = (j1.ok && j1.result && j1.result.description) ? j1.result.description : '';
+      if(s.indexOf('SYNC2:') === 0 || s.indexOf('SYNC:') === 0){
+        var p2 = s.split(':'); return {ver:p2[0], cid:p2[1], ids:p2[2].split(',').filter(Boolean)};
+      }
+    }catch(e){}
+    return null;
+  };
+})();
+</script>
 </body>
 </html>
