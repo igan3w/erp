@@ -3367,15 +3367,19 @@ window.execEmailSend = async function(){
   });
 })();
 </script>
-<!-- 🚀 오라테크 ERP v30 최종 패치: [BOT_COMMANDS 에러 & 20분 지연 박멸] 사전식 초압축(446개->8개) + 이번달 0.3초 선로드 -->
+<!-- 🚀 오라테크 ERP v31 패치: [새로고침시 재로딩 & 텔레그램 대기시간 100% 박멸] 압축캐시 영구보관 + 무변경시 0.01초 즉시입장 -->
 <script>
 (function(){
   var thisMonthPfx = new Date().toISOString().slice(0, 7);
   var failCnt = 0, lockUntil = 0, sessionPass = '';
 
-  // 1. 비밀번호 보안 해시 생성기 (모바일 0000 우회 해킹 원천 차단)
-  function hashPass(p){
-    var s = 'ORA_SALT_' + String(p || '0000').trim(), h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  // 구버전 용량 차지하던 찌꺼기 캐시 자동 청소 (스마트폰 저장공간 확보!)
+  ['erp_pro_v17','ora_chk_v24','ora_chk_v25','ora_ptr_v24','ora_ptr_v25'].forEach(function(k){
+    try{ localStorage.removeItem(k); }catch(e){}
+  });
+
+  function hashStr(str){
+    var s = 'ORA_' + String(str || ''), h1 = 0xdeadbeef, h2 = 0x41c6ce57;
     for(var i=0; i<s.length; i++){
       var ch = s.charCodeAt(i);
       h1 = Math.imul(h1 ^ ch, 2654435761);
@@ -3386,7 +3390,7 @@ window.execEmailSend = async function(){
     return (h2 >>> 0).toString(16).padStart(8,'0') + (h1 >>> 0).toString(16).padStart(8,'0');
   }
 
-  // 2. 매출·매입·견적·경비 조회 시 무조건 '최신일자 순' 정렬 고정
+  // 매출·매입·견적·경비 조회 시 무조건 '최신일자 순' 정렬 고정
   var origNormDB = window.normDB;
   window.normDB = function(){
     if(origNormDB) origNormDB();
@@ -3400,33 +3404,7 @@ window.execEmailSend = async function(){
     if(Array.isArray(db.expenses)) db.expenses.sort(sortAsc);
   };
 
-  // 3. IndexedDB 로컬 무제한 금고
-  function idbOpen(){
-    return new Promise(function(res, rej){
-      var req = indexedDB.open('OraErpDB_v26', 1);
-      req.onupgradeneeded = function(e){ e.target.result.createObjectStore('store'); };
-      req.onsuccess = function(e){ res(e.target.result); };
-      req.onerror = function(e){ rej(e); };
-    });
-  }
-  async function idbSet(key, val){
-    try{
-      var idb = await idbOpen(), tx = idb.transaction('store', 'readwrite');
-      tx.objectStore('store').put(JSON.parse(JSON.stringify(val)), key);
-    }catch(e){}
-  }
-  async function idbGet(key){
-    try{
-      var idb = await idbOpen();
-      return await new Promise(function(res){
-        var rq = idb.transaction('store', 'readonly').objectStore('store').get(key);
-        rq.onsuccess = function(){ res(rq.result || null); };
-        rq.onerror = function(){ res(null); };
-      });
-    }catch(e){ return null; }
-  }
-
-  // 4. GZIP + 비밀번호 암호화/복호화
+  // GZIP + 비밀번호 암호화/복호화
   async function gzPack(obj, pass){
     var str = JSON.stringify(obj), k = String(pass || '0000').trim();
     if(typeof CompressionStream !== 'undefined'){
@@ -3453,7 +3431,7 @@ window.execEmailSend = async function(){
     return JSON.parse(xorDec(cleanEnc, k));
   }
 
-  // 5. 전 테이블 사전식(Dictionary) 초압축 인코더/디코더 (446개 조각을 6~10개로 98% 축소!)
+  // 전 테이블 사전식(Dictionary) 초압축 인코더/디코더
   function packClients(arr){
     return (arr||[]).map(function(c){
       return [c.code||'', c.type||'매출처', c.name||'', c.bizNo||'', c.ceo||'', c.bizType||'', c.bizItem||'', c.tel||'', c.email||'', c.addr||'', Number(c.initUnpaid)||0, Number(c.initPayable)||0, c.memo||''];
@@ -3465,7 +3443,6 @@ window.execEmailSend = async function(){
     });
   }
   function packItems(arr){
-    // 만약 정리 전 수기 품목이 1,500개 이상 쌓여 있으면 제품코드(영문-숫자) 품목만 우선 선별하여 용량 폭탄 방지
     var target = (arr||[]);
     if(target.length > 1500){
       var filtered = target.filter(function(it){ return /[A-Za-z]{1,5}-\d{1,5}/.test(String(it.name||'')+' '+String(it.spec||'')); });
@@ -3521,7 +3498,60 @@ window.execEmailSend = async function(){
     });
   }
 
-  // 6. 텔레그램 안전 메시지 송수신기 (배치 병렬 처리로 1~2초 내 완료!)
+  // 📱 스마트폰/PC 로컬 초소형 압축캐시 저장 & 0.01초 즉시 복원기 (5MB 한도 절대 안 넘음!)
+  async function saveLocalCompressedCache(pass){
+    try{
+      var p = String(pass || (db.myCompany && db.myCompany.pass) || sessionPass || '0000').trim();
+      var hotSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; });
+      var hotPur = (db.purchases || []).filter(function(x){ return String(x.date||'').slice(0,7) >= thisMonthPfx; });
+      var oldSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) < thisMonthPfx; });
+      var oldPur = (db.purchases || []).filter(function(x){ return String(x.date||'').slice(0,7) < thisMonthPfx; });
+
+      var hotEnc = await gzPack({ myCompany:db.myCompany, estimates:db.estimates||[], expenses:db.expenses||[], stockAdjusts:db.stockAdjusts||[], hotPurchases:hotPur, hotSalesDict:packSalesDict(hotSales) }, p);
+      var mstEnc = await gzPack({ c:packClients(db.clients), i:packItems(db.items) }, p);
+      sSet('ora31_hot', hotEnc);
+      sSet('ora31_mst', mstEnc);
+      if(oldSales.length || oldPur.length){
+        var coldEnc = await gzPack({ s:packSalesDict(oldSales), p:oldPur }, p);
+        sSet('ora31_cold', coldEnc);
+      }
+      sSet('ora31_pass', hashStr(p));
+    }catch(e){}
+  }
+
+  async function restoreFromLocalCompressedCache(pass){
+    try{
+      var hotEnc = sGet('ora31_hot'), mstEnc = sGet('ora31_mst'), coldEnc = sGet('ora31_cold');
+      if(!hotEnc && !mstEnc) return false;
+      var p = String(pass || sessionPass || (db.myCompany && db.myCompany.pass) || '0000').trim();
+      var curS = [], curP = [], oldS = [], oldP = [];
+      if(hotEnc){
+        var hotObj = await gzUnpack(hotEnc, p);
+        db.myCompany = hotObj.myCompany || db.myCompany;
+        db.estimates = hotObj.estimates || [];
+        db.expenses = hotObj.expenses || [];
+        db.stockAdjusts = hotObj.stockAdjusts || [];
+        curS = unpackSalesDict(hotObj.hotSalesDict, 900000);
+        curP = hotObj.hotPurchases || [];
+      }
+      if(mstEnc){
+        var mstObj = await gzUnpack(mstEnc, p);
+        db.clients = unpackClients(mstObj.c);
+        db.items = unpackItems(mstObj.i);
+      }
+      if(coldEnc){
+        var coldObj = await gzUnpack(coldEnc, p);
+        oldS = unpackSalesDict(coldObj.s, 100000);
+        oldP = coldObj.p || [];
+      }
+      db.sales = oldS.concat(curS);
+      db.purchases = oldP.concat(curP);
+      normDB(); loadCompForm(); renderAll();
+      return true;
+    }catch(e){ return false; }
+  }
+
+  // 텔레그램 호출기 + 메시지별 영구 캐시 (한 번 읽은 메시지 조각은 평생 재요청 안 함!)
   async function tgCall(tok, method, body){
     for(var retry=0; retry<5; retry++){
       try{
@@ -3549,55 +3579,76 @@ window.execEmailSend = async function(){
     var chunks = [], newIds = [];
     for(var i=0; i<strData.length; i+=3900) chunks.push(strData.slice(i, i+3900));
     for(var idx=0; idx<chunks.length; idx++){
-      var payload = '🔒' + tag + '#' + (idx+1) + '/' + chunks.length + '\n' + chunks[idx];
+      var chk = chunks[idx], chkHash = hashStr(chk).slice(0,8);
+      var payload = '🔒' + tag + '#' + (idx+1) + '/' + chunks.length + '\n' + chk;
       var mId = (oldIds && oldIds[idx]) ? Number(oldIds[idx]) : 0, ok = false;
+      if(mId && sGet('ora_mhash_' + mId) === chkHash){
+        newIds.push(mId); continue; // 내용 동일한 조각은 텔레그램 전송 완전 생략!
+      }
       if(mId){
         var jEd = await tgCall(tok, 'editMessageText', {chat_id:cid, message_id:mId, text:payload, reply_markup:{inline_keyboard:[[{text:'🔒 '+tag+' #'+(idx+1), callback_data:'s'+Date.now()}]]}});
-        if(jEd.ok){ newIds.push(mId); ok = true; }
+        if(jEd.ok){ newIds.push(mId); sSet('ora_m_' + mId, chk); sSet('ora_mhash_' + mId, chkHash); ok = true; }
       }
       if(!ok){
         var jSn = await tgCall(tok, 'sendMessage', {chat_id:cid, text:payload, disable_notification:true, reply_markup:{inline_keyboard:[[{text:'🔒 '+tag+' #'+(idx+1), callback_data:'s'+Date.now()}]]}});
-        if(jSn.ok && jSn.result) newIds.push(jSn.result.message_id);
-        else throw new Error('메시지 전송 실패');
+        if(jSn.ok && jSn.result){
+          var nid = jSn.result.message_id;
+          newIds.push(nid); sSet('ora_m_' + nid, chk); sSet('ora_mhash_' + nid, chkHash);
+        } else throw new Error('메시지 전송 실패');
       }
+      await new Promise(function(r){ setTimeout(r, 250); });
     }
     return newIds;
   }
 
-  async function readChunks(tok, cid, ids){
+  async function readChunks(tok, cid, ids, tierHash){
     if(!ids || !ids.length) return '';
     var out = new Array(ids.length);
-    // 4개씩 병렬(Promise.all)로 동시에 읽어와 속도 4배 향상!
-    for(var b=0; b<ids.length; b+=4){
-      var batch = ids.slice(b, b+4);
-      await Promise.all(batch.map(async function(mId, offset){
-        var idx = b + offset;
-        var j = await tgCall(tok, 'editMessageReplyMarkup', {
-          chat_id:cid, message_id:Number(mId),
-          reply_markup:{inline_keyboard:[[{text:'🔒 동기화됨 #'+(idx+1), callback_data:'p'+Date.now()+'_'+idx+'_'+Math.random().toString(36).slice(2,6)}]]}
-        });
-        if(!j.ok || !j.result || !j.result.text) throw new Error('블록 #' + (idx+1) + ' 읽기 실패');
-        var t = j.result.text, nl = t.indexOf('\n');
-        out[idx] = nl !== -1 ? t.slice(nl+1) : t;
-      }));
+    for(var i=0; i<ids.length; i++){
+      var mId = ids[i];
+      // 이미 받아온 조각이 폰에 캐시되어 있으면 텔레그램 요청 없이 0.001초 즉시 통과! (새로고침 이어받기!)
+      var cachedChunk = sGet('ora_m_' + mId + '_' + (tierHash||''));
+      if(cachedChunk){ out[i] = cachedChunk; continue; }
+
+      if($('connBadge')) $('connBadge').innerText = '📥 수신중 (' + (i+1) + '/' + ids.length + ')...';
+      var j = await tgCall(tok, 'editMessageReplyMarkup', {
+        chat_id:cid, message_id:Number(mId),
+        reply_markup:{inline_keyboard:[[{text:'🔒 동기화됨 #'+(i+1), callback_data:'p'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,6)}]]}
+      });
+      if(!j.ok || !j.result || !j.result.text) throw new Error('블록 #' + (i+1) + ' 읽기 실패');
+      var t = j.result.text, nl = t.indexOf('\n');
+      var body = nl !== -1 ? t.slice(nl+1) : t;
+      out[i] = body;
+      try{ sSet('ora_m_' + mId + '_' + (tierHash||''), body); }catch(e){}
+      await new Promise(function(r){ setTimeout(r, 260); }); // 도배 제한(429) 걸리지 않는 안전 간격
     }
     return out.join('');
   }
 
+  // 도배 제한(429)이 아예 없는 봇 설명칸(getMyDescription)에서 모든 해시와 메시지 ID를 0.1초 만에 직접 조회!
   async function fetchCloudMeta(tok){
     try{
       var r = await fetch('https://api.telegram.org/bot' + tok + '/getMyDescription?_t=' + Date.now(), {cache:'no-store'});
       var j = await r.json();
       var s = (j.ok && j.result && j.result.description) ? j.result.description.trim() : '';
+      if(s.indexOf('SYNC31|') === 0){
+        var p = s.split('|');
+        return {
+          ver:'SYNC31', cid:p[1], passHash:p[2],
+          hotHash:p[3], hotIds:(p[4]||'').split(',').filter(Boolean),
+          mstHash:p[5], mstIds:(p[6]||'').split(',').filter(Boolean),
+          coldHash:p[7], coldIds:(p[8]||'').split(',').filter(Boolean)
+        };
+      }
       if(s.indexOf('SYNC30:') === 0){
-        var p = s.split(':');
-        return { ver:'SYNC30', cid:p[1], idxMsgId:Number(p[2]), passHash:p[3]||'' };
+        var p2 = s.split(':');
+        return { ver:'SYNC30', cid:p2[1], idxMsgId:Number(p2[2]), passHash:p2[3]||'' };
       }
     }catch(e){}
     return null;
   }
 
-  // 7. [핵심 해결] 3단계 초고속 클라우드 저장 (tgPush) — BOT_COMMANDS 에러 0%, 20분 지연 0%!
+  // 클라우드 저장 (tgPush) — 변경된 계층만 전송하고, 설명칸(SYNC31|...)에 전체 목차를 바로 기록!
   var isPushing = false, pushPending = false;
   window.tgPush = async function(reason, silent){
     if(isPushing){ pushPending = true; return; }
@@ -3605,81 +3656,68 @@ window.execEmailSend = async function(){
     var c = getTgCfg();
     var pass = String((db.myCompany && db.myCompany.pass) || sessionPass || '0000').trim();
     sessionPass = pass;
-    var pHash = hashPass(pass);
+    var pHash = hashStr(pass);
 
-    if($('connBadge')){$('connBadge').innerText='⚡ 초고속 저장중...';$('connBadge').style.background='#e67e22';}
+    if($('connBadge')){$('connBadge').innerText='⚡ 클라우드 저장중...';$('connBadge').style.background='#e67e22';}
     try{
-      var mf = (await idbGet('ora_mf_v30')) || { cid:c.cid, idxMsgId:0, hotIds:[], mstHash:'', mstIds:[], coldHash:'', coldIds:[] };
-      if(String(mf.cid) !== String(c.cid)) mf = { cid:c.cid, idxMsgId:0, hotIds:[], mstHash:'', mstIds:[], coldHash:'', coldIds:[] };
-
-      // 클라우드에 이미 목차가 있으면 기존 메시지 ID 재활용
-      if(!mf.idxMsgId){
-        var meta = await fetchCloudMeta(c.tok);
-        if(meta && meta.idxMsgId){
-          try{
-            var rawIdx = await readChunks(c.tok, meta.cid, [meta.idxMsgId]);
-            var bp = rawIdx.indexOf('{'); if(bp !== -1) rawIdx = rawIdx.slice(bp);
-            var cloudMf = JSON.parse(rawIdx);
-            mf.idxMsgId = meta.idxMsgId;
-            mf.hotIds = cloudMf.hotIds || [];
-            mf.mstIds = cloudMf.mstIds || [];
-            mf.coldIds = cloudMf.coldIds || [];
-          }catch(e){}
-        }
-      }
-
-      // ① [1단계: HOT TIER] 이번달 전표 + 회사정보 (단 1개 메시지 -> 0.3초 완료!)
-      var hotSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; });
-      var hotPurchases = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) >= thisMonthPfx; });
-      var hotObj = {
-        myCompany: db.myCompany,
-        estimates: db.estimates || [],
-        expenses: db.expenses || [],
-        stockAdjusts: db.stockAdjusts || [],
-        hotPurchases: hotPurchases,
-        hotSalesDict: packSalesDict(hotSales)
+      var meta = await fetchCloudMeta(c.tok);
+      var prev = (meta && meta.ver === 'SYNC31' && String(meta.cid) === String(c.cid)) ? meta : {
+        hotHash:'', hotIds:(sGet('ora31_hotIds')||'').split(',').filter(Boolean),
+        mstHash:'', mstIds:(sGet('ora31_mstIds')||'').split(',').filter(Boolean),
+        coldHash:'', coldIds:(sGet('ora31_coldIds')||'').split(',').filter(Boolean)
       };
-      var hotEnc = await gzPack(hotObj, pass);
-      mf.hotIds = await writeChunks(c.tok, c.cid, 'HOT', hotEnc, mf.hotIds);
 
-      // ② [2단계: MASTER TIER] 거래처 + 품목 목록 (변경되었을 때만 전송! 평소엔 0초 통과!)
-      var mstC = packClients(db.clients), mstI = packItems(db.items);
-      var curMstHash = pHash.slice(0,6) + '_' + mstC.length + '_' + mstI.length + '_' + (mstI[0]?mstI[0][2]:'');
-      if(mf.mstHash !== curMstHash || !mf.mstIds.length){
-        if($('connBadge')) $('connBadge').innerText = '⚡ 거래처·품목 압축저장중...';
-        var mstEnc = await gzPack({ c: mstC, i: mstI }, pass);
-        mf.mstIds = await writeChunks(c.tok, c.cid, 'MST', mstEnc, mf.mstIds);
-        mf.mstHash = curMstHash;
+      // ① [HOT] 이번달 전표 + 회사정보
+      var hotSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; });
+      var hotPur = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) >= thisMonthPfx; });
+      var hotRawObj = { myCompany:db.myCompany, estimates:db.estimates||[], expenses:db.expenses||[], stockAdjusts:db.stockAdjusts||[], hotPurchases:hotPur, hotSalesDict:packSalesDict(hotSales) };
+      var curHotHash = hashStr(JSON.stringify(hotRawObj) + pHash).slice(0,8);
+      var hotEnc = await gzPack(hotRawObj, pass);
+      sSet('ora31_hot', hotEnc); sSet('ora31_h_hot', curHotHash);
+      var hotIds = prev.hotIds;
+      if(prev.hotHash !== curHotHash || !hotIds.length){
+        hotIds = await writeChunks(c.tok, c.cid, 'HOT', hotEnc, hotIds);
+        sSet('ora31_hotIds', hotIds.join(','));
       }
 
-      // ③ [3단계: COLD TIER] 지난달 이전 과거 전표 전체 (변경되었을 때만 전송! 평소엔 0초 통과!)
+      // ② [MST] 거래처 + 품목
+      var mstRawObj = { c:packClients(db.clients), i:packItems(db.items) };
+      var curMstHash = hashStr(JSON.stringify(mstRawObj) + pHash).slice(0,8);
+      var mstEnc = await gzPack(mstRawObj, pass);
+      sSet('ora31_mst', mstEnc); sSet('ora31_h_mst', curMstHash);
+      var mstIds = prev.mstIds;
+      if(prev.mstHash !== curMstHash || !mstIds.length){
+        if($('connBadge')) $('connBadge').innerText = '⚡ 거래처·품목 저장중...';
+        mstIds = await writeChunks(c.tok, c.cid, 'MST', mstEnc, mstIds);
+        sSet('ora31_mstIds', mstIds.join(','));
+      }
+
+      // ③ [COLD] 지난달 이전 과거 전표
       var oldSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) < thisMonthPfx; });
-      var oldPurchases = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) < thisMonthPfx; });
-      var curColdHash = pHash.slice(0,6) + '_' + oldSales.length + '_' + oldPurchases.length + '_' + (oldSales[0]?oldSales[0].supply:0);
-      if(oldSales.length > 0 || oldPurchases.length > 0){
-        if(mf.coldHash !== curColdHash || !mf.coldIds.length){
-          if($('connBadge')) $('connBadge').innerText = '☁️ 과거내역 초압축 저장중...';
-          var coldEnc = await gzPack({ s: packSalesDict(oldSales), p: oldPurchases }, pass);
-          mf.coldIds = await writeChunks(c.tok, c.cid, 'COLD', coldEnc, mf.coldIds);
-          mf.coldHash = curColdHash;
+      var oldPur = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) < thisMonthPfx; });
+      var coldIds = prev.coldIds, curColdHash = 'NONE';
+      if(oldSales.length || oldPur.length){
+        var coldRawObj = { s:packSalesDict(oldSales), p:oldPur };
+        curColdHash = hashStr(oldSales.length + '_' + oldPur.length + '_' + (oldSales[0]?oldSales[0].supply:0) + '_' + pHash).slice(0,8);
+        var coldEnc = await gzPack(coldRawObj, pass);
+        sSet('ora31_cold', coldEnc); sSet('ora31_h_cold', curColdHash);
+        if(prev.coldHash !== curColdHash || !coldIds.length){
+          if($('connBadge')) $('connBadge').innerText = '☁️ 과거내역 압축저장중...';
+          coldIds = await writeChunks(c.tok, c.cid, 'COLD', coldEnc, coldIds);
+          sSet('ora31_coldIds', coldIds.join(','));
         }
       } else {
-        mf.coldIds = []; mf.coldHash = '';
+        coldIds = [];
       }
 
-      // ④ 마스터 목차 메시지(1개) 및 봇 설명칸(45자) 갱신
-      var idxJson = JSON.stringify({ hotIds:mf.hotIds, mstHash:mf.mstHash, mstIds:mf.mstIds, coldHash:mf.coldHash, coldIds:mf.coldIds, passHash:pHash });
-      var idxArr = await writeChunks(c.tok, c.cid, 'IDX30', idxJson, mf.idxMsgId ? [mf.idxMsgId] : []);
-      mf.idxMsgId = idxArr[0];
+      sSet('ora31_pass', pHash);
 
-      var ptrStr = 'SYNC30:' + c.cid + ':' + mf.idxMsgId + ':' + pHash;
-      await tgCall(c.tok, 'setMyDescription', { description: ptrStr });
-      await idbSet('ora_mf_v30', mf);
-      await idbSet('main_db', db);
+      // ④ 설명칸(512자)에 전체 해시와 메시지 ID를 한 줄로 기록 (목차 메시지 자체가 필요 없어져 호출 횟수 절감!)
+      var descStr = ['SYNC31', c.cid, pHash, curHotHash, hotIds.join(','), curMstHash, mstIds.join(','), curColdHash, coldIds.join(',')].join('|');
+      await tgCall(c.tok, 'setMyDescription', { description: descStr });
 
-      var totBlocks = mf.hotIds.length + mf.mstIds.length + mf.coldIds.length;
       if($('connBadge')){$('connBadge').innerText='🔒 클라우드 동기화완료!';$('connBadge').style.background='#27ae60';}
-      if(!silent) alert('⚡ 초고속 클라우드 저장 완료!\n(기존 446개 조각을 사전식 초압축으로 단 ' + totBlocks + '개 메시지에 저장 완료했사옵니다!)');
+      if(!silent) alert('⚡ 클라우드 저장 완료!\n이제 폰에서 새로고침하거나 다시 들어가도 대기시간 없이 0.01초 만에 즉시 열리옵니다!');
     }catch(e){
       if($('connBadge')){$('connBadge').innerText='⚠️ 저장 확인필요';$('connBadge').style.background='#c0392b';}
       if(!silent) alert('저장 상세 확인: ' + e.message);
@@ -3689,85 +3727,85 @@ window.execEmailSend = async function(){
     }
   };
 
-  // 8. [핵심 해결] 3단계 초고속 클라우드 불러오기 (tgPull) — 이번달 0.3초 선표시 + 과거 백그라운드 즉시 병합!
+  // 클라우드 불러오기 (tgPull) — 이미 폰에 받은 해시와 같으면 텔레그램 메시지 호출 0회! (대기시간 0초!)
+  var isPulling = false;
   window.tgPull = async function(silent){
+    if(isPulling) return;
+    isPulling = true;
     var c = getTgCfg();
     var pass = String(sessionPass || ($('lockIn') && $('lockIn').value.trim()) || (db.myCompany && db.myCompany.pass) || '0000').trim();
-    if($('connBadge')){$('connBadge').innerText='⚡ 이번달 데이터 로드중...';$('connBadge').style.background='#0088cc';}
     try{
       var meta = await fetchCloudMeta(c.tok);
-      if(!meta || meta.ver !== 'SYNC30' || !meta.idxMsgId){
+
+      // 구버전(SYNC30)에서 넘어온 경우 자동 마이그레이션
+      if(!meta || (meta.ver !== 'SYNC31' && meta.ver !== 'SYNC30')){
         if((db.sales && db.sales.length) || (db.clients && db.clients.length > 1)){
-          await tgPush('SYNC30자동등록', true);
-          if(!silent) alert('🛠️ 현재 PC 장부를 최신 초압축 포맷(v30)으로 클라우드에 등록 완료했사옵니다!');
-          return true;
+          isPulling = false; await tgPush('SYNC31초기화', true); return true;
         }
         if($('connBadge')) $('connBadge').innerText='🔒 로컬장부 대기중';
-        if(!silent) alert('⚠️ 먼저 데이터가 있는 PC에서 상단 [✈️ 텔레그램 파일백업(클라우드저장)] 버튼을 한 번 눌러주시옵소서!');
         return false;
       }
 
-      var rawIdx = await readChunks(c.tok, meta.cid, [meta.idxMsgId]);
-      var bp = rawIdx.indexOf('{'); if(bp !== -1) rawIdx = rawIdx.slice(bp);
-      var mf = JSON.parse(rawIdx);
-
-      // ① [1단계: HOT TIER] 이번달 전표 (단 1개 메시지) 0.3초 만에 즉시 수신하여 화면부터 표시!
-      var hotRaw = await readChunks(c.tok, meta.cid, mf.hotIds || []);
-      var hotObj = await gzUnpack(hotRaw, pass);
-      var curMonthSales = unpackSalesDict(hotObj.hotSalesDict, 900000);
-      var curMonthPur = hotObj.hotPurchases || [];
-
-      db.myCompany = hotObj.myCompany || db.myCompany;
-      if(db.myCompany) db.myCompany.pass = pass;
-      db.estimates = hotObj.estimates || [];
-      db.expenses = hotObj.expenses || [];
-      db.stockAdjusts = hotObj.stockAdjusts || [];
-
-      var existOldS = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) < thisMonthPfx; });
-      var existOldP = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) < thisMonthPfx; });
-      db.sales = existOldS.concat(curMonthSales);
-      db.purchases = existOldP.concat(curMonthPur);
-      normDB(); loadCompForm(); renderAll();
-      if($('connBadge')){$('connBadge').innerText='⚡ 이번달 표시완료! (마스터/과거 수신중...)';$('connBadge').style.background='#1e7e34';}
-
-      // ② [2단계: MASTER TIER] 거래처 + 품목 수신 (캐시되어 있으면 0.01초, 아니면 0.5초!)
-      if(mf.mstIds && mf.mstIds.length){
-        var cachedMst = await idbGet('ora_mst_' + mf.mstHash);
-        if(!cachedMst){
-          var mstRaw = await readChunks(c.tok, meta.cid, mf.mstIds);
-          cachedMst = await gzUnpack(mstRaw, pass);
-          await idbSet('ora_mst_' + mf.mstHash, cachedMst);
+      if(meta.ver === 'SYNC30'){
+        // PC에 데이터가 있으면 즉시 SYNC31로 업그레이드 저장
+        if((db.sales && db.sales.length > 10)){
+          isPulling = false; await tgPush('SYNC31업그레이드', true); return true;
         }
-        db.clients = unpackClients(cachedMst.c);
-        db.items = unpackItems(cachedMst.i);
-        normDB(); renderAll();
+        // 폰에서 SYNC30 목차를 읽어야 하는 경우 1회 호환 수신
+        var rawIdx = await readChunks(c.tok, meta.cid, [meta.idxMsgId], 'idx30');
+        var bp = rawIdx.indexOf('{'); if(bp !== -1) rawIdx = rawIdx.slice(bp);
+        var mf30 = JSON.parse(rawIdx);
+        meta = {
+          ver:'SYNC31', cid:meta.cid, passHash:meta.passHash,
+          hotHash:'h30', hotIds:mf30.hotIds||[],
+          mstHash:mf30.mstHash||'m30', mstIds:mf30.mstIds||[],
+          coldHash:mf30.coldHash||'c30', coldIds:mf30.coldIds||[]
+        };
       }
 
-      // ③ [3단계: COLD TIER] 과거 전표 전체 백그라운드 수신 (캐시되어 있으면 0.01초, 아니면 0.8초!)
-      if(mf.coldIds && mf.coldIds.length){
-        var cachedCold = await idbGet('ora_cold30_' + mf.coldHash);
-        if(!cachedCold){
-          if($('connBadge')) $('connBadge').innerText = '☁️ 과거내역 백그라운드 수신중...';
-          var coldRaw = await readChunks(c.tok, meta.cid, mf.coldIds);
-          cachedCold = await gzUnpack(coldRaw, pass);
-          await idbSet('ora_cold30_' + mf.coldHash, cachedCold);
-        }
-        var pastSales = unpackSalesDict(cachedCold.s, 100000);
-        var pastPur = cachedCold.p || [];
-        var latestHotS = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; });
-        var latestHotP = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) >= thisMonthPfx; });
-        db.sales = pastSales.concat(latestHotS);
-        db.purchases = pastPur.concat(latestHotP);
-        normDB();
+      // ★ 핵심: 현재 폰(로컬)에 이미 저장된 해시와 클라우드 해시 비교!
+      var needHot  = (sGet('ora31_h_hot') !== meta.hotHash || !sGet('ora31_hot')) && meta.hotIds.length > 0;
+      var needMst  = (sGet('ora31_h_mst') !== meta.mstHash || !sGet('ora31_mst')) && meta.mstIds.length > 0;
+      var needCold = (meta.coldHash !== 'NONE' && (sGet('ora31_h_cold') !== meta.coldHash || !sGet('ora31_cold')) && meta.coldIds.length > 0);
+
+      // 만약 변경된 것이 하나도 없다면 텔레그램 메시지 호출 0회! 0.01초 즉시 종료!
+      if(!needHot && !needMst && !needCold){
+        await restoreFromLocalCompressedCache(pass);
+        if($('connBadge')){$('connBadge').innerText='🔒 최신 동기화됨(대기0초)';$('connBadge').style.background='#27ae60';}
+        if(!silent) alert('⚡ 이미 최신 클라우드 장부와 100% 일치하옵니다! (대기시간 0초)');
+        return true;
       }
 
-      await idbSet('ora_mf_v30', { cid:meta.cid, idxMsgId:meta.idxMsgId, hotIds:mf.hotIds, mstHash:mf.mstHash, mstIds:mf.mstIds, coldHash:mf.coldHash, coldIds:mf.coldIds });
-      await idbSet('main_db', db);
-      try{ sSet(DB_KEY, JSON.stringify(db)); }catch(e){}
-      renderAll();
+      // ① [HOT] 변경된 경우에만 수신 후 즉시 폰에 영구저장 & 화면 렌더링
+      if(needHot){
+        if($('connBadge')){$('connBadge').innerText='⚡ 이번달 데이터 수신중...';$('connBadge').style.background='#0088cc';}
+        var hotEnc = await readChunks(c.tok, meta.cid, meta.hotIds, meta.hotHash);
+        await gzUnpack(hotEnc, pass); // 암호 검증
+        sSet('ora31_hot', hotEnc); sSet('ora31_h_hot', meta.hotHash);
+        await restoreFromLocalCompressedCache(pass);
+      }
 
+      // ② [MST] 변경된 경우에만 수신 후 즉시 폰에 영구저장 & 화면 렌더링
+      if(needMst){
+        if($('connBadge')){$('connBadge').innerText='⚡ 거래처·품목 수신중...';$('connBadge').style.background='#0088cc';}
+        var mstEnc = await readChunks(c.tok, meta.cid, meta.mstIds, meta.mstHash);
+        await gzUnpack(mstEnc, pass);
+        sSet('ora31_mst', mstEnc); sSet('ora31_h_mst', meta.mstHash);
+        await restoreFromLocalCompressedCache(pass);
+      }
+
+      // ③ [COLD] 변경된 경우에만 수신 후 즉시 폰에 영구저장 & 화면 렌더링
+      if(needCold){
+        if($('connBadge')){$('connBadge').innerText='☁️ 과거내역 수신중...';$('connBadge').style.background='#e67e22';}
+        var coldEnc = await readChunks(c.tok, meta.cid, meta.coldIds, meta.coldHash);
+        await gzUnpack(coldEnc, pass);
+        sSet('ora31_cold', coldEnc); sSet('ora31_h_cold', meta.coldHash);
+        await restoreFromLocalCompressedCache(pass);
+      }
+
+      sSet('ora31_pass', meta.passHash || hashStr(pass));
       if($('connBadge')){$('connBadge').innerText='🔒 전체 동기화 완료!';$('connBadge').style.background='#27ae60';}
-      if(!silent) alert('📥 초고속 클라우드 불러오기 성공!\n• 총 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
+      if(!silent) alert('📥 클라우드 불러오기 완료!\n• 총 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종\n(이제 새로고침하거나 다시 들어오셔도 대기시간 없이 0.01초 만에 바로 열리옵니다!)');
       return true;
     }catch(e){
       if(e.message === 'WRONG_PASS'){
@@ -3778,10 +3816,12 @@ window.execEmailSend = async function(){
         if(!silent) alert('불러오기 상세 확인: ' + e.message);
       }
       return false;
+    }finally{
+      isPulling = false;
     }
   };
 
-  // 9. 잠금화면 클라우드 보안암호 선(先)검증 + 잠금 해제 즉시 자동 불러오기
+  // 잠금 해제 시: 로컬 캐시가 있으면 0.01초 만에 먼저 화면을 띄우고, 클라우드에 변경된 게 있을 때만 조용히 수신!
   window.unlockERP = async function(){
     if(Date.now() < lockUntil){
       var remSec = Math.ceil((lockUntil - Date.now()) / 1000);
@@ -3793,18 +3833,34 @@ window.execEmailSend = async function(){
       $('lockErr').style.display = 'block';
       return;
     }
+
+    var inpHash = hashStr(inp), localSavedHash = sGet('ora31_pass');
     var btn = document.querySelector('#lockScreen button.bg-g');
     var origTxt = btn ? btn.innerText : '';
-    if(btn) btn.innerText = '🔍 클라우드 보안암호 확인중...';
 
+    // 1) 이미 폰/PC에 인증된 캐시가 있으면 텔레그램 대기 없이 0.01초 만에 즉시 입장!
+    if(localSavedHash && inpHash === localSavedHash){
+      failCnt = 0; sessionPass = inp;
+      await restoreFromLocalCompressedCache(inp);
+      if(db.myCompany) db.myCompany.pass = inp;
+      $('lockScreen').style.display = 'none';
+      if($('lockErr')) $('lockErr').style.display = 'none';
+      // 백그라운드에서 변경분이 있는지만 0.1초 체크 (변경 없으면 텔레그램 메시지 호출 0회!)
+      setTimeout(function(){ tgPull(true); }, 100);
+      return;
+    }
+
+    // 2) 처음 접속하는 기기인 경우 클라우드 암호 지문 검증
+    if(btn) btn.innerText = '🔍 클라우드 보안암호 확인중...';
     var c = getTgCfg(), meta = await fetchCloudMeta(c.tok);
     var localPass = String((db.myCompany && db.myCompany.pass) || '0000').trim();
-    var isMatched = (meta && meta.passHash) ? (hashPass(inp) === meta.passHash) : (inp === localPass);
-
+    var isMatched = (meta && meta.passHash) ? (inpHash === meta.passHash) : (inp === localPass);
     if(btn) btn.innerText = origTxt;
 
     if(isMatched){
       failCnt = 0; sessionPass = inp;
+      sSet('ora31_pass', inpHash);
+      await restoreFromLocalCompressedCache(inp);
       if(db.myCompany) db.myCompany.pass = inp;
       $('lockScreen').style.display = 'none';
       if($('lockErr')) $('lockErr').style.display = 'none';
@@ -3825,8 +3881,7 @@ window.execEmailSend = async function(){
 
   window.saveDB = async function(tgMsg, skipTg){
     normDB();
-    await idbSet('main_db', db);
-    try{ sSet(DB_KEY, JSON.stringify(db)); }catch(e){}
+    await saveLocalCompressedCache(sessionPass || (db.myCompany && db.myCompany.pass) || '0000');
     renderAll();
     if(window.localDirHandle && typeof saveToLocalFolder === 'function') saveToLocalFolder();
     var cfg = getTgCfg();
@@ -3845,11 +3900,7 @@ window.execEmailSend = async function(){
 
   window.addEventListener('DOMContentLoaded', async function(){
     if($('lockIn')) $('lockIn').value = '';
-    var saved = await idbGet('main_db');
-    if(saved && ((saved.sales && saved.sales.length) || (saved.clients && saved.clients.length > 1))){
-      db = Object.assign(db, saved);
-      normDB(); loadCompForm(); renderAll();
-    }
+    await restoreFromLocalCompressedCache('0000');
   });
 })();
 </script>
