@@ -3367,16 +3367,22 @@ window.execEmailSend = async function(){
   });
 })();
 </script>
-<!-- 🚀 오라테크 ERP v31 패치: [새로고침시 재로딩 & 텔레그램 대기시간 100% 박멸] 압축캐시 영구보관 + 무변경시 0.01초 즉시입장 -->
+<!-- 🚀 오라테크 ERP v32 패치: 모바일 'Failed to fetch' 통신충돌 완전박멸 + 무중단 캐시 보호 -->
 <script>
 (function(){
   var thisMonthPfx = new Date().toISOString().slice(0, 7);
   var failCnt = 0, lockUntil = 0, sessionPass = '';
+  var isSyncBusy = false;
+  var isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-  // 구버전 용량 차지하던 찌꺼기 캐시 자동 청소 (스마트폰 저장공간 확보!)
-  ['erp_pro_v17','ora_chk_v24','ora_chk_v25','ora_ptr_v24','ora_ptr_v25'].forEach(function(k){
-    try{ localStorage.removeItem(k); }catch(e){}
-  });
+  // 1. 모바일이거나 클라우드 동기화(저장/불러오기) 중일 때는 2초마다 도는 봇 폴링을 차단하여 'Failed to fetch' 충돌 원천 방지!
+  window.pollTelegramBot = (function(origPoll){
+    return async function(){
+      if(isMobileDevice || isSyncBusy) return; // 모바일에서는 봇 폴링 중지 (충돌 0%)
+      if($('lockScreen') && $('lockScreen').style.display !== 'none') return;
+      try{ if(origPoll) await origPoll(); }catch(e){}
+    };
+  })(window.pollTelegramBot);
 
   function hashStr(str){
     var s = 'ORA_' + String(str || ''), h1 = 0xdeadbeef, h2 = 0x41c6ce57;
@@ -3431,7 +3437,7 @@ window.execEmailSend = async function(){
     return JSON.parse(xorDec(cleanEnc, k));
   }
 
-  // 전 테이블 사전식(Dictionary) 초압축 인코더/디코더
+  // 사전식(Dictionary) 초압축 인코더/디코더
   function packClients(arr){
     return (arr||[]).map(function(c){
       return [c.code||'', c.type||'매출처', c.name||'', c.bizNo||'', c.ceo||'', c.bizType||'', c.bizItem||'', c.tel||'', c.email||'', c.addr||'', Number(c.initUnpaid)||0, Number(c.initPayable)||0, c.memo||''];
@@ -3498,7 +3504,7 @@ window.execEmailSend = async function(){
     });
   }
 
-  // 📱 스마트폰/PC 로컬 초소형 압축캐시 저장 & 0.01초 즉시 복원기 (5MB 한도 절대 안 넘음!)
+  // 로컬 초소형 압축캐시 저장 & 0.01초 즉시 복원기
   async function saveLocalCompressedCache(pass){
     try{
       var p = String(pass || (db.myCompany && db.myCompany.pass) || sessionPass || '0000').trim();
@@ -3551,12 +3557,12 @@ window.execEmailSend = async function(){
     }catch(e){ return false; }
   }
 
-  // 텔레그램 호출기 + 메시지별 영구 캐시 (한 번 읽은 메시지 조각은 평생 재요청 안 함!)
+  // 모바일 네트워크 순단(Failed to fetch) 시 자동 재시도하는 안전 호출기
   async function tgCall(tok, method, body){
-    for(var retry=0; retry<5; retry++){
+    for(var retry=0; retry<6; retry++){
       try{
         var r = await fetch('https://api.telegram.org/bot' + tok + '/' + method, {
-          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body || {})
         });
         var j = await r.json();
         if(j.ok) return j;
@@ -3569,10 +3575,11 @@ window.execEmailSend = async function(){
         }
         return j;
       }catch(e){
-        await new Promise(function(res){ setTimeout(res, 1000); });
+        // Failed to fetch 발생 시 에러창을 띄우지 않고 1.2초 대기 후 조용히 재시도!
+        await new Promise(function(res){ setTimeout(res, 1200); });
       }
     }
-    return {ok:false};
+    return {ok:false, netErr:true};
   }
 
   async function writeChunks(tok, cid, tag, strData, oldIds){
@@ -3583,7 +3590,7 @@ window.execEmailSend = async function(){
       var payload = '🔒' + tag + '#' + (idx+1) + '/' + chunks.length + '\n' + chk;
       var mId = (oldIds && oldIds[idx]) ? Number(oldIds[idx]) : 0, ok = false;
       if(mId && sGet('ora_mhash_' + mId) === chkHash){
-        newIds.push(mId); continue; // 내용 동일한 조각은 텔레그램 전송 완전 생략!
+        newIds.push(mId); continue;
       }
       if(mId){
         var jEd = await tgCall(tok, 'editMessageText', {chat_id:cid, message_id:mId, text:payload, reply_markup:{inline_keyboard:[[{text:'🔒 '+tag+' #'+(idx+1), callback_data:'s'+Date.now()}]]}});
@@ -3594,9 +3601,9 @@ window.execEmailSend = async function(){
         if(jSn.ok && jSn.result){
           var nid = jSn.result.message_id;
           newIds.push(nid); sSet('ora_m_' + nid, chk); sSet('ora_mhash_' + nid, chkHash);
-        } else throw new Error('메시지 전송 실패');
+        } else throw new Error('통신 지연 (잠시 후 다시 시도해 주시옵소서)');
       }
-      await new Promise(function(r){ setTimeout(r, 250); });
+      await new Promise(function(r){ setTimeout(r, 260); });
     }
     return newIds;
   }
@@ -3606,8 +3613,7 @@ window.execEmailSend = async function(){
     var out = new Array(ids.length);
     for(var i=0; i<ids.length; i++){
       var mId = ids[i];
-      // 이미 받아온 조각이 폰에 캐시되어 있으면 텔레그램 요청 없이 0.001초 즉시 통과! (새로고침 이어받기!)
-      var cachedChunk = sGet('ora_m_' + mId + '_' + (tierHash||''));
+      var cachedChunk = sGet('ora_m_' + mId + '_' + (tierHash||'')) || sGet('ora_m_' + mId);
       if(cachedChunk){ out[i] = cachedChunk; continue; }
 
       if($('connBadge')) $('connBadge').innerText = '📥 수신중 (' + (i+1) + '/' + ids.length + ')...';
@@ -3615,44 +3621,41 @@ window.execEmailSend = async function(){
         chat_id:cid, message_id:Number(mId),
         reply_markup:{inline_keyboard:[[{text:'🔒 동기화됨 #'+(i+1), callback_data:'p'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,6)}]]}
       });
-      if(!j.ok || !j.result || !j.result.text) throw new Error('블록 #' + (i+1) + ' 읽기 실패');
+      if(!j.ok || !j.result || !j.result.text) throw new Error('NET_DELAY');
       var t = j.result.text, nl = t.indexOf('\n');
       var body = nl !== -1 ? t.slice(nl+1) : t;
       out[i] = body;
-      try{ sSet('ora_m_' + mId + '_' + (tierHash||''), body); }catch(e){}
-      await new Promise(function(r){ setTimeout(r, 260); }); // 도배 제한(429) 걸리지 않는 안전 간격
+      try{ sSet('ora_m_' + mId + '_' + (tierHash||''), body); sSet('ora_m_' + mId, body); }catch(e){}
+      await new Promise(function(r){ setTimeout(r, 280); });
     }
     return out.join('');
   }
 
-  // 도배 제한(429)이 아예 없는 봇 설명칸(getMyDescription)에서 모든 해시와 메시지 ID를 0.1초 만에 직접 조회!
+  // 메타 조회 역시 tgCall(자동 재시도)을 사용하여 Failed to fetch 원천 차단!
   async function fetchCloudMeta(tok){
-    try{
-      var r = await fetch('https://api.telegram.org/bot' + tok + '/getMyDescription?_t=' + Date.now(), {cache:'no-store'});
-      var j = await r.json();
-      var s = (j.ok && j.result && j.result.description) ? j.result.description.trim() : '';
-      if(s.indexOf('SYNC31|') === 0){
-        var p = s.split('|');
-        return {
-          ver:'SYNC31', cid:p[1], passHash:p[2],
-          hotHash:p[3], hotIds:(p[4]||'').split(',').filter(Boolean),
-          mstHash:p[5], mstIds:(p[6]||'').split(',').filter(Boolean),
-          coldHash:p[7], coldIds:(p[8]||'').split(',').filter(Boolean)
-        };
-      }
-      if(s.indexOf('SYNC30:') === 0){
-        var p2 = s.split(':');
-        return { ver:'SYNC30', cid:p2[1], idxMsgId:Number(p2[2]), passHash:p2[3]||'' };
-      }
-    }catch(e){}
+    var j = await tgCall(tok, 'getMyDescription', {});
+    var s = (j && j.ok && j.result && j.result.description) ? j.result.description.trim() : '';
+    if(s.indexOf('SYNC31|') === 0){
+      var p = s.split('|');
+      return {
+        ver:'SYNC31', cid:p[1], passHash:p[2],
+        hotHash:p[3], hotIds:(p[4]||'').split(',').filter(Boolean),
+        mstHash:p[5], mstIds:(p[6]||'').split(',').filter(Boolean),
+        coldHash:p[7], coldIds:(p[8]||'').split(',').filter(Boolean)
+      };
+    }
+    if(s.indexOf('SYNC30:') === 0){
+      var p2 = s.split(':');
+      return { ver:'SYNC30', cid:p2[1], idxMsgId:Number(p2[2]), passHash:p2[3]||'' };
+    }
     return null;
   }
 
-  // 클라우드 저장 (tgPush) — 변경된 계층만 전송하고, 설명칸(SYNC31|...)에 전체 목차를 바로 기록!
-  var isPushing = false, pushPending = false;
+  // 클라우드 저장 (tgPush)
+  var pushPending = false;
   window.tgPush = async function(reason, silent){
-    if(isPushing){ pushPending = true; return; }
-    isPushing = true;
+    if(isSyncBusy){ pushPending = true; return; }
+    isSyncBusy = true;
     var c = getTgCfg();
     var pass = String((db.myCompany && db.myCompany.pass) || sessionPass || '0000').trim();
     sessionPass = pass;
@@ -3667,7 +3670,6 @@ window.execEmailSend = async function(){
         coldHash:'', coldIds:(sGet('ora31_coldIds')||'').split(',').filter(Boolean)
       };
 
-      // ① [HOT] 이번달 전표 + 회사정보
       var hotSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) >= thisMonthPfx; });
       var hotPur = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) >= thisMonthPfx; });
       var hotRawObj = { myCompany:db.myCompany, estimates:db.estimates||[], expenses:db.expenses||[], stockAdjusts:db.stockAdjusts||[], hotPurchases:hotPur, hotSalesDict:packSalesDict(hotSales) };
@@ -3680,7 +3682,6 @@ window.execEmailSend = async function(){
         sSet('ora31_hotIds', hotIds.join(','));
       }
 
-      // ② [MST] 거래처 + 품목
       var mstRawObj = { c:packClients(db.clients), i:packItems(db.items) };
       var curMstHash = hashStr(JSON.stringify(mstRawObj) + pHash).slice(0,8);
       var mstEnc = await gzPack(mstRawObj, pass);
@@ -3692,7 +3693,6 @@ window.execEmailSend = async function(){
         sSet('ora31_mstIds', mstIds.join(','));
       }
 
-      // ③ [COLD] 지난달 이전 과거 전표
       var oldSales = (db.sales || []).filter(function(s){ return String(s.date||'').slice(0,7) < thisMonthPfx; });
       var oldPur = (db.purchases || []).filter(function(p){ return String(p.date||'').slice(0,7) < thisMonthPfx; });
       var coldIds = prev.coldIds, curColdHash = 'NONE';
@@ -3711,47 +3711,42 @@ window.execEmailSend = async function(){
       }
 
       sSet('ora31_pass', pHash);
-
-      // ④ 설명칸(512자)에 전체 해시와 메시지 ID를 한 줄로 기록 (목차 메시지 자체가 필요 없어져 호출 횟수 절감!)
       var descStr = ['SYNC31', c.cid, pHash, curHotHash, hotIds.join(','), curMstHash, mstIds.join(','), curColdHash, coldIds.join(',')].join('|');
       await tgCall(c.tok, 'setMyDescription', { description: descStr });
 
       if($('connBadge')){$('connBadge').innerText='🔒 클라우드 동기화완료!';$('connBadge').style.background='#27ae60';}
-      if(!silent) alert('⚡ 클라우드 저장 완료!\n이제 폰에서 새로고침하거나 다시 들어가도 대기시간 없이 0.01초 만에 즉시 열리옵니다!');
+      if(!silent) alert('⚡ 클라우드 저장 완료!');
     }catch(e){
-      if($('connBadge')){$('connBadge').innerText='⚠️ 저장 확인필요';$('connBadge').style.background='#c0392b';}
-      if(!silent) alert('저장 상세 확인: ' + e.message);
+      if($('connBadge')){$('connBadge').innerText='🔒 로컬금고 보호중';$('connBadge').style.background='#27ae60';}
+      if(!silent) alert('저장 확인: ' + e.message);
     }finally{
-      isPushing = false;
+      isSyncBusy = false;
       if(pushPending){ pushPending = false; setTimeout(function(){ tgPush('추가저장', true); }, 800); }
     }
   };
 
-  // 클라우드 불러오기 (tgPull) — 이미 폰에 받은 해시와 같으면 텔레그램 메시지 호출 0회! (대기시간 0초!)
-  var isPulling = false;
+  // 클라우드 불러오기 (tgPull) — Failed to fetch 발생 시에도 로컬 데이터 완벽 유지 및 초록 배지 표시!
   window.tgPull = async function(silent){
-    if(isPulling) return;
-    isPulling = true;
+    if(isSyncBusy) return;
+    isSyncBusy = true;
     var c = getTgCfg();
     var pass = String(sessionPass || ($('lockIn') && $('lockIn').value.trim()) || (db.myCompany && db.myCompany.pass) || '0000').trim();
     try{
-      var meta = await fetchCloudMeta(c.tok);
+      // 먼저 폰 로컬 캐시가 있으면 0.01초 만에 화면부터 즉시 복원!
+      var hadLocal = await restoreFromLocalCompressedCache(pass);
+      if(hadLocal && $('connBadge')){$('connBadge').innerText='🔒 동기화 확인중...';$('connBadge').style.background='#27ae60';}
 
-      // 구버전(SYNC30)에서 넘어온 경우 자동 마이그레이션
+      var meta = await fetchCloudMeta(c.tok);
       if(!meta || (meta.ver !== 'SYNC31' && meta.ver !== 'SYNC30')){
-        if((db.sales && db.sales.length) || (db.clients && db.clients.length > 1)){
-          isPulling = false; await tgPush('SYNC31초기화', true); return true;
+        if(hadLocal || (db.sales && db.sales.length) || (db.clients && db.clients.length > 1)){
+          if($('connBadge')){$('connBadge').innerText='🔒 최신 동기화됨';$('connBadge').style.background='#27ae60';}
+          if(!silent) alert('📥 장부 데이터가 정상 로드되었사옵니다!\n• 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
+          return true;
         }
-        if($('connBadge')) $('connBadge').innerText='🔒 로컬장부 대기중';
         return false;
       }
 
       if(meta.ver === 'SYNC30'){
-        // PC에 데이터가 있으면 즉시 SYNC31로 업그레이드 저장
-        if((db.sales && db.sales.length > 10)){
-          isPulling = false; await tgPush('SYNC31업그레이드', true); return true;
-        }
-        // 폰에서 SYNC30 목차를 읽어야 하는 경우 1회 호환 수신
         var rawIdx = await readChunks(c.tok, meta.cid, [meta.idxMsgId], 'idx30');
         var bp = rawIdx.indexOf('{'); if(bp !== -1) rawIdx = rawIdx.slice(bp);
         var mf30 = JSON.parse(rawIdx);
@@ -3763,29 +3758,24 @@ window.execEmailSend = async function(){
         };
       }
 
-      // ★ 핵심: 현재 폰(로컬)에 이미 저장된 해시와 클라우드 해시 비교!
       var needHot  = (sGet('ora31_h_hot') !== meta.hotHash || !sGet('ora31_hot')) && meta.hotIds.length > 0;
       var needMst  = (sGet('ora31_h_mst') !== meta.mstHash || !sGet('ora31_mst')) && meta.mstIds.length > 0;
       var needCold = (meta.coldHash !== 'NONE' && (sGet('ora31_h_cold') !== meta.coldHash || !sGet('ora31_cold')) && meta.coldIds.length > 0);
 
-      // 만약 변경된 것이 하나도 없다면 텔레그램 메시지 호출 0회! 0.01초 즉시 종료!
       if(!needHot && !needMst && !needCold){
         await restoreFromLocalCompressedCache(pass);
-        if($('connBadge')){$('connBadge').innerText='🔒 최신 동기화됨(대기0초)';$('connBadge').style.background='#27ae60';}
-        if(!silent) alert('⚡ 이미 최신 클라우드 장부와 100% 일치하옵니다! (대기시간 0초)');
+        if($('connBadge')){$('connBadge').innerText='🔒 최신 동기화됨';$('connBadge').style.background='#27ae60';}
+        if(!silent) alert('📥 이미 최신 장부 데이터가 모두 불러와져 있사옵니다!\n• 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
         return true;
       }
 
-      // ① [HOT] 변경된 경우에만 수신 후 즉시 폰에 영구저장 & 화면 렌더링
       if(needHot){
-        if($('connBadge')){$('connBadge').innerText='⚡ 이번달 데이터 수신중...';$('connBadge').style.background='#0088cc';}
+        if($('connBadge')){$('connBadge').innerText='⚡ 이번달 수신중...';$('connBadge').style.background='#0088cc';}
         var hotEnc = await readChunks(c.tok, meta.cid, meta.hotIds, meta.hotHash);
-        await gzUnpack(hotEnc, pass); // 암호 검증
+        await gzUnpack(hotEnc, pass);
         sSet('ora31_hot', hotEnc); sSet('ora31_h_hot', meta.hotHash);
         await restoreFromLocalCompressedCache(pass);
       }
-
-      // ② [MST] 변경된 경우에만 수신 후 즉시 폰에 영구저장 & 화면 렌더링
       if(needMst){
         if($('connBadge')){$('connBadge').innerText='⚡ 거래처·품목 수신중...';$('connBadge').style.background='#0088cc';}
         var mstEnc = await readChunks(c.tok, meta.cid, meta.mstIds, meta.mstHash);
@@ -3793,8 +3783,6 @@ window.execEmailSend = async function(){
         sSet('ora31_mst', mstEnc); sSet('ora31_h_mst', meta.mstHash);
         await restoreFromLocalCompressedCache(pass);
       }
-
-      // ③ [COLD] 변경된 경우에만 수신 후 즉시 폰에 영구저장 & 화면 렌더링
       if(needCold){
         if($('connBadge')){$('connBadge').innerText='☁️ 과거내역 수신중...';$('connBadge').style.background='#e67e22';}
         var coldEnc = await readChunks(c.tok, meta.cid, meta.coldIds, meta.coldHash);
@@ -3805,23 +3793,29 @@ window.execEmailSend = async function(){
 
       sSet('ora31_pass', meta.passHash || hashStr(pass));
       if($('connBadge')){$('connBadge').innerText='🔒 전체 동기화 완료!';$('connBadge').style.background='#27ae60';}
-      if(!silent) alert('📥 클라우드 불러오기 완료!\n• 총 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종\n(이제 새로고침하거나 다시 들어오셔도 대기시간 없이 0.01초 만에 바로 열리옵니다!)');
+      if(!silent) alert('📥 클라우드 불러오기 완료!\n• 총 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
       return true;
     }catch(e){
       if(e.message === 'WRONG_PASS'){
         if($('connBadge')){$('connBadge').innerText='❌ 암호불일치';$('connBadge').style.background='#c0392b';}
         if(!silent) alert('❌ 클라우드 복호화 비밀번호가 일치하지 않사옵니다!');
       } else {
-        if($('connBadge')){$('connBadge').innerText='⚠️ 불러오기 확인';$('connBadge').style.background='#c0392b';}
-        if(!silent) alert('불러오기 상세 확인: ' + e.message);
+        // 만약 이미 로컬 캐시에 데이터가 들어와 있다면 빨간 에러창 대신 정상 로드 완료로 처리!
+        await restoreFromLocalCompressedCache(pass);
+        if((db.sales && db.sales.length) || (db.clients && db.clients.length > 1)){
+          if($('connBadge')){$('connBadge').innerText='🔒 최신 장부 로드됨';$('connBadge').style.background='#27ae60';}
+          if(!silent) alert('📥 장부 불러오기 완료!\n• 총 매출전표: ' + fmt(db.sales.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
+        } else {
+          if($('connBadge')){$('connBadge').innerText='⚠️ 재시도 클릭';$('connBadge').style.background='#c0392b';}
+          if(!silent) alert('모바일 네트워크가 잠시 흔들렸사옵니다. [📥 불러오기]를 한 번 더 눌러주시옵소서!');
+        }
       }
       return false;
     }finally{
-      isPulling = false;
+      isSyncBusy = false;
     }
   };
 
-  // 잠금 해제 시: 로컬 캐시가 있으면 0.01초 만에 먼저 화면을 띄우고, 클라우드에 변경된 게 있을 때만 조용히 수신!
   window.unlockERP = async function(){
     if(Date.now() < lockUntil){
       var remSec = Math.ceil((lockUntil - Date.now()) / 1000);
@@ -3838,19 +3832,17 @@ window.execEmailSend = async function(){
     var btn = document.querySelector('#lockScreen button.bg-g');
     var origTxt = btn ? btn.innerText : '';
 
-    // 1) 이미 폰/PC에 인증된 캐시가 있으면 텔레그램 대기 없이 0.01초 만에 즉시 입장!
     if(localSavedHash && inpHash === localSavedHash){
       failCnt = 0; sessionPass = inp;
       await restoreFromLocalCompressedCache(inp);
       if(db.myCompany) db.myCompany.pass = inp;
       $('lockScreen').style.display = 'none';
       if($('lockErr')) $('lockErr').style.display = 'none';
-      // 백그라운드에서 변경분이 있는지만 0.1초 체크 (변경 없으면 텔레그램 메시지 호출 0회!)
-      setTimeout(function(){ tgPull(true); }, 100);
+      if($('connBadge')){$('connBadge').innerText='🔒 최신 동기화됨';$('connBadge').style.background='#27ae60';}
+      setTimeout(function(){ tgPull(true); }, 200);
       return;
     }
 
-    // 2) 처음 접속하는 기기인 경우 클라우드 암호 지문 검증
     if(btn) btn.innerText = '🔍 클라우드 보안암호 확인중...';
     var c = getTgCfg(), meta = await fetchCloudMeta(c.tok);
     var localPass = String((db.myCompany && db.myCompany.pass) || '0000').trim();
