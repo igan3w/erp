@@ -2847,11 +2847,11 @@ window.applySimToItem = function(buyP, sellP){
 
 
 // ==================== AI ASSISTANT & ORDER PARSER ====================
-window.copyTextById = function(id){
+window.copyTextById = function(id, label){
   const el = $(id);
   if(!el || !el.value){ alert('복사할 내용이 없습니다.'); return; }
   navigator.clipboard.writeText(el.value).then(() => {
-    alert('📋 클립보드에 복사되었습니다! 카카오톡이나 문자에 붙여넣기(Ctrl+V) 하세요.');
+    alert(`📋 [${label||'텍스트'}] 클립보드에 복사되었습니다! 카카오톡이나 문자에 붙여넣기(Ctrl+V) 하세요.`);
   }).catch(() => {
     el.select(); document.execCommand('copy');
     alert('📋 클립보드에 복사되었습니다!');
@@ -2868,15 +2868,16 @@ window.openAiModal = function(focusMode){
       ? unpaidList.map(x => `<option value="${esc(x.c.name)}">${esc(x.c.name)} (미수: ${fmt(x.ar)}원 / ${x.overdueDays}일 경과)</option>`).join('')
       : '<option value="">현재 미수금 있는 거래처 없음</option>';
   }
+  if($('geminiApiKey')) $('geminiApiKey').value = sGet('ora_gemini_key') || '';
   aiGenerateArMsg();
-  if(focusMode === 'order') setTimeout(() => $('aiOrderText').focus(), 80);
-  else if(focusMode === 'brief') askAiAssistant('brief');
+  if(focusMode === 'order' && $('aiOrderText')) setTimeout(() => $('aiOrderText').focus(), 80);
+  else if(focusMode === 'brief') askAiAssistant('이번 달 매출과 순이익 요약해주고 전월 대비 어때?');
 };
 
 window.aiGenerateArMsg = function(){
   const cliName = $('aiArClientSel') ? $('aiArClientSel').value : '';
-  const tone = $('aiArTone') ? $('aiArTone').value : 'polite';
-  const box = $('aiArMsgText');
+  const tone = $('aiArToneSel') ? $('aiArToneSel').value : 'polite';
+  const box = $('aiArMsgOut');
   if(!box) return;
   if(!cliName){
     box.value = '현재 미수잔액이 남아있는 거래처가 없습니다. 훌륭합니다!';
@@ -2889,15 +2890,15 @@ window.aiGenerateArMsg = function(){
   const comp = db.comp || {};
 
   if(tone === 'polite'){
-    box.value = `안녕하세요, ${cliName} 대표님(담당자님). ${comp.name} ${comp.ceo}입니다.\n항상 저희 ${comp.name}와 함께해 주셔서 진심으로 감사드립니다.\n\n다름이 아니오라, 월말 정산 기준 귀사의 미결제 잔액이 금 ${fmt(ar)}원(부가세 포함)으로 확인되어 안내 말씀드립니다.\n\n▶ 입금계좌: ${comp.bank}\n▶ 미결제 잔액: ${fmt(ar)}원\n\n바쁘시겠지만 확인 후 입금 처리 부탁드리며, 이미 입금하셨다면 본 메시지는 양해 부탁드립니다. 오늘도 번창하시는 하루 되십시오! 감사합니다.\n- ${comp.name} 드림 (${comp.tel}) -`;
-  } else if(tone === 'remind'){
-    box.value = `[${comp.name} 대금 결제 확인 요청]\n안녕하세요, ${cliName} 담당자님. ${comp.name}입니다.\n\n지난 거래 건에 대한 미수잔액이 현재 ${fmt(ar)}원(약 ${ov}일 경과) 남아있어 재안내 드립니다.\n원활한 자재 수급과 차기 출고 진행을 위해 이번 주 내로 결제 처리해 주시면 감사하겠습니다.\n\n▶ 입금계좌: ${comp.bank}\n▶ 청구 잔액: ${fmt(ar)}원\n\n세금계산서나 거래원장 재발행이 필요하시면 언제든 말씀해 주세요. 감사합니다.\n- ${comp.name} (${comp.tel}) -`;
+    box.value = `안녕하세요, ${cliName} 대표님(담당자님). ${comp.name} ${comp.ceo}입니다.\n항상 저희 ${comp.name}와 함께해 주셔서 진심으로 감사드립니다.\n\n다름이 아니오라, 정산 기준 귀사의 미결제 잔액이 금 ${fmt(ar)}원(부가세 포함)으로 확인되어 안내 말씀드립니다.\n\n▶ 입금계좌: ${comp.bank}\n▶ 미결제 잔액: ${fmt(ar)}원\n\n바쁘시겠지만 확인 후 입금 처리 부탁드리며, 이미 입금하셨다면 본 메시지는 양해 부탁드립니다. 오늘도 번창하시는 하루 되십시오! 감사합니다.\n- ${comp.name} 드림 (${comp.tel}) -`;
+  } else if(tone === 'statement'){
+    box.value = `[${comp.name} 거래원장 및 대금 정산 확인 요청]\n안녕하세요, ${cliName} 담당자님. ${comp.name}입니다.\n\n지난 거래 건에 대한 미수잔액이 현재 ${fmt(ar)}원(약 ${ov}일 경과) 남아있어 재안내 드립니다.\n원활한 자재 수급과 차기 출고 진행을 위해 이번 주 내로 결제 처리해 주시면 감사하겠습니다.\n\n▶ 입금계좌: ${comp.bank}\n▶ 청구 잔액: ${fmt(ar)}원\n\n세금계산서나 거래원장 재발행이 필요하시면 언제든 말씀해 주세요. 감사합니다.\n- ${comp.name} (${comp.tel}) -`;
   } else {
     box.value = `[${comp.name} 장기 미수대금 정산 요청의 건]\n${cliName} 귀중\n\n귀사의 무궁한 발전을 기원합니다.\n당사와의 거래 대금 중 미결제 잔액 금 ${fmt(ar)}원이 장기간(${ov}일 경과) 미정산 상태로 남아있어 정중히 독촉 안내드립니다.\n\n▶ 입금계좌: ${comp.bank}\n▶ 미수 잔액: 금 ${fmt(ar)}원정\n\n조속한 시일 내에 입금 또는 결제 일정 회신을 부탁드립니다. 감사합니다.\n- ${comp.name} 대표 ${comp.ceo} (${comp.tel}) -`;
   }
 };
 
-window.aiParseOrderToSlip = function(){
+window.aiParseOrderToSlip = function(targetMode){
   const raw = ($('aiOrderText').value || '').trim();
   if(!raw){ alert('카톡이나 문자로 받은 주문 내용을 먼저 붙여넣어 주세요!'); $('aiOrderText').focus(); return; }
 
@@ -2938,13 +2939,15 @@ window.aiParseOrderToSlip = function(){
       if(detectedClient && db.priceMem[cKey] && db.priceMem[cKey][iKey] && db.priceMem[cKey][iKey].length){
         price = db.priceMem[cKey][iKey][0].p;
       }
+      const uCost = itObj ? (Number(itObj.buyPrice)||0) : Math.round(price * 0.75);
       parsedLines.push({
         item: code,
         spec: itObj ? (itObj.spec||code) : code,
         qty: qty,
         price: price,
-        supply: qty * price,
-        cost: itObj ? (Number(itObj.buyPrice)||0) : 0
+        sup: qty * price,
+        vat: Math.round(qty * price * 0.1),
+        uCost: uCost
       });
     }
   });
@@ -2956,7 +2959,7 @@ window.aiParseOrderToSlip = function(){
           const qMatch = tok.match(/(\d+)\s*(개|대|박스|EA|세트)?/i);
           const qty = qMatch ? Math.max(1, Number(qMatch[1])||1) : 1;
           const price = Number(it.sellPrice)||0;
-          parsedLines.push({ item: it.name, spec: it.spec||'', qty, price, supply: qty*price, cost: Number(it.buyPrice)||0 });
+          parsedLines.push({ item: it.name, spec: it.spec||'', qty, price, sup: qty*price, vat: Math.round(qty*price*0.1), uCost: Number(it.buyPrice)||0 });
         }
       });
     });
@@ -2967,26 +2970,42 @@ window.aiParseOrderToSlip = function(){
     return;
   }
 
-  goTab(0);
-  resetSaleForm();
-  if(detectedClient){
-    $('sClient').value = detectedClient;
-    $('sOneTime').checked = false;
+  if(targetMode === 'est'){
+    goTab('t-est');
+    resetEstForm();
+    if(detectedClient){
+      $('esClient').value = detectedClient;
+      $('esOneTime').checked = false;
+    } else {
+      $('esOneTime').checked = true;
+      toggleOneTime('es', true);
+    }
+    estDraft = parsedLines;
+    $('esMemo').value = '🤖 AI 카톡견적 자동입력 (' + raw.replace(/\s+/g,' ').slice(0,30) + ')';
+    recalcEstDraft();
   } else {
-    $('sOneTime').checked = true;
-    toggleOneTime('s');
+    goTab('t-sale');
+    resetSaleForm();
+    if(detectedClient){
+      $('sClient').value = detectedClient;
+      $('sOneTime').checked = false;
+    } else {
+      $('sOneTime').checked = true;
+      toggleOneTime('s', true);
+    }
+    saleDraft = parsedLines;
+    $('sMemo').value = '🤖 AI 카톡주문 자동입력 (' + raw.replace(/\s+/g,' ').slice(0,30) + ')';
+    recalcSaleDraft();
   }
-  saleDraft = parsedLines;
-  $('sMemo').value = '🤖 AI 카톡주문 자동입력 (' + raw.replace(/\s+/g,' ').slice(0,30) + ')';
-  recalcSaleDraft();
   closeModal('aiModal');
-  alert(`✨ AI 주문서 분석 완료!\n• 거래처: ${detectedClient || '1회성(기타)거래처'}\n• 추출 품목: ${parsedLines.length}건\n\n전표 입력창에 자동으로 채워졌습니다. 단가 확인 후 [전표 저장]만 누르세요!`);
+  alert(`✨ AI 주문서 분석 완료!\n• 거래처: ${detectedClient || '1회성(기타)거래처'}\n• 추출 품목: ${parsedLines.length}건\n\n전표 입력창에 자동으로 채워졌습니다. 단가 확인 후 [저장]만 누르세요!`);
 };
 
-window.askAiAssistant = function(mode){
-  const qInput = $('aiQuestionInput');
-  const q = mode === 'custom' ? (qInput.value||'').trim() : mode;
+window.askAiAssistant = function(presetQ){
+  const qInput = $('aiQuestionIn');
+  const q = presetQ ? presetQ : (qInput ? (qInput.value||'').trim() : '');
   if(!q) return;
+  if(presetQ && qInput) qInput.value = presetQ;
 
   const sDate = $('fStart').value || '2000-01-01';
   const eDate = $('fEnd').value || '2099-12-31';
@@ -3006,8 +3025,8 @@ window.askAiAssistant = function(mode){
       (s.lines||[]).forEach(l => {
         if(!itemAgg[l.item]) itemAgg[l.item] = { qty:0, amt:0, prof:0 };
         itemAgg[l.item].qty += (Number(l.qty)||0);
-        itemAgg[l.item].amt += (Number(l.supply)||0);
-        itemAgg[l.item].prof += ((Number(l.price)||0) - (Number(l.cost)||0)) * (Number(l.qty)||0);
+        itemAgg[l.item].amt += (Number(l.sup)||Number(l.supply)||(Number(l.qty)*Number(l.price))||0);
+        itemAgg[l.item].prof += ((Number(l.price)||0) - (Number(l.uCost)||Number(l.cost)||0)) * (Number(l.qty)||0);
       });
     }
   });
@@ -3027,22 +3046,22 @@ window.askAiAssistant = function(mode){
   let html = '';
   const qLower = q.toLowerCase();
 
-  if(mode === 'brief' || qLower.includes('요약') || qLower.includes('브리핑') || qLower.includes('매출')){
+  if(qLower.includes('요약') || qLower.includes('실적') || qLower.includes('브리핑') || qLower.includes('이번 달')){
     const marginRate = periodSale > 0 ? ((periodProf / (periodSale/1.1)) * 100).toFixed(1) : '0.0';
     html = `<div style="font-weight:900;color:#142d4c;font-size:14px;margin-bottom:6px">📊 [AI 경영 비서 브리핑] 조회기간(${sDate} ~ ${eDate}) 핵심 요약</div>
-      • <b>총 매출액(VAT포함):</b> <span class="t-blu b">${fmt(periodSale)}원</span> (총 ${fmt(periodCnt)}건 출고)\n
-      • <b>추정 매출순이익:</b> <span class="t-grn b">+${fmt(periodProf)}원</span> (평균 마진율 약 <b>${marginRate}%</b>)\n
-      • <b>현재 총 미수잔액(받을 돈):</b> <span class="t-red b">${fmt(totalAr)}원</span> (${topArList.length}곳) / <b>총 미지급금(줄 돈):</b> ${fmt(totalAp)}원\n
+      • <b>총 매출액(VAT포함):</b> <span class="t-blu b">${fmt(periodSale)}원</span> (총 ${fmt(periodCnt)}건 출고)<br>
+      • <b>추정 매출순이익:</b> <span class="t-grn b">+${fmt(periodProf)}원</span> (평균 마진율 약 <b>${marginRate}%</b>)<br>
+      • <b>현재 총 미수잔액(받을 돈):</b> <span class="t-red b">${fmt(totalAr)}원</span> (${topArList.length}곳) / <b>총 미지급금(줄 돈):</b> ${fmt(totalAp)}원
       <hr style="margin:8px 0;border:0;border-top:1px dashed #cbd5e1">
       <b>🏆 기간 내 효자 거래처 TOP 3:</b> ${topClis.slice(0,3).map((x,idx)=>`${idx+1}위 ${esc(x[0])}(${fmt(x[1])}원)`).join(' / ') || '내역 없음'}<br>
       <b>🔥 기간 내 베스트셀러 품목 TOP 3:</b> ${topItems.slice(0,3).map((x,idx)=>`${idx+1}위 ${esc(x[0])}(${fmt(x[1].qty)}개, ${fmt(x[1].amt)}원)`).join(' / ') || '내역 없음'}`;
-  } else if(mode === 'ar' || qLower.includes('미수') || qLower.includes('외상') || qLower.includes('받을')){
+  } else if(qLower.includes('미수') || qLower.includes('외상') || qLower.includes('받을') || qLower.includes('회수')){
     html = `<div style="font-weight:900;color:#d63031;font-size:14px;margin-bottom:6px">🚨 [AI 미수금 위험 분석] 총 미수금 ${fmt(totalAr)}원 (${topArList.length}곳)</div>`
       + (topArList.slice(0,7).map((x,i) => `${i+1}. <b>${esc(x.c.name)}</b>: 미수잔액 <b class="t-red">${fmt(x.ar)}원</b> (${getOverdueDaysBadge(x.overdueDays, x.ar)} / 최근거래: ${x.lastDate||'-'})`).join('<br>') || '현재 미수금이 있는 거래처가 없습니다!');
-  } else if(mode === 'item' || qLower.includes('품목') || qLower.includes('효자') || qLower.includes('마진')){
+  } else if(qLower.includes('효자') || qLower.includes('마진') || qLower.includes('top')){
     html = `<div style="font-weight:900;color:#00b894;font-size:14px;margin-bottom:6px">🏆 [AI 품목 수익성 분석] 기간 내 매출 상위 품목 TOP 5</div>`
       + (topItems.map((x,i) => `${i+1}. <b>${esc(x[0])}</b> — 총 <b>${fmt(x[1].qty)}개</b> 판매 / 공급가 합계 <b class="t-blu">${fmt(x[1].amt)}원</b> / 마진 <b class="t-grn">+${fmt(x[1].prof)}원</b>`).join('<br>') || '해당 기간 판매된 품목이 없습니다.');
-  } else if(mode === 'stock' || qLower.includes('재고') || qLower.includes('발주') || qLower.includes('부족')){
+  } else if(qLower.includes('재고') || qLower.includes('발주') || qLower.includes('부족')){
     html = `<div style="font-weight:900;color:#e67e22;font-size:14px;margin-bottom:6px">📦 [AI 안전재고 경보] 재고 부족 품목 총 ${lowItems.length}종</div>`
       + (lowItems.slice(0,10).map(x => `• <b>${esc(x.it.name)}</b>: 현재고 <b class="t-red">${fmt(x.curQty)}개</b> (안전재고 기준: ${fmt(x.it.safeQty)}개)`).join('<br>') || '현재 안전재고 미만인 품목이 없습니다. 재고 상태가 매우 양호합니다!');
   } else {
@@ -3065,7 +3084,7 @@ window.askAiAssistant = function(mode){
         특정 <b>거래처명</b>이나 <b>품목코드(예: PCW-5000)</b>를 입력하시면 해당 대상의 정밀 분석 결과를 즉시 보여드립니다!`;
     }
   }
-  $('aiAnswerBox').innerHTML = html;
+  if($('aiAnswerBox')) $('aiAnswerBox').innerHTML = html;
 };
 
 // ==================== CEO EXECUTIVE DASHBOARD (대표님 한눈에 보기 도식화 그래프) ====================
@@ -3073,9 +3092,20 @@ window.renderDashboard = function(){
   const dashEl = $('t-dash');
   if(!dashEl) return;
 
-  const curYear = ($('fEnd').value || todayStr()).slice(0, 4);
+  const yearSet = new Set([String(new Date().getFullYear())]);
+  (db.sales||[]).forEach(s => { if(s.date && s.date.length >= 4) yearSet.add(s.date.slice(0,4)); });
+  (db.purchases||[]).forEach(p => { if(p.date && p.date.length >= 4) yearSet.add(p.date.slice(0,4)); });
+  const years = Array.from(yearSet).sort().reverse();
+
+  const sel = $('dashYearSel');
+  let curYear = String(new Date().getFullYear());
+  if(sel){
+    const prevVal = sel.value;
+    sel.innerHTML = years.map(y => `<option value="${y}">${y}년</option>`).join('');
+    if(prevVal && years.includes(prevVal)) sel.value = prevVal;
+    curYear = sel.value || years[0];
+  }
   const prevYear = String(Number(curYear) - 1);
-  if($('dashYearTitle')) $('dashYearTitle').innerText = `${curYear}년 (전년 ${prevYear}년 대비 비교 포함)`;
 
   const mSale = Array(12).fill(0), mPur = Array(12).fill(0), mProf = Array(12).fill(0), mPrevSale = Array(12).fill(0);
   const cliMap = {}, itmMap = {};
@@ -3094,7 +3124,7 @@ window.renderDashboard = function(){
       (s.lines||[]).forEach(l => {
         const k = l.item || '기타';
         if(!itmMap[k]) itmMap[k] = { amt:0, qty:0 };
-        itmMap[k].amt += (Number(l.supply)||0);
+        itmMap[k].amt += (Number(l.sup)||Number(l.supply)||(Number(l.qty)*Number(l.price))||0);
         itmMap[k].qty += (Number(l.qty)||0);
       });
     } else if(yr === prevYear && mo >= 0 && mo < 12){
@@ -3126,59 +3156,77 @@ window.renderDashboard = function(){
 
   const yoyGrowth = yrPrevSum > 0 ? (((yrSaleSum - yrPrevSum) / yrPrevSum) * 100).toFixed(1) : null;
   const marginPct = yrSaleSum > 0 ? ((yrProfSum / (yrSaleSum/1.1)) * 100).toFixed(1) : '0.0';
+  const topClis = Object.entries(cliMap).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+  const topItms = Object.entries(itmMap).sort((a,b)=>b[1].amt - a[1].amt).slice(0, 10);
 
-  if($('dashSummaryCards')){
-    $('dashSummaryCards').innerHTML = `
-      <div class="dash-card">
-        <div class="dc-lbl">📈 ${curYear}년 누적 총 매출액 (VAT포함)</div>
-        <div class="dc-val t-blu">${fmt(yrSaleSum)} 원</div>
-        <div class="dc-sub">${yoyGrowth !== null ? `전년(${fmt(yrPrevSum)}원) 대비 <b>${yoyGrowth >= 0 ? '▲ +'+yoyGrowth : '▼ '+yoyGrowth}%</b>` : `전년도(${prevYear}년) 비교 데이터 없음`}</div>
+  if($('dashBriefingBox')){
+    $('dashBriefingBox').innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:10px">
+        <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #0984e3;padding:10px;border-radius:6px">
+          <div style="font-size:11.5px;color:#555;font-weight:bold">📈 ${curYear}년 누적 총매출 (VAT포함)</div>
+          <div style="font-size:20px;font-weight:900;color:#0984e3">${fmt(yrSaleSum)} 원</div>
+          <div style="font-size:11px;color:#666">${yoyGrowth !== null ? `전년(${fmt(yrPrevSum)}원) 대비 <b>${yoyGrowth >= 0 ? '▲ +'+yoyGrowth : '▼ '+yoyGrowth}%</b>` : `전년도(${prevYear}년) 비교 데이터 없음`}</div>
+        </div>
+        <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #27ae60;padding:10px;border-radius:6px" class="sec-prof">
+          <div style="font-size:11.5px;color:#555;font-weight:bold">💎 ${curYear}년 누적 매출순이익 (마진 ${marginPct}%)</div>
+          <div style="font-size:20px;font-weight:900;color:#27ae60">+${fmt(yrProfSum)} 원</div>
+          <div style="font-size:11px;color:#666">매출원가 차감 실질 마진</div>
+        </div>
+        <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #8e44ad;padding:10px;border-radius:6px" class="sec-prof">
+          <div style="font-size:11.5px;color:#555;font-weight:bold">🚢 ${curYear}년 누적 총매입액</div>
+          <div style="font-size:20px;font-weight:900;color:#8e44ad">${fmt(yrPurSum)} 원</div>
+          <div style="font-size:11px;color:#666">수입물대 + 관세/운임 + 국내매입</div>
+        </div>
+        <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #d63031;padding:10px;border-radius:6px">
+          <div style="font-size:11.5px;color:#555;font-weight:bold">🚨 현재 받을 총 미수금 (${arCliCnt}곳)</div>
+          <div style="font-size:20px;font-weight:900;color:#d63031">${fmt(totalAr)} 원</div>
+          <div style="font-size:11px;color:#666">${arRank[0] ? `최다 미수: ${esc(arRank[0].c.name)}(${fmt(arRank[0].ar)}원)` : '미수금 없음'}</div>
+        </div>
       </div>
-      <div class="dash-card" style="border-left-color:#27ae60">
-        <div class="dc-lbl">💎 ${curYear}년 누적 매출순이익 <span class="sec-prof">(평균마진 ${marginPct}%)</span></div>
-        <div class="dc-val t-grn sec-prof">+${fmt(yrProfSum)} 원</div>
-        <div class="dc-sub">매출원가 차감 기준 실질 마진</div>
-      </div>
-      <div class="dash-card" style="border-left-color:#8e44ad">
-        <div class="dc-lbl">🚢 ${curYear}년 누적 총 매입액 (VAT포함)</div>
-        <div class="dc-val" style="color:#8e44ad">${fmt(yrPurSum)} 원</div>
-        <div class="dc-sub">수입물대 + 관세/운임 + 국내매입 합계</div>
-      </div>
-      <div class="dash-card" style="border-left-color:#d63031">
-        <div class="dc-lbl">🚨 현재 받을 총 미수금 (외상채권)</div>
-        <div class="dc-val t-red">${fmt(totalAr)} 원</div>
-        <div class="dc-sub">미수 보유 거래처 총 <b>${fmt(arCliCnt)}곳</b> (집중관리 요망)</div>
+      <div>
+        💡 <b>김향래 대표님 핵심 요약:</b> ${curYear}년 최고 효자 거래처는 <b>${topClis[0]?esc(topClis[0][0]):'-'}</b>이며, 베스트셀러 모델은 <b>${topItms[0]?esc(topItms[0][0]):'-'}</b>입니다.
       </div>
     `;
   }
 
   const maxM = Math.max(...mSale, ...mPur, 1000000);
   if($('dashMonthlyChart')){
-    $('dashMonthlyChart').innerHTML = mSale.map((sVal, i) => {
+    $('dashMonthlyChart').innerHTML = `<div style="display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:210px;padding:18px 6px 6px 6px;border-bottom:2px solid #cbd5e1">` + mSale.map((sVal, i) => {
       const pVal = mPur[i], prVal = mProf[i];
-      const sH = Math.max(2, Math.round((sVal / maxM) * 145));
-      const pH = Math.max(2, Math.round((pVal / maxM) * 145));
-      const prH = Math.max(2, Math.round((Math.max(0, prVal) / maxM) * 145));
+      const sH = Math.max(3, Math.round((sVal / maxM) * 145));
+      const pH = Math.max(3, Math.round((pVal / maxM) * 145));
+      const prH = Math.max(3, Math.round((Math.max(0, prVal) / maxM) * 145));
       const sLabel = sVal >= 10000 ? Math.round(sVal/10000).toLocaleString() + '만' : (sVal > 0 ? fmt(sVal) : '-');
-      return `<div class="m-col" title="${i+1}월 매출: ${fmt(sVal)}원 / 매입: ${fmt(pVal)}원 / 순이익: ${fmt(prVal)}원">
-        <div class="m-val">${sLabel}</div>
-        <div class="m-bars">
-          <div class="m-bar sale" style="height:${sH}px"></div>
-          <div class="m-bar pur" style="height:${pH}px"></div>
-          <div class="m-bar prof sec-prof" style="height:${prH}px"></div>
+      return `<div style="display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end" title="${i+1}월 매출: ${fmt(sVal)}원 / 매입: ${fmt(pVal)}원 / 순이익: ${fmt(prVal)}원">
+        <div style="font-size:10px;font-weight:bold;color:#142d4c;margin-bottom:3px">${sLabel}</div>
+        <div style="display:flex;gap:2px;align-items:flex-end;width:100%;justify-content:center">
+          <div style="width:30%;height:${sH}px;background:linear-gradient(180deg,#0984e3,#142d4c);border-radius:3px 3px 0 0"></div>
+          <div style="width:30%;height:${pH}px;background:linear-gradient(180deg,#a55eea,#8e44ad);border-radius:3px 3px 0 0" class="sec-prof"></div>
+          <div style="width:30%;height:${prH}px;background:linear-gradient(180deg,#2ecc71,#27ae60);border-radius:3px 3px 0 0" class="sec-prof"></div>
         </div>
-        <div class="m-lbl">${i+1}월</div>
+        <div style="font-size:11.5px;font-weight:900;margin-top:5px;color:#333">${i+1}월</div>
       </div>`;
-    }).join('');
+    }).join('') + `</div>`;
   }
 
-  const topClis = Object.entries(cliMap).sort((a,b)=>b[1]-a[1]).slice(0, 7);
+  const maxAr = arRank.length ? arRank[0].ar : 1;
+  if($('dashArChart')){
+    $('dashArChart').innerHTML = arRank.length ? arRank.slice(0, 10).map((st, idx) => {
+      const pct = Math.max(6, Math.round((st.ar / maxAr) * 100));
+      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(st.c.name)}')" title="클릭 시 상세 거래원장 열기">
+        <div class="bar-lbl">${idx+1}. ${esc(st.c.name)}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#d63031,#e17055)">최근: ${st.lastDate||'이월'}</div></div>
+        <div class="bar-val t-red" style="width:175px">${fmt(st.ar)}원 ${getOverdueDaysBadge(st.overdueDays, st.ar)}</div>
+      </div>`;
+    }).join('') : '<div style="padding:20px;text-align:center;color:#27ae60;font-weight:bold">🎉 현재 미수금이 남아있는 거래처가 한 곳도 없습니다!</div>';
+  }
+
   const maxCli = topClis.length ? topClis[0][1] : 1;
-  if($('dashTopClients')){
-    $('dashTopClients').innerHTML = topClis.length ? topClis.map(([name, amt], idx) => {
+  if($('dashClientChart')){
+    $('dashClientChart').innerHTML = topClis.length ? topClis.map(([name, amt], idx) => {
       const pct = Math.max(5, Math.round((amt / maxCli) * 100));
       const share = yrSaleSum > 0 ? ((amt / yrSaleSum) * 100).toFixed(1) : '0.0';
-      return `<div class="bar-row">
+      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(name)}')">
         <div class="bar-lbl" title="${esc(name)}">${idx+1}. ${esc(name)}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#0984e3,#00cec9)">${share}%</div></div>
         <div class="bar-val t-blu">${fmt(amt)}원</div>
@@ -3186,10 +3234,9 @@ window.renderDashboard = function(){
     }).join('') : '<div style="padding:20px;text-align:center;color:#888">해당 연도 매출 데이터가 없습니다.</div>';
   }
 
-  const topItms = Object.entries(itmMap).sort((a,b)=>b[1].amt - a[1].amt).slice(0, 7);
   const maxItm = topItms.length ? topItms[0][1].amt : 1;
-  if($('dashTopItems')){
-    $('dashTopItems').innerHTML = topItms.length ? topItms.map(([name, obj], idx) => {
+  if($('dashItemChart')){
+    $('dashItemChart').innerHTML = topItms.length ? topItms.map(([name, obj], idx) => {
       const pct = Math.max(5, Math.round((obj.amt / maxItm) * 100));
       return `<div class="bar-row">
         <div class="bar-lbl" title="${esc(name)}">${idx+1}. ${esc(name)} <span style="color:#666;font-size:11px">(${fmt(obj.qty)}개)</span></div>
@@ -3197,37 +3244,6 @@ window.renderDashboard = function(){
         <div class="bar-val t-grn">${fmt(obj.amt)}원</div>
       </div>`;
     }).join('') : '<div style="padding:20px;text-align:center;color:#888">해당 연도 품목 판매 데이터가 없습니다.</div>';
-  }
-
-  const maxAr = arRank.length ? arRank[0].ar : 1;
-  if($('dashTopAr')){
-    $('dashTopAr').innerHTML = arRank.length ? arRank.slice(0, 7).map((st, idx) => {
-      const pct = Math.max(6, Math.round((st.ar / maxAr) * 100));
-      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(st.c.name)}')" title="클릭 시 상세 거래원장 열기">
-        <div class="bar-lbl">${idx+1}. ${esc(st.c.name)}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#d63031,#e17055)">최근거래: ${st.lastDate||'이월'}</div></div>
-        <div class="bar-val t-red" style="width:175px">${fmt(st.ar)}원 ${getOverdueDaysBadge(st.overdueDays, st.ar)}</div>
-      </div>`;
-    }).join('') : '<div style="padding:20px;text-align:center;color:#27ae60;font-weight:bold">🎉 현재 미수금이 남아있는 거래처가 한 곳도 없습니다!</div>';
-  }
-
-  const curMonthIdx = new Date().getMonth();
-  const thisMonthSale = mSale[curMonthIdx] || 0;
-  const lastMonthSale = curMonthIdx > 0 ? (mSale[curMonthIdx-1]||0) : (mPrevSale[11]||0);
-  const mDiffPct = lastMonthSale > 0 ? (((thisMonthSale - lastMonthSale)/lastMonthSale)*100).toFixed(1) : '0.0';
-
-  if($('dashAiSummaryBox')){
-    $('dashAiSummaryBox').innerHTML = `
-      <div style="font-weight:900;color:#142d4c;font-size:14px;margin-bottom:6px">📌 김향래 대표님을 위한 경영 핵심 진단</div>
-      1. <b>연간 매출 추이:</b> ${curYear}년 현재까지 누적 매출은 <b class="t-blu">${fmt(yrSaleSum)}원</b>, 누적 순이익은 <b class="t-grn sec-prof">+${fmt(yrProfSum)}원(마진율 ${marginPct}%)</b>입니다.<br>
-      2. <b>이달의 실적(${curMonthIdx+1}월):</b> 이번 달 매출은 <b>${fmt(thisMonthSale)}원</b>으로 직전월(${fmt(lastMonthSale)}원) 대비 <b>${Number(mDiffPct)>=0?'+'+mDiffPct:mDiffPct}%</b> 기록 중입니다.<br>
-      3. <b>최우수 고객 & 주력 모델:</b> 올해 최고 매출 거래처는 <b>${topClis[0]?esc(topClis[0][0]):'-'}</b>이며, 최고 인기 모델은 <b>${topItms[0]?esc(topItms[0][0]):'-'}</b>입니다.<br>
-      4. <b>채권(미수금) 관리:</b> 현재 미수금 합계는 <b class="t-red">${fmt(totalAr)}원</b>입니다. ${arRank[0] ? `가장 미수금이 큰 곳은 <b>${esc(arRank[0].c.name)}(${fmt(arRank[0].ar)}원, ${arRank[0].overdueDays}일 경과)</b>입니다.` : ''}<br>
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-ai" onclick="openAiModal('ar')">📲 미수거래처 카톡 안내문 1초 생성하기</button>
-        <button class="btn-g" style="background:#16a085" onclick="openBankMatchModal()">🏦 은행 입금내역 붙여넣고 자동 수금처리</button>
-      </div>
-    `;
   }
 };
 
@@ -3373,17 +3389,18 @@ window.importHometaxFiles = async function(fileList){
         }
 
         if(!isPur){
+          const uCost = exItm ? (exItm.buyPrice||0) : Math.round(price*0.75);
           const newSale = {
             id: Date.now() + Math.floor(Math.random()*1000000),
-            date: rawDate, client: cliName, vatMode: vat === 0 ? 'zero' : 'ex',
-            lines: [{item: cleanCode, spec: cleanSpec, qty, price, supply: sup, cost: exItm ? (exItm.buyPrice||0) : 0}],
-            supply: sup, vat, profit: sup - (exItm ? (exItm.buyPrice||0)*qty : 0),
+            date: rawDate, client: cliName, vatType: vat === 0 ? 'zero' : 'tax',
+            lines: [{item: cleanCode, spec: cleanSpec, qty, price, sup: sup, vat: vat, uCost}],
+            supply: sup, vat, total: sup + vat, profit: sup - (uCost*qty),
             paid: (rcp.indexOf('영수') !== -1) ? (sup + vat) : 0,
             memo: (vat===0 ? '[홈택스면세] ' : '[홈택스세금] ') + (memo || appNo),
             htxKey: appNo || ''
           };
           const sFp = getSaleFp(newSale);
-          if((appNo && existingSaleFps[appNo]) || existingSaleFps[sFp] || (db.deletedFp||[]).includes(sFp)){ skipCnt++; continue; }
+          if((appNo && existingSaleFps[appNo]) || existingSaleFps[sFp] || (db.deletedFp||[]).includes('S_'+sFp)){ skipCnt++; continue; }
           existingSaleFps[sFp] = true;
           if(appNo) existingSaleFps[appNo] = true;
           db.sales.push(newSale);
@@ -3391,15 +3408,15 @@ window.importHometaxFiles = async function(fileList){
         } else {
           const newPur = {
             id: Date.now() + Math.floor(Math.random()*1000000),
-            date: rawDate, client: cliName, cur: 'KRW', rate: 1, custom: 0, freight: 0,
-            lines: [{item: cleanCode, spec: cleanSpec, qty, price, krwGoods: sup, incCost: 0, unitCost: price}],
+            date: rawDate, client: cliName, currency: 'KRW', rate: 1, custom: 0, freight: 0,
+            lines: [{item: cleanCode, spec: cleanSpec, qty, price, krwAmt: sup, incAmt: 0, uCost: price}],
             goodsKrw: sup, totalCost: sup, vat,
             paid: (rcp.indexOf('영수') !== -1) ? (sup + vat) : 0,
             memo: (vat===0 ? '[홈택스면세매입] ' : '[홈택스매입] ') + (memo || appNo),
             htxKey: appNo || ''
           };
           const pFp = getPurFp(newPur);
-          if((appNo && existingPurFps[appNo]) || existingPurFps[pFp] || (db.deletedFp||[]).includes(pFp)){ skipCnt++; continue; }
+          if((appNo && existingPurFps[appNo]) || existingPurFps[pFp] || (db.deletedFp||[]).includes('P_'+pFp)){ skipCnt++; continue; }
           existingPurFps[pFp] = true;
           if(appNo) existingPurFps[appNo] = true;
           db.purchases.push(newPur);
@@ -3458,8 +3475,8 @@ function openLiveDrop(inputEl, list, onSelect){
 
   drop.innerHTML = list.map((it, idx) => `
     <div class="ld-item ${idx===0?'active':''}" data-idx="${idx}">
-      <div><b>${esc(it.title)}</b> <span class="sub">${esc(it.sub||'')}</span></div>
-      <div class="right">${esc(it.right||'')}</div>
+      <div><b>${esc(it.title)}</b> <span class="ld-sub">${esc(it.sub||'')}</span></div>
+      <div style="font-size:11.5px;color:#0984e3;font-weight:bold">${esc(it.right||'')}</div>
     </div>
   `).join('');
   drop.style.display = 'block';
@@ -3477,6 +3494,11 @@ function openLiveDrop(inputEl, list, onSelect){
 
 document.addEventListener('keydown', e => {
   const drop = $('liveDrop');
+  if(e.key === 'F8'){
+    e.preventDefault();
+    saveSale(false);
+    return;
+  }
   if(!drop || drop.style.display === 'none' || !dropItems.length) return;
   if(e.key === 'ArrowDown'){
     e.preventDefault();
@@ -3514,6 +3536,7 @@ document.addEventListener('click', e => {
 
 function onClientInput(prefix){
   const el = $(prefix + 'Client');
+  if(!el) return;
   const kw = el.value.trim();
   const cStats = getClientStats();
   const matches = (db.clients||[]).filter(c => matchKw(c.name, kw) || matchKw(c.bizNo, kw)).slice(0, 25).map(c => {
@@ -3527,16 +3550,17 @@ function onClientInput(prefix){
   });
   openLiveDrop(el, matches, c => {
     el.value = c.name;
-    if(prefix === 's' || prefix === 'e') lookupPrice(prefix);
+    if(prefix === 's' || prefix === 'es') lookupPrice(prefix);
     else if(prefix === 'p') lookupPurPrice();
-    $(prefix + 'Item').focus();
+    if($(prefix + 'Item')) $(prefix + 'Item').focus();
   });
-  if(prefix === 's' || prefix === 'e') lookupPrice(prefix);
+  if(prefix === 's' || prefix === 'es') lookupPrice(prefix);
   else if(prefix === 'p') lookupPurPrice();
 }
 
 function onItemInput(prefix){
   const el = $(prefix + 'Item');
+  if(!el) return;
   const kw = el.value.trim();
   const iStats = getItemStats();
   const matches = (db.items||[]).filter(it => matchKw(it.name, kw) || matchKw(it.spec, kw)).slice(0, 30).map(it => {
@@ -3552,23 +3576,27 @@ function onItemInput(prefix){
   openLiveDrop(el, matches, it => {
     el.value = it.name;
     if($(prefix + 'Spec')) $(prefix + 'Spec').value = it.spec || '';
-    if(prefix === 's' || prefix === 'e'){
+    if(prefix === 's' || prefix === 'es'){
       lookupPrice(prefix);
       calcLinePreview(prefix);
     } else if(prefix === 'p'){
       lookupPurPrice();
     }
-    $(prefix + 'Qty').focus();
-    $(prefix + 'Qty').select();
+    if($(prefix + 'Qty')){
+      $(prefix + 'Qty').focus();
+      $(prefix + 'Qty').select();
+    }
   });
-  if(prefix === 's' || prefix === 'e'){ lookupPrice(prefix); calcLinePreview(prefix); }
+  if(prefix === 's' || prefix === 'es'){ lookupPrice(prefix); calcLinePreview(prefix); }
   else if(prefix === 'p') lookupPurPrice();
 }
 
 function lookupPrice(prefix){
-  const cliName = ($(prefix+'Client').value||'').trim();
-  const itmName = ($(prefix+'Item').value||'').trim();
-  const bar = $(prefix==='s' ? 'sPmBar' : 'ePmBar');
+  const cliEl = $(prefix+'Client'), itmEl = $(prefix+'Item'), priceEl = $(prefix+'Price');
+  if(!cliEl || !itmEl || !priceEl) return;
+  const cliName = (cliEl.value||'').trim();
+  const itmName = (itmEl.value||'').trim();
+  const bar = $(prefix==='s' ? 'sPmBar' : 'esPmBar');
   if(!itmName){
     if(bar) bar.innerHTML = '<span>💡 거래처와 품목을 선택하면 <b>직전 출고단가 TOP 5</b> 및 표준단가를 자동 불러옵니다.</span>';
     return;
@@ -3580,24 +3608,37 @@ function lookupPrice(prefix){
   if(itm && $(prefix+'Spec') && !$(prefix+'Spec').value) $(prefix+'Spec').value = itm.spec || '';
 
   const cKey = normSearch(cliName), iKey = normSearch(itmName);
-  const hist = (db.priceMem[cKey] && db.priceMem[cKey][iKey]) ? db.priceMem[cKey][iKey] : [];
+  const hist = [];
+  if(cliName){
+    for(let i=0; i<(db.sales||[]).length; i++){
+      const s = db.sales[i];
+      if(normSearch(s.client) === cKey){
+        (s.lines||[]).forEach(l => {
+          if(normSearch(l.item) === iKey && l.price > 0 && !hist.some(h => h.p === l.price)){
+            hist.push({ p: l.price, d: s.date });
+          }
+        });
+      }
+      if(hist.length >= 5) break;
+    }
+  }
 
   let stdPrice = itm ? (Number(itm.sellPrice)||0) : 0;
   let tierPrice = Math.round(stdPrice * (1 - tierDisc/100));
 
   if(hist.length > 0){
-    $(prefix+'Price').value = hist[0].p;
+    priceEl.value = hist[0].p;
   } else if(tierPrice > 0){
-    $(prefix+'Price').value = tierPrice;
+    priceEl.value = tierPrice;
   }
 
   if(bar){
     let html = `<b>[${esc(itmName)}]</b> `;
-    if(itm) html += `표준가:<span class="pm-chip" onclick="$('${prefix}Price').value=${stdPrice};calcLinePreview('${prefix}')">${fmt(stdPrice)}원</span> `;
-    if(tierDisc > 0 && itm) html += `등급할인(${tierDisc}%):<span class="pm-chip" onclick="$('${prefix}Price').value=${tierPrice};calcLinePreview('${prefix}')">${fmt(tierPrice)}원</span> `;
+    if(itm) html += `표준가:<span class="pm-pill" onclick="$('${prefix}Price').value=${stdPrice};calcLinePreview('${prefix}')">${fmt(stdPrice)}원</span> `;
+    if(tierDisc > 0 && itm) html += `등급할인(${tierDisc}%):<span class="pm-pill" onclick="$('${prefix}Price').value=${tierPrice};calcLinePreview('${prefix}')">${fmt(tierPrice)}원</span> `;
     if(hist.length){
       html += ` | <b>${esc(cliName)} 최근출고가:</b> ` + hist.slice(0,5).map(h =>
-        `<span class="pm-chip" onclick="$('${prefix}Price').value=${h.p};calcLinePreview('${prefix}')">${fmt(h.p)}원 <small>(${h.d.slice(2)})</small></span>`
+        `<span class="pm-pill" onclick="$('${prefix}Price').value=${h.p};calcLinePreview('${prefix}')">${fmt(h.p)}원 <small>(${h.d.slice(2)})</small></span>`
       ).join('');
     }
     bar.innerHTML = html;
@@ -3612,39 +3653,36 @@ function lookupPurPrice(){
   const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(itmName));
   if(itm && !$('pSpec').value) $('pSpec').value = itm.spec || '';
 
-  const cKey = normSearch(cliName), iKey = normSearch(itmName);
-  const hist = (db.purPriceMem[cKey] && db.purPriceMem[cKey][iKey]) ? db.purPriceMem[cKey][iKey] : [];
   const stdBuy = itm ? (Number(itm.buyPrice)||0) : 0;
-
-  if(hist.length > 0) $('pPrice').value = hist[0].p;
-  else if(stdBuy > 0) $('pPrice').value = stdBuy;
+  if(stdBuy > 0) $('pPrice').value = stdBuy;
 
   if(bar){
-    let html = `<b>[${esc(itmName)}]</b> 평균원가:<span class="pm-chip" onclick="$('pPrice').value=${stdBuy}">${fmt(stdBuy)}원</span> `;
-    if(hist.length){
-      html += ` | 최근매입가: ` + hist.slice(0,5).map(h =>
-        `<span class="pm-chip" onclick="$('pPrice').value=${h.p}">${fmt(h.p)} <small>(${h.d.slice(2)})</small></span>`
-      ).join('');
-    }
-    bar.innerHTML = html;
+    bar.innerHTML = `<b>[${esc(itmName)}]</b> 평균매입원가: <span class="pm-pill" onclick="$('pPrice').value=${stdBuy}">${fmt(stdBuy)}원</span>`;
   }
 }
 
 function calcLinePreview(prefix){
-  if(prefix !== 's') return;
+  if(prefix !== 's' || !$('sLinePrev')) return;
   const q = num($('sQty').value);
   const p = num($('sPrice').value);
-  $('sLineAmt').value = fmt(Math.round(q * p));
+  const itmName = ($('sItem').value||'').trim();
+  const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(itmName));
+  const uCost = itm ? (Number(itm.buyPrice)||0) : Math.round(p * 0.75);
+  const sup = Math.round(q * p);
+  const prof = sup - Math.round(q * uCost);
+  $('sLinePrev').innerText = `공급가: ${fmt(sup)}원 / 예상마진: ${fmt(prof)}원`;
 }
 
-function toggleOneTime(prefix){
-  const chk = $(prefix + 'OneTime').checked;
+function toggleOneTime(prefix, checked){
+  const chk = (typeof checked === 'boolean') ? checked : $(prefix + 'OneTime').checked;
   const inp = $(prefix + 'Client');
+  const otBox = $(prefix + 'OtBox');
+  if(otBox) otBox.style.display = chk ? 'block' : 'none';
   if(chk){
     inp.value = '1회성(기타)거래처';
     inp.readOnly = true;
     inp.style.background = '#eee';
-    if(prefix === 's') $('sPaid').value = Number($('sSumSup').value||0) + Number($('sSumVat').value||0);
+    if(prefix === 's') $('sPaid').value = num($('sSumTot').value);
   } else {
     if(inp.value === '1회성(기타)거래처') inp.value = '';
     inp.readOnly = false;
@@ -3661,97 +3699,133 @@ function addSaleLine(){
   const qty = num($('sQty').value) || 1;
   const price = num($('sPrice').value);
   const itmObj = (db.items||[]).find(i => normSearch(i.name) === normSearch(item));
-  const cost = itmObj ? (Number(itmObj.buyPrice)||0) : Math.round(price * 0.75);
+  const uCost = itmObj ? (Number(itmObj.buyPrice)||0) : Math.round(price * 0.75);
 
-  saleDraft.push({ item, spec: rawSpec || (itmObj?itmObj.spec:''), qty, price, supply: Math.round(qty * price), cost });
-  $('sItem').value = ''; $('sSpec').value = ''; $('sQty').value = 1; $('sPrice').value = 0; $('sLineAmt').value = 0;
+  saleDraft.push({ item, spec: rawSpec || (itmObj?itmObj.spec:''), qty, price, sup: Math.round(qty * price), vat: Math.round(qty * price * 0.1), uCost });
+  $('sItem').value = ''; $('sSpec').value = ''; $('sQty').value = 1; $('sPrice').value = 0;
+  if($('sLinePrev')) $('sLinePrev').innerText = '공급가: 0원 / 예상마진: 0원';
   recalcSaleDraft();
   $('sItem').focus();
 }
 
+function clearSaleLines(){
+  saleDraft = [];
+  recalcSaleDraft();
+}
+
+function onManualVatChange(){
+  const sup = num($('sSumSup').value);
+  const vat = num($('sSumVat').value);
+  $('sSumTot').value = sup + vat;
+  if($('sOneTime').checked || $('sPayMethod').value !== '외상(미수)'){
+    $('sPaid').value = sup + vat;
+  }
+}
+
 function recalcSaleDraft(keepVat){
-  const mode = $('sVatMode').value;
+  const mode = $('sVatType') ? $('sVatType').value : 'tax';
   let sumSup = 0, sumVat = 0;
   saleDraft.forEach(l => {
     const raw = Math.round(l.qty * l.price);
-    if(mode === 'in'){
+    if(mode === 'inc'){
       const sp = Math.round(raw / 1.1);
-      l.supply = sp;
+      l.sup = sp;
+      l.vat = raw - sp;
       sumSup += sp;
-      sumVat += (raw - sp);
+      sumVat += l.vat;
     } else if(mode === 'zero'){
-      l.supply = raw;
+      l.sup = raw;
+      l.vat = 0;
       sumSup += raw;
     } else {
-      l.supply = raw;
+      l.sup = raw;
+      l.vat = Math.round(raw * 0.1);
       sumSup += raw;
-      sumVat += Math.round(raw * 0.1);
+      sumVat += l.vat;
     }
   });
   $('sSumSup').value = sumSup;
   if(!keepVat) $('sSumVat').value = sumVat;
   const finalVat = num($('sSumVat').value);
-  $('sSumTot').value = fmt(sumSup + finalVat);
-  if($('sOneTime').checked) $('sPaid').value = sumSup + finalVat;
+  $('sSumTot').value = sumSup + finalVat;
+  if($('sOneTime').checked || ($('sPayMethod') && $('sPayMethod').value !== '외상(미수)')){
+    $('sPaid').value = sumSup + finalVat;
+  }
 
   $('sDraftTb').innerHTML = saleDraft.map((l, idx) => `
     <tr>
       <td class="b">${esc(l.item)}</td>
       <td class="c">${esc(l.spec)}</td>
-      <td class="r"><input type="number" value="${l.qty}" style="width:55px;text-align:right" oninput="saleDraft[${idx}].qty=num(this.value);recalcSaleDraft()"></td>
-      <td class="r"><input type="number" value="${l.price}" style="width:85px;text-align:right" oninput="saleDraft[${idx}].price=num(this.value);recalcSaleDraft()"></td>
-      <td class="r b">${fmt(l.supply)}</td>
+      <td class="r"><input type="number" value="${l.qty}" style="width:50px;text-align:right" oninput="saleDraft[${idx}].qty=num(this.value);recalcSaleDraft()"></td>
+      <td class="r"><input type="number" value="${l.price}" style="width:75px;text-align:right" oninput="saleDraft[${idx}].price=num(this.value);recalcSaleDraft()"></td>
+      <td class="r b">${fmt(l.sup)}</td>
+      <td class="r">${fmt(l.vat)}</td>
       <td class="c"><button class="btn-r" style="padding:1px 5px" onclick="saleDraft.splice(${idx},1);recalcSaleDraft()">✕</button></td>
     </tr>
-  `).join('') || '<tr><td colspan="6" class="c" style="color:#888;padding:12px">출고할 품목을 추가하거나 우측 상단 [🎁 세트상품 출고]를 선택하세요.</td></tr>';
+  `).join('') || '<tr><td colspan="7" class="c" style="color:#888;padding:12px">출고할 품목을 추가하거나 우측 상단 [🎁 세트상품출고]를 선택하세요.</td></tr>';
 }
 
-function saveSale(){
+function saveSale(printAfter){
   if(($('sItem').value||'').trim()) addSaleLine();
   if(!saleDraft.length){ alert('출고 품목을 1개 이상 추가해주세요.'); return; }
   const date = $('sDate').value || todayStr();
-  const client = ($('sClient').value||'').trim() || '1회성(기타)거래처';
+  const isOt = $('sOneTime').checked;
+  const client = isOt ? '1회성(기타)거래처' : (($('sClient').value||'').trim() || '1회성(기타)거래처');
   const supply = num($('sSumSup').value);
   const vat = num($('sSumVat').value);
+  const total = supply + vat;
   const paid = num($('sPaid').value);
+  const payMethod = $('sPayMethod') ? $('sPayMethod').value : '외상(미수)';
+  const asStatus = $('sAsStatus') ? $('sAsStatus').value : '';
+  const serialNo = $('sSerialNo') ? $('sSerialNo').value.trim() : '';
   const memo = ($('sMemo').value||'').trim();
-  const serialNo = ($('sSerialNo') ? $('sSerialNo').value : '').trim();
   const editId = num($('sEditId').value);
+
+  const otInfo = isOt ? {
+    name: ($('sOtName').value||'').trim() || '1회성고객',
+    bizNo: ($('sOtBiz').value||'').trim(),
+    ceo: ($('sOtCeo').value||'').trim(),
+    addr: ($('sOtAddr').value||'').trim(),
+    tel: ($('sOtTel').value||'').trim()
+  } : null;
 
   ensureClientAndItems(client, '매출처', saleDraft, false);
 
   let costSum = 0;
   saleDraft.forEach(l => {
-    costSum += (Number(l.cost)||0) * (Number(l.qty)||0);
+    costSum += (Number(l.uCost)||0) * (Number(l.qty)||0);
     recordPriceMem(db.priceMem, client, l.item, l.price, date);
   });
   const profit = supply - costSum;
+  let savedId = editId;
 
   if(editId){
     const idx = db.sales.findIndex(x => Number(x.id) === editId);
     if(idx > -1){
       const prev = db.sales[idx];
       db.sales[idx] = Object.assign({}, prev, {
-        date, client, vatMode: $('sVatMode').value,
+        date, client, vatType: $('sVatType').value,
         lines: JSON.parse(JSON.stringify(saleDraft)),
-        supply, vat, profit, paid, memo, serialNo
+        supply, vat, total, profit, paid, payMethod, asStatus, serialNo, memo, otInfo
       });
     }
   } else {
+    savedId = Date.now();
     const newSlip = {
-      id: Date.now(), date, client, vatMode: $('sVatMode').value,
+      id: savedId, date, client, vatType: $('sVatType').value,
       lines: JSON.parse(JSON.stringify(saleDraft)),
-      supply, vat, profit, paid, memo, serialNo,
-      payLog: paid > 0 ? [{d:date, a:paid, m:'출고시수금'}] : []
+      supply, vat, total, profit, paid, payMethod, asStatus, serialNo, memo, otInfo,
+      payLog: paid > 0 ? [{date, amt:paid, memo:'출고시수금'}] : []
     };
     const fp = getSaleFp(newSlip);
-    db.deletedFp = (db.deletedFp||[]).filter(x => x !== fp);
+    db.deletedFp = (db.deletedFp||[]).filter(x => x !== 'S_'+fp && x !== fp);
     db.sales.unshift(newSlip);
   }
 
   resetSaleForm();
   saveDB('매출저장');
   renderAll();
+  if(printAfter && savedId) openInvoice(savedId);
 }
 
 function resetSaleForm(){
@@ -3759,13 +3833,18 @@ function resetSaleForm(){
   $('sDate').value = todayStr();
   $('sClient').value = '';
   $('sOneTime').checked = false;
-  toggleOneTime('s');
-  $('sVatMode').value = 'ex';
-  $('sItem').value = ''; $('sSpec').value = ''; $('sQty').value = 1; $('sPrice').value = 0; $('sLineAmt').value = 0;
-  $('sPaid').value = 0; $('sMemo').value = '';
+  toggleOneTime('s', false);
+  ['sOtName','sOtBiz','sOtCeo','sOtAddr','sOtTel'].forEach(k => { if($(k)) $(k).value = ''; });
+  if($('sVatType')) $('sVatType').value = 'tax';
+  $('sItem').value = ''; $('sSpec').value = ''; $('sQty').value = 1; $('sPrice').value = 0;
+  if($('sLinePrev')) $('sLinePrev').innerText = '공급가: 0원 / 예상마진: 0원';
+  $('sPaid').value = 0;
+  if($('sPayMethod')) $('sPayMethod').value = '외상(미수)';
+  if($('sAsStatus')) $('sAsStatus').value = '';
   if($('sSerialNo')) $('sSerialNo').value = '';
-  $('sFormTitle').innerText = '📝 매출·출고전표 등록 (수량·단가 엔터 즉시추가)';
-  $('sSaveBtn').innerText = '💾 매출·출고전표 저장 (미수금 및 재고 즉시 반영)';
+  $('sMemo').value = '';
+  if($('saleFormTitle')) $('saleFormTitle').innerText = '✏️ 매출전표 등록 (다중품목 / 세트출고 / A/S·시리얼)';
+  if($('sSaveBtn')) $('sSaveBtn').innerText = '💾 매출전표 저장 (F8)';
   saleDraft = [];
   recalcSaleDraft();
 }
@@ -3776,19 +3855,29 @@ function editSale(id){
   $('sEditId').value = s.id;
   $('sDate').value = s.date;
   $('sClient').value = s.client;
-  $('sOneTime').checked = (s.client === '1회성(기타)거래처');
-  toggleOneTime('s');
-  $('sVatMode').value = s.vatMode || 'ex';
+  const isOt = (s.client === '1회성(기타)거래처' || Boolean(s.otInfo));
+  $('sOneTime').checked = isOt;
+  toggleOneTime('s', isOt);
+  if(s.otInfo){
+    $('sOtName').value = s.otInfo.name || '';
+    $('sOtBiz').value = s.otInfo.bizNo || '';
+    $('sOtCeo').value = s.otInfo.ceo || '';
+    $('sOtAddr').value = s.otInfo.addr || '';
+    $('sOtTel').value = s.otInfo.tel || '';
+  }
+  if($('sVatType')) $('sVatType').value = s.vatType || 'tax';
   saleDraft = JSON.parse(JSON.stringify(s.lines || []));
   recalcSaleDraft(true);
   $('sSumSup').value = s.supply;
   $('sSumVat').value = s.vat;
-  $('sSumTot').value = fmt((Number(s.supply)||0) + (Number(s.vat)||0));
+  $('sSumTot').value = (Number(s.supply)||0) + (Number(s.vat)||0);
   $('sPaid').value = s.paid || 0;
-  $('sMemo').value = s.memo || '';
+  if($('sPayMethod')) $('sPayMethod').value = s.payMethod || '외상(미수)';
+  if($('sAsStatus')) $('sAsStatus').value = s.asStatus || '';
   if($('sSerialNo')) $('sSerialNo').value = s.serialNo || '';
-  $('sFormTitle').innerText = `✏️ 매출전표 수정 중 (#${s.date} ${s.client})`;
-  $('sSaveBtn').innerText = '💾 수정사항 저장 완료';
+  $('sMemo').value = s.memo || '';
+  if($('saleFormTitle')) $('saleFormTitle').innerText = `✏️ 매출전표 수정 중 (#${s.date} ${s.client})`;
+  if($('sSaveBtn')) $('sSaveBtn').innerText = '💾 수정사항 저장 완료 (F8)';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -3809,7 +3898,7 @@ function collectSale(id){
   if(addAmt <= 0) return;
   s.paid = (Number(s.paid)||0) + addAmt;
   if(!Array.isArray(s.payLog)) s.payLog = [];
-  s.payLog.push({d: todayStr(), a: addAmt, m: '수금완납'});
+  s.payLog.push({date: todayStr(), amt: addAmt, memo: '수금완납'});
   saveDB('미수금수금');
   renderAll();
 }
@@ -3817,7 +3906,7 @@ function collectSale(id){
 function cycleAsStatus(id){
   const s = (db.sales||[]).find(x => Number(x.id) === Number(id));
   if(!s) return;
-  const order = ['', '수리접수', '수리중', '수리완료', '출고완료'];
+  const order = ['', 'AS접수', 'AS진행중', 'AS완료'];
   const cur = s.asStatus || '';
   const next = order[(order.indexOf(cur) + 1) % order.length];
   s.asStatus = next;
@@ -3829,74 +3918,88 @@ function delSale(id){
   const s = (db.sales||[]).find(x => Number(x.id) === Number(id));
   if(!s || !confirm(`[${s.date} ${s.client}] 매출전표를 삭제하시겠습니까?`)) return;
   const fp = getSaleFp(s);
-  if(!db.deletedFp.includes(fp)) db.deletedFp.push(fp);
+  if(!db.deletedFp.includes('S_'+fp)) db.deletedFp.push('S_'+fp);
   db.sales = db.sales.filter(x => Number(x.id) !== Number(id));
   saveDB('매출삭제');
   renderAll();
 }
 
-// ==================== ESTIMATES CRUD ====================
+// ==================== ESTIMATES CRUD (es prefix) ====================
 function addEstLine(){
-  const rawName = ($('eItem').value||'').trim();
+  const rawName = ($('esItem').value||'').trim();
   if(!rawName){ alert('품목명을 입력하세요.'); return; }
-  const rawSpec = ($('eSpec').value||'').trim().toUpperCase();
+  const rawSpec = ($('esSpec').value||'').trim().toUpperCase();
   const item = extractPureCode(rawName, rawSpec);
-  const qty = num($('eQty').value) || 1;
-  const price = num($('ePrice').value);
-  estDraft.push({ item, spec: rawSpec, qty, price, supply: Math.round(qty * price) });
-  $('eItem').value = ''; $('eSpec').value = ''; $('eQty').value = 1; $('ePrice').value = 0;
+  const qty = num($('esQty').value) || 1;
+  const price = num($('esPrice').value);
+  estDraft.push({ item, spec: rawSpec, qty, price, sup: Math.round(qty * price) });
+  $('esItem').value = ''; $('esSpec').value = ''; $('esQty').value = 1; $('esPrice').value = 0;
   recalcEstDraft();
-  $('eItem').focus();
+  $('esItem').focus();
 }
 
 function recalcEstDraft(){
-  const mode = $('eVatMode').value;
-  let sumSup = 0, sumVat = 0;
+  let sumSup = 0;
   estDraft.forEach(l => {
-    const raw = Math.round(l.qty * l.price);
-    if(mode === 'in'){ const sp = Math.round(raw/1.1); l.supply = sp; sumSup += sp; sumVat += (raw-sp); }
-    else if(mode === 'zero'){ l.supply = raw; sumSup += raw; }
-    else { l.supply = raw; sumSup += raw; sumVat += Math.round(raw*0.1); }
+    l.sup = Math.round(l.qty * l.price);
+    sumSup += l.sup;
   });
-  $('eSumSup').value = sumSup;
-  $('eSumVat').value = sumVat;
-  $('eSumTot').value = fmt(sumSup + sumVat);
+  const sumVat = Math.round(sumSup * 0.1);
+  $('esSumSup').value = sumSup;
+  $('esSumVat').value = sumVat;
+  $('esSumTot').value = sumSup + sumVat;
 
-  $('eDraftTb').innerHTML = estDraft.map((l, idx) => `
+  $('esDraftTb').innerHTML = estDraft.map((l, idx) => `
     <tr>
       <td class="b">${esc(l.item)}</td>
       <td class="c">${esc(l.spec)}</td>
       <td class="r">${fmt(l.qty)}</td>
       <td class="r">${fmt(l.price)}</td>
-      <td class="r b">${fmt(l.supply)}</td>
+      <td class="r b">${fmt(l.sup)}</td>
       <td class="c"><button class="btn-r" style="padding:1px 5px" onclick="estDraft.splice(${idx},1);recalcEstDraft()">✕</button></td>
     </tr>
   `).join('') || '<tr><td colspan="6" class="c" style="color:#888;padding:12px">견적 품목을 추가하세요.</td></tr>';
 }
 
-function saveEstimate(){
-  if(($('eItem').value||'').trim()) addEstLine();
+function saveEstimate(printAfter){
+  if(($('esItem').value||'').trim()) addEstLine();
   if(!estDraft.length){ alert('견적 품목을 추가하세요.'); return; }
-  const date = $('eDate').value || todayStr();
-  const client = ($('eClient').value||'').trim() || '고객사 귀중';
-  const supply = num($('eSumSup').value);
-  const vat = num($('eSumVat').value);
-  const memo = ($('eMemo').value||'').trim();
-  const editId = num($('eEditId').value);
+  const date = $('esDate').value || todayStr();
+  const isOt = $('esOneTime').checked;
+  const client = isOt ? '1회성(기타)거래처' : (($('esClient').value||'').trim() || '고객사 귀중');
+  const valid = ($('esValid').value||'').trim();
+  const supply = num($('esSumSup').value);
+  const vat = num($('esSumVat').value);
+  const total = supply + vat;
+  const memo = ($('esMemo').value||'').trim();
+  const editId = num($('esEditId').value);
+  const otInfo = isOt ? {
+    name: ($('esOtName').value||'').trim() || '고객사',
+    bizNo: ($('esOtBiz').value||'').trim(),
+    ceo: ($('esOtCeo').value||'').trim(),
+    addr: ($('esOtAddr').value||'').trim(),
+    tel: ($('esOtTel').value||'').trim()
+  } : null;
 
+  let savedId = editId;
   if(editId){
     const idx = db.estimates.findIndex(x => Number(x.id) === editId);
-    if(idx > -1) db.estimates[idx] = Object.assign({}, db.estimates[idx], { date, client, vatMode:$('eVatMode').value, lines:JSON.parse(JSON.stringify(estDraft)), supply, vat, memo });
+    if(idx > -1) db.estimates[idx] = Object.assign({}, db.estimates[idx], { date, client, valid, lines:JSON.parse(JSON.stringify(estDraft)), supply, vat, total, memo, otInfo });
   } else {
-    db.estimates.unshift({ id: Date.now(), date, client, vatMode:$('eVatMode').value, lines:JSON.parse(JSON.stringify(estDraft)), supply, vat, memo, status:'견적제출' });
+    savedId = Date.now();
+    db.estimates.unshift({ id: savedId, date, client, valid, lines:JSON.parse(JSON.stringify(estDraft)), supply, vat, total, memo, otInfo, status:'견적제출' });
   }
   resetEstForm();
   saveDB('견적저장');
   renderAll();
+  if(printAfter && savedId) openEstInvoice(savedId);
 }
 
 function resetEstForm(){
-  $('eEditId').value = ''; $('eDate').value = todayStr(); $('eClient').value = ''; $('eMemo').value = '';
+  $('esEditId').value = ''; $('esDate').value = todayStr(); $('esClient').value = '';
+  $('esOneTime').checked = false; toggleOneTime('es', false);
+  ['esOtName','esOtBiz','esOtCeo','esOtAddr','esOtTel'].forEach(k => { if($(k)) $(k).value = ''; });
+  $('esMemo').value = '';
   estDraft = []; recalcEstDraft();
 }
 
@@ -3909,17 +4012,17 @@ function convertEstToSale(id){
     const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(l.item));
     const c = itm ? (Number(itm.buyPrice)||0) : Math.round(l.price * 0.75);
     costSum += c * l.qty;
-    return Object.assign({}, l, {cost: c});
+    return Object.assign({}, l, {sup: l.sup||l.supply||(l.qty*l.price), vat: Math.round((l.qty*l.price)*0.1), uCost: c});
   });
   db.sales.unshift({
-    id: Date.now(), date: todayStr(), client: e.client, vatMode: e.vatMode||'ex',
-    lines, supply: e.supply, vat: e.vat, profit: e.supply - costSum, paid: 0,
-    memo: `[견적수주전환] ${e.memo||''}`
+    id: Date.now(), date: todayStr(), client: e.client, vatType: 'tax',
+    lines, supply: e.supply, vat: e.vat, total: e.supply + e.vat, profit: e.supply - costSum, paid: 0,
+    payMethod: '외상(미수)', memo: `[견적수주전환] ${e.memo||''}`, otInfo: e.otInfo||null
   });
   e.status = '수주완료';
   saveDB('견적매출전환');
   renderAll();
-  goTab(0);
+  goTab('t-sale');
 }
 
 function delEstimate(id){
@@ -3929,7 +4032,7 @@ function delEstimate(id){
 }
 
 // ==================== PURCHASES & IMPORT COST CRUD ====================
-function onPurCurChange(){
+window.onCurChange = function(){
   const cur = $('pCur').value;
   if(cur === 'KRW'){ $('pRate').value = 1; $('pPriceLbl').innerText = '매입단가(원화)'; }
   else {
@@ -3938,7 +4041,7 @@ function onPurCurChange(){
     $('pPriceLbl').innerText = `외화단가(${cur})`;
   }
   recalcPurDraft();
-}
+};
 
 function addPurLine(){
   const rawName = ($('pItem').value||'').trim();
@@ -3947,7 +4050,7 @@ function addPurLine(){
   const item = extractPureCode(rawName, rawSpec);
   const qty = num($('pQty').value) || 1;
   const price = num($('pPrice').value);
-  purDraft.push({ item, spec: rawSpec, qty, price, krwGoods:0, incCost:0, unitCost:0 });
+  purDraft.push({ item, spec: rawSpec, qty, price, krwAmt:0, incAmt:0, uCost:0 });
   $('pItem').value = ''; $('pSpec').value = ''; $('pQty').value = 1; $('pPrice').value = 0;
   recalcPurDraft();
   $('pItem').focus();
@@ -3961,14 +4064,14 @@ function recalcPurDraft(){
 
   let sumGoodsKrw = 0;
   purDraft.forEach(l => {
-    l.krwGoods = Math.round(l.qty * l.price * rate);
-    sumGoodsKrw += l.krwGoods;
+    l.krwAmt = Math.round(l.qty * l.price * rate);
+    sumGoodsKrw += l.krwAmt;
   });
 
   purDraft.forEach(l => {
-    const ratio = sumGoodsKrw > 0 ? (l.krwGoods / sumGoodsKrw) : (1 / Math.max(1, purDraft.length));
-    l.incCost = Math.round(totalInc * ratio);
-    l.unitCost = Math.round((l.krwGoods + l.incCost) / Math.max(1, l.qty));
+    const ratio = sumGoodsKrw > 0 ? (l.krwAmt / sumGoodsKrw) : (1 / Math.max(1, purDraft.length));
+    l.incAmt = Math.round(totalInc * ratio);
+    l.uCost = Math.round((l.krwAmt + l.incAmt) / Math.max(1, l.qty));
   });
 
   const totalCost = sumGoodsKrw + totalInc;
@@ -3981,9 +4084,9 @@ function recalcPurDraft(){
       <td class="b">${esc(l.item)}</td>
       <td class="r">${fmt(l.qty)}</td>
       <td class="r">${fmt(l.price)}</td>
-      <td class="r">${fmt(l.krwGoods)}</td>
-      <td class="r t-org">+${fmt(l.incCost)}</td>
-      <td class="r b t-blu">${fmt(l.unitCost)}원</td>
+      <td class="r">${fmt(l.krwAmt)}</td>
+      <td class="r" style="color:#d35400">+${fmt(l.incAmt)}</td>
+      <td class="r b t-blu">${fmt(l.uCost)}원</td>
       <td class="c"><button class="btn-r" style="padding:1px 5px" onclick="purDraft.splice(${idx},1);recalcPurDraft()">✕</button></td>
     </tr>
   `).join('') || '<tr><td colspan="7" class="c" style="color:#888;padding:12px">입고 품목을 추가하면 관세·운임이 자동 배부됩니다.</td></tr>';
@@ -3994,7 +4097,7 @@ function savePurchase(){
   if(!purDraft.length){ alert('입고 품목을 1개 이상 추가하세요.'); return; }
   const date = $('pDate').value || todayStr();
   const client = ($('pClient').value||'').trim() || '해외/일반공급처';
-  const cur = $('pCur').value;
+  const currency = $('pCur').value;
   const rate = num($('pRate').value) || 1;
   const custom = num($('pCustom').value);
   const freight = num($('pFreight').value);
@@ -4006,15 +4109,15 @@ function savePurchase(){
   const editId = num($('pEditId').value);
 
   ensureClientAndItems(client, '매입처', purDraft, true);
-  purDraft.forEach(l => recordPriceMem(db.purPriceMem, client, l.item, l.unitCost, date));
+  purDraft.forEach(l => recordPriceMem(db.purPriceMem, client, l.item, l.uCost, date));
 
   if(editId){
     const idx = db.purchases.findIndex(x => Number(x.id) === editId);
-    if(idx > -1) db.purchases[idx] = Object.assign({}, db.purchases[idx], { date, client, cur, rate, custom, freight, lines:JSON.parse(JSON.stringify(purDraft)), goodsKrw, totalCost, vat, paid, memo });
+    if(idx > -1) db.purchases[idx] = Object.assign({}, db.purchases[idx], { date, client, currency, rate, custom, freight, lines:JSON.parse(JSON.stringify(purDraft)), goodsKrw, totalCost, vat, paid, memo });
   } else {
-    const newPur = { id: Date.now(), date, client, cur, rate, custom, freight, lines:JSON.parse(JSON.stringify(purDraft)), goodsKrw, totalCost, vat, paid, memo };
+    const newPur = { id: Date.now(), date, client, currency, rate, custom, freight, lines:JSON.parse(JSON.stringify(purDraft)), goodsKrw, totalCost, vat, paid, memo };
     const fp = getPurFp(newPur);
-    db.deletedFp = (db.deletedFp||[]).filter(x => x !== fp);
+    db.deletedFp = (db.deletedFp||[]).filter(x => x !== 'P_'+fp && x !== fp);
     db.purchases.unshift(newPur);
   }
   resetPurForm();
@@ -4033,7 +4136,7 @@ function editPurchase(id){
   const p = (db.purchases||[]).find(x => Number(x.id) === Number(id));
   if(!p) return;
   $('pEditId').value = p.id; $('pDate').value = p.date; $('pClient').value = p.client;
-  $('pCur').value = p.cur || 'KRW'; $('pRate').value = p.rate || 1;
+  $('pCur').value = p.currency || p.cur || 'KRW'; $('pRate').value = p.rate || 1;
   $('pCustom').value = p.custom || 0; $('pFreight').value = p.freight || 0;
   purDraft = JSON.parse(JSON.stringify(p.lines || []));
   recalcPurDraft();
@@ -4064,28 +4167,29 @@ function delPurchase(id){
   const p = (db.purchases||[]).find(x => Number(x.id) === Number(id));
   if(!p || !confirm('이 매입전표를 삭제하시겠습니까?')) return;
   const fp = getPurFp(p);
-  if(!db.deletedFp.includes(fp)) db.deletedFp.push(fp);
+  if(!db.deletedFp.includes('P_'+fp)) db.deletedFp.push('P_'+fp);
   db.purchases = db.purchases.filter(x => Number(x.id) !== Number(id));
   saveDB('매입삭제'); renderAll();
 }
 
 // ==================== CLIENTS, ITEMS, EXPENSES & BULK DELETE ====================
 function ensureClientAndItems(cliName, defType, lines, isPur){
-  if(cliName && !db.clients.some(c => normSearch(c.name) === normSearch(cliName))){
+  if(cliName && cliName !== '1회성(기타)거래처' && !db.clients.some(c => normSearch(c.name) === normSearch(cliName))){
     db.clients.push({ id:Date.now()+Math.floor(Math.random()*1000), name:cliName, bizNo:'', ceo:'', type:defType, tier:0, tel:'', email:'', addr:'', initAr:0, initAp:0 });
   }
   (lines||[]).forEach(l => {
     let it = (db.items||[]).find(i => normSearch(i.name) === normSearch(l.item));
     if(!it){
+      const costVal = l.uCost || l.unitCost || l.price || 0;
       db.items.push({
         id: Date.now()+Math.floor(Math.random()*10000),
         name: l.item, spec: l.spec||'',
-        buyPrice: isPur ? (l.unitCost||l.price||0) : Math.round((l.price||0)*0.75),
-        sellPrice: !isPur ? (l.price||0) : Math.round((l.unitCost||l.price||0)*1.3),
+        buyPrice: isPur ? costVal : Math.round((l.price||0)*0.75),
+        sellPrice: !isPur ? (l.price||0) : Math.round(costVal*1.3),
         initQty: 0, safeQty: 5, cat: '일반품목'
       });
     } else {
-      if(isPur && l.unitCost > 0) it.buyPrice = l.unitCost;
+      if(isPur && (l.uCost || l.unitCost) > 0) it.buyPrice = l.uCost || l.unitCost;
       if(!isPur && l.price > 0 && !it.sellPrice) it.sellPrice = l.price;
     }
   });
@@ -4180,7 +4284,7 @@ function bulkDeleteSales(){
   const ids = Array.from(document.querySelectorAll('.sChk:checked')).map(el => Number(el.value));
   if(!ids.length){ alert('삭제할 매출전표를 선택하세요.'); return; }
   if(!confirm(`선택한 ${ids.length}건의 매출전표를 일괄 삭제하시겠습니까?`)) return;
-  db.sales.forEach(s => { if(ids.includes(Number(s.id))) db.deletedFp.push(getSaleFp(s)); });
+  db.sales.forEach(s => { if(ids.includes(Number(s.id))) db.deletedFp.push('S_'+getSaleFp(s)); });
   db.sales = db.sales.filter(s => !ids.includes(Number(s.id)));
   saveDB('매출일괄삭제'); renderAll();
 }
@@ -4189,7 +4293,7 @@ function bulkDeletePurchases(){
   const ids = Array.from(document.querySelectorAll('.pChk:checked')).map(el => Number(el.value));
   if(!ids.length){ alert('삭제할 매입전표를 선택하세요.'); return; }
   if(!confirm(`선택한 ${ids.length}건의 매입전표를 일괄 삭제하시겠습니까?`)) return;
-  db.purchases.forEach(p => { if(ids.includes(Number(p.id))) db.deletedFp.push(getPurFp(p)); });
+  db.purchases.forEach(p => { if(ids.includes(Number(p.id))) db.deletedFp.push('P_'+getPurFp(p)); });
   db.purchases = db.purchases.filter(p => !ids.includes(Number(p.id)));
   saveDB('매입일괄삭제'); renderAll();
 }
@@ -4216,6 +4320,7 @@ function scheduleRender(type){
   clearTimeout(renderTimers[type]);
   renderTimers[type] = setTimeout(() => {
     if(type === 'sales') renderSales();
+    else if(type === 'est') renderEstimates();
     else if(type === 'pur') renderPurchases();
     else if(type === 'cli') renderClients();
     else if(type === 'itm') renderItems();
@@ -4258,11 +4363,10 @@ function getClientStats(){
     if(p.date && p.date > map[k].lastDate) map[k].lastDate = p.date;
   });
 
-  const tStr = todayStr();
   Object.values(map).forEach(st => {
     if(st.ar > 0){
       const refDate = st.oldestUnpaidDate || st.lastDate;
-      st.overdueDays = refDate ? calcDaysBetween(refDate, tStr) : 30;
+      st.overdueDays = refDate ? calcDaysBetween(refDate) : 30;
     } else {
       st.overdueDays = 0;
     }
@@ -4282,7 +4386,7 @@ function getItemStats(){
   (db.purchases||[]).forEach(p => {
     (p.lines||[]).forEach(l => {
       const k = normSearch(l.item);
-      if(!map[k]) map[k] = { it:{id:Date.now(),name:l.item,spec:l.spec||'',buyPrice:l.unitCost||0,sellPrice:0,initQty:0,safeQty:5}, inQty:0, outQty:0, curQty:0, lastDate:'' };
+      if(!map[k]) map[k] = { it:{id:Date.now(),name:l.item,spec:l.spec||'',buyPrice:l.uCost||l.unitCost||0,sellPrice:0,initQty:0,safeQty:5}, inQty:0, outQty:0, curQty:0, lastDate:'' };
       map[k].inQty += (Number(l.qty)||0);
       map[k].curQty += (Number(l.qty)||0);
       if(p.date && p.date > map[k].lastDate) map[k].lastDate = p.date;
@@ -4356,47 +4460,41 @@ function renderKPI(sDate, eDate){
     if(st.ap > 0){ totAp += st.ap; apCnt++; }
   });
 
-  const iStats = getItemStats();
-  let stockVal = 0, lowCnt = 0;
-  Object.values(iStats).forEach(st => {
-    stockVal += st.val;
-    if(st.low) lowCnt++;
-  });
-
-  $('kSale').innerText = fmt(pSaleSup + pSaleVat) + '원';
-  $('kSaleSub').innerText = `공급가: ${fmt(pSaleSup)} | 건수: ${fmt(pSaleCnt)}건`;
-  $('kPur').innerText = fmt(pPurCost + pPurVat) + '원';
-  $('kPurSub').innerText = `원가: ${fmt(pPurCost)} | 건수: ${fmt(pPurCnt)}건`;
+  if($('k-sale')) $('k-sale').innerText = fmt(pSaleSup + pSaleVat) + '원';
+  if($('k-sale-s')) $('k-sale-s').innerText = `공급가: ${fmt(pSaleSup)} | 건수: ${fmt(pSaleCnt)}건`;
+  if($('k-pur')) $('k-pur').innerText = fmt(pPurCost + pPurVat) + '원';
+  if($('k-pur-s')) $('k-pur-s').innerText = `원가: ${fmt(pPurCost)} | 건수: ${fmt(pPurCnt)}건`;
   const netProfit = pProfit - pExpSup;
   const marginPct = pSaleSup > 0 ? ((netProfit / pSaleSup) * 100).toFixed(1) : '0.0';
-  $('kProfit').innerText = fmt(netProfit) + '원';
-  $('kProfitSub').innerText = `이익률: ${marginPct}% (경비차감후)`;
-  $('kAr').innerText = fmt(totAr) + '원';
-  $('kArSub').innerText = `미수 거래처: ${fmt(arCnt)}곳 (클릭시 조회)`;
-  $('kAp').innerText = fmt(totAp) + '원';
-  $('kApSub').innerText = `미지급 거래처: ${fmt(apCnt)}곳`;
-  $('kStock').innerText = fmt(stockVal) + '원';
-  $('kStockSub').innerText = `안전재고 미달: ${fmt(lowCnt)}품목`;
+  if($('k-prof')) $('k-prof').innerText = fmt(netProfit) + '원';
+  if($('k-prof-s')) $('k-prof-s').innerText = `이익률: ${marginPct}% (경비차감후)`;
+  if($('k-ar')) $('k-ar').innerText = fmt(totAr) + '원';
+  if($('k-ar-s')) $('k-ar-s').innerText = `미수 거래처: ${fmt(arCnt)}곳 (클릭시 조회)`;
+  if($('k-ap')) $('k-ap').innerText = fmt(totAp) + '원';
+  if($('k-ap-s')) $('k-ap-s').innerText = `미지급 거래처: ${fmt(apCnt)}곳`;
   const vatDiff = pSaleVat - (pPurVat + pExpVat);
-  $('kVat').innerText = fmt(vatDiff) + '원';
-  $('kVatSub').innerText = vatDiff >= 0 ? '납부예상 세액' : '환급예상 세액';
+  if($('k-vat')) $('k-vat').innerText = fmt(vatDiff) + '원';
+  if($('k-vat-s')) $('k-vat-s').innerText = vatDiff >= 0 ? '납부예상 세액' : '환급예상 세액';
 }
 
 function renderSales(sDate, eDate){
   sDate = sDate || $('fStart').value || '2000-01-01';
   eDate = eDate || $('fEnd').value || '2099-12-31';
   const kw = ($('fSaleKw').value||'').trim();
-  const unpaidOnly = $('fSaleUnpaidOnly') && $('fSaleUnpaidOnly').checked;
-  const tStr = todayStr();
+  const statusFilter = $('fSaleStatus') ? $('fSaleStatus').value : 'ALL';
 
   const filtered = (db.sales||[]).filter(s => {
     if(s.date < sDate || s.date > eDate) return false;
     const tot = (Number(s.supply)||0) + (Number(s.vat)||0);
     const rem = tot - (Number(s.paid)||0);
-    if(unpaidOnly && rem <= 0) return false;
+    if(statusFilter === 'UNPAID' && rem <= 0) return false;
+    if(statusFilter === 'PAID' && rem > 0) return false;
+    if(statusFilter === 'AS' && !s.asStatus) return false;
+    if(statusFilter === 'SN' && !s.serialNo) return false;
     if(!kw) return true;
     const itemSummary = (s.lines||[]).map(l => l.item + ' ' + (l.spec||'')).join(' ');
-    return matchKw(s.client, kw) || matchKw(itemSummary, kw) || matchKw(s.memo, kw) || matchKw(s.serialNo, kw);
+    const otName = s.otInfo ? s.otInfo.name : '';
+    return matchKw(s.client, kw) || matchKw(otName, kw) || matchKw(itemSummary, kw) || matchKw(s.memo, kw) || matchKw(s.serialNo, kw);
   });
 
   const st = sortState.sales;
@@ -4410,10 +4508,11 @@ function renderSales(sDate, eDate){
       item: [itmA, itmB],
       supply: [Number(a.supply)||0, Number(b.supply)||0],
       vat: [Number(a.vat)||0, Number(b.vat)||0],
-      tot: [totA, totB],
+      total: [totA, totB],
       paid: [Number(a.paid)||0, Number(b.paid)||0],
       rem: [remA, remB],
-      profit: [Number(a.profit)||0, Number(b.profit)||0]
+      profit: [Number(a.profit)||0, Number(b.profit)||0],
+      status: [remA > 0 ? calcDaysBetween(a.date) : -1, remB > 0 ? calcDaysBetween(b.date) : -1]
     }[st.col] || [a.date, b.date];
     return compareValues(mapVal[0], mapVal[1], st.dir, a.date, b.date);
   });
@@ -4427,38 +4526,44 @@ function renderSales(sDate, eDate){
     const rem = tot - paid;
 
     const asSt = s.asStatus || '';
-    const asBadge = asSt ? `<span class="badge ${asSt==='출고완료'?'bg-grn':(asSt==='수리중'?'bg-org':'bg-pur')}" style="cursor:pointer;margin-left:4px" onclick="cycleAsStatus(${s.id})" title="클릭 시 A/S 진행상태 변경">🛠️${asSt}</span>` : '';
-    const snBadge = s.serialNo ? `<span class="badge bg-blu" style="margin-left:4px" title="시리얼번호">🔢${esc(s.serialNo)}</span>` : '';
-    const ovDays = rem > 0 ? calcDaysBetween(s.date, tStr) : 0;
-    const ovBadge = rem > 0 && ovDays >= 30 ? `<div style="margin-top:2px">${getOverdueDaysBadge(ovDays, rem)}</div>` : '';
+    const asBadge = asSt ? `<span class="bg ${asSt==='AS완료'?'bg-g':(asSt==='AS진행중'?'bg-y':'bg-p')}" style="cursor:pointer;margin-left:4px" onclick="cycleAsStatus(${s.id})" title="클릭 시 A/S 진행상태 변경">🛠️${esc(asSt)}</span>` : '';
+    const snBadge = s.serialNo ? `<span class="bg bg-b" style="margin-left:4px" title="시리얼번호">🔢${esc(s.serialNo)}</span>` : '';
+    const ovDays = rem > 0 ? calcDaysBetween(s.date) : 0;
+    const dispCli = (s.client === '1회성(기타)거래처' && s.otInfo && s.otInfo.name) ? `⚡${s.otInfo.name}` : s.client;
 
     return `<tr>
       <td class="c"><input type="checkbox" class="sChk" value="${s.id}"></td>
       <td class="c">${esc(s.date)}</td>
-      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(s.client)}')">${esc(s.client)}</td>
+      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(s.client)}')">${esc(dispCli)}</td>
       <td>${itemTitle}${asBadge}${snBadge} ${s.memo?`<div style="font-size:10.5px;color:#666">${esc(s.memo)}</div>`:''}</td>
       <td class="r">${fmt(s.supply)}</td>
       <td class="r">${fmt(s.vat)}</td>
       <td class="r b">${fmt(tot)}</td>
       <td class="r t-grn">${fmt(paid)}</td>
-      <td class="r b ${rem>0?'t-red':''}">${fmt(rem)}${ovBadge}</td>
+      <td class="r b ${rem>0?'t-red':''}">${fmt(rem)}</td>
       <td class="r t-blu sec-prof">${fmt(s.profit)}</td>
+      <td class="c">${getOverdueDaysBadge(ovDays, rem)}</td>
       <td class="c">
         <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openInvoice(${s.id})">🖨️명세/수리</button>
         <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#0984e3" onclick="reorderSale(${s.id})" title="이 전표 그대로 오늘 날짜로 재주문 복사">🔁재주문</button>
         <button class="${rem>0?'btn-g':'btn-w'}" style="padding:2px 6px;font-size:11px" onclick="collectSale(${s.id})">${rem>0?'💰수금':'완납'}</button>
-        <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="cycleAsStatus(${s.id})" title="A/S 상태 변경">🛠️</button>
         <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editSale(${s.id})">✏️</button>
         <button class="btn-r" style="padding:2px 5px;font-size:11px" onclick="delSale(${s.id})">✕</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="11" class="c" style="padding:20px;color:#888">조회된 매출전표가 없습니다. 상단 [전체] 버튼을 눌러보세요.</td></tr>';
+  }).join('') || '<tr><td colspan="12" class="c" style="padding:20px;color:#888">조회된 매출전표가 없습니다. 상단 [전체] 버튼을 눌러보세요.</td></tr>';
 }
 
 function renderEstimates(sDate, eDate){
   sDate = sDate || $('fStart').value || '2000-01-01';
   eDate = eDate || $('fEnd').value || '2099-12-31';
-  const filtered = (db.estimates||[]).filter(e => e.date >= sDate && e.date <= eDate);
+  const kw = ($('fEstKw') ? $('fEstKw').value : '').trim();
+  const filtered = (db.estimates||[]).filter(e => {
+    if(e.date < sDate || e.date > eDate) return false;
+    if(!kw) return true;
+    const itemSummary = (e.lines||[]).map(l => l.item).join(' ');
+    return matchKw(e.client, kw) || matchKw(itemSummary, kw) || matchKw(e.memo, kw);
+  });
   const st = sortState.est;
   filtered.sort((a, b) => {
     const totA = (Number(a.supply)||0)+(Number(a.vat)||0), totB = (Number(b.supply)||0)+(Number(b.vat)||0);
@@ -4466,7 +4571,7 @@ function renderEstimates(sDate, eDate){
     const mapVal = {
       date: [a.date, b.date], client: [a.client, b.client], item: [itmA, itmB],
       supply: [Number(a.supply)||0, Number(b.supply)||0], vat: [Number(a.vat)||0, Number(b.vat)||0],
-      tot: [totA, totB], status: [a.status||'', b.status||'']
+      total: [totA, totB], status: [a.status||'', b.status||'']
     }[st.col] || [a.date, b.date];
     return compareValues(mapVal[0], mapVal[1], st.dir, a.date, b.date);
   });
@@ -4475,14 +4580,15 @@ function renderEstimates(sDate, eDate){
     const L = e.lines || [];
     const itemTitle = L.length ? (`<b>${esc(L[0].item)}</b>` + (L.length>1 ? ` 외 ${L.length-1}건` : ` (${fmt(L[0].qty)}개)`)) : '-';
     const tot = (Number(e.supply)||0) + (Number(e.vat)||0);
+    const dispCli = (e.client === '1회성(기타)거래처' && e.otInfo && e.otInfo.name) ? `⚡${e.otInfo.name}` : e.client;
     return `<tr>
       <td class="c">${esc(e.date)}</td>
-      <td class="b">${esc(e.client)}</td>
+      <td class="b">${esc(dispCli)}</td>
       <td>${itemTitle} ${e.memo?`<small style="color:#666">(${esc(e.memo)})</small>`:''}</td>
       <td class="r">${fmt(e.supply)}</td>
       <td class="r">${fmt(e.vat)}</td>
       <td class="r b">${fmt(tot)}</td>
-      <td class="c"><span class="badge ${e.status==='수주완료'?'bg-grn':'bg-blu'}">${esc(e.status||'견적제출')}</span></td>
+      <td class="c"><span class="bg ${e.status==='수주완료'?'bg-g':'bg-b'}">${esc(e.status||'견적제출')}</span></td>
       <td class="c">
         <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openEstInvoice(${e.id})">🖨️견적서</button>
         <button class="btn-g" style="padding:2px 6px;font-size:11px" onclick="convertEstToSale(${e.id})">🚀매출전환</button>
@@ -4510,7 +4616,7 @@ function renderPurchases(sDate, eDate){
     const remB = (Number(b.totalCost)||0)+(Number(b.vat)||0)-(Number(b.paid)||0);
     const itmA = (a.lines&&a.lines[0]) ? a.lines[0].item : '', itmB = (b.lines&&b.lines[0]) ? b.lines[0].item : '';
     const mapVal = {
-      date: [a.date, b.date], client: [a.client, b.client], cur: [a.cur||'KRW', b.cur||'KRW'],
+      date: [a.date, b.date], client: [a.client, b.client], cur: [a.currency||a.cur||'KRW', b.currency||b.cur||'KRW'],
       item: [itmA, itmB], goods: [Number(a.goodsKrw)||0, Number(b.goodsKrw)||0],
       inc: [incA, incB], totalCost: [Number(a.totalCost)||0, Number(b.totalCost)||0],
       vat: [Number(a.vat)||0, Number(b.vat)||0], rem: [remA, remB]
@@ -4524,14 +4630,15 @@ function renderPurchases(sDate, eDate){
     const inc = (Number(p.custom)||0) + (Number(p.freight)||0);
     const tot = (Number(p.totalCost)||0) + (Number(p.vat)||0);
     const rem = tot - (Number(p.paid)||0);
+    const cur = p.currency || p.cur || 'KRW';
     return `<tr>
       <td class="c"><input type="checkbox" class="pChk" value="${p.id}"></td>
       <td class="c">${esc(p.date)}</td>
       <td class="b" style="cursor:pointer;color:var(--pur)" onclick="openLedger('${esc(p.client)}')">${esc(p.client)}</td>
-      <td class="c">${esc(p.cur||'KRW')} ${p.cur&&p.cur!=='KRW'?`(${fmt(p.rate)})`:''}</td>
+      <td class="c">${esc(cur)} ${cur!=='KRW'?`(${fmt(p.rate)})`:''}</td>
       <td>${itemTitle} ${p.memo?`<div style="font-size:10.5px;color:#666">${esc(p.memo)}</div>`:''}</td>
       <td class="r">${fmt(p.goodsKrw)}</td>
-      <td class="r t-org">${fmt(inc)}</td>
+      <td class="r" style="color:#d35400">${fmt(inc)}</td>
       <td class="r b">${fmt(p.totalCost)}</td>
       <td class="r">${fmt(p.vat)}</td>
       <td class="r b ${rem>0?'t-red':''}">${fmt(rem)}</td>
@@ -4576,14 +4683,14 @@ function renderClients(){
       <td class="c"><input type="checkbox" class="cChk" value="${c.id}"></td>
       <td class="c">${esc(st.lastDate||'-')}</td>
       <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(c.name)}')">${esc(c.name)}</td>
-      <td class="c"><span class="badge ${c.type==='매출처'?'bg-blu':(c.type==='매입처'?'bg-pur':'bg-grn')}">${esc(c.type||'매출처')}</span></td>
+      <td class="c"><span class="bg ${c.type==='매출처'?'bg-b':(c.type==='매입처'?'bg-p':'bg-g')}">${esc(c.type||'매출처')}</span></td>
       <td class="c">${esc(c.bizNo||'')}</td>
       <td class="c">${esc(c.ceo||'')}</td>
       <td class="r">${fmt(st.sale)}</td>
       <td class="r t-grn">${fmt(st.paid)}</td>
       <td class="r b ${st.ar>0?'t-red':''}">${fmt(st.ar)}</td>
       <td class="c">${getOverdueDaysBadge(st.overdueDays, st.ar)}</td>
-      <td class="r b ${st.ap>0?'t-org':''}">${fmt(st.ap)}</td>
+      <td class="r b ${st.ap>0?'t-pur':''}">${fmt(st.ap)}</td>
       <td class="c">
         <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openLedger('${esc(c.name)}')">📊원장</button>
         <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editClient(${c.id})">✏️</button>
@@ -4629,7 +4736,7 @@ function renderItems(){
       <td class="r t-red">-${fmt(st.outQty)}</td>
       <td class="r b">${fmt(st.curQty)}</td>
       <td class="r sec-prof">${fmt(st.val)}</td>
-      <td class="c"><span class="badge ${st.low?'bg-red':'bg-grn'}">${st.low?'발주필요':'정상'}</span></td>
+      <td class="c"><span class="bg ${st.low?'bg-r':'bg-g'}">${st.low?'발주필요':'정상'}</span></td>
       <td class="c"><button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editItem(${it.id})">✏️</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="13" class="c" style="padding:18px;color:#888">등록된 품목이 없습니다.</td></tr>';
@@ -4688,63 +4795,70 @@ function renderVatAndExp(sDate, eDate){
 // ==================== A4 DOCUMENT & FEATURE #7 A/S REPAIR RECEIPT BUILDER ====================
 function buildDocHtml(title, slip, isEst){
   const comp = db.comp || {};
-  const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(slip.client)) || { name: slip.client };
+  const isOt = slip.client === '1회성(기타)거래처' || Boolean(slip.otInfo);
+  const cli = isOt
+    ? (slip.otInfo || { name: '고객' })
+    : ((db.clients||[]).find(c => normSearch(c.name) === normSearch(slip.client)) || { name: slip.client });
   const cStats = getClientStats()[normSearch(slip.client)] || { ar: 0 };
   const tot = (Number(slip.supply)||0) + (Number(slip.vat)||0);
   const lines = slip.lines || [];
-  const padRows = Math.max(0, 8 - lines.length);
+  const padRows = Math.max(0, 12 - lines.length);
 
-  let rowsHtml = lines.map((l, i) => `
-    <tr>
+  let rowsHtml = lines.map((l, i) => {
+    const sp = Number(l.sup)||Number(l.supply)||Math.round((Number(l.qty)||1)*(Number(l.price)||0));
+    const vt = slip.vat > 0 ? Math.round(sp * 0.1) : 0;
+    return `<tr>
       <td class="c">${i+1}</td>
       <td class="b">${esc(l.item)}</td>
       <td class="c">${esc(l.spec||'')}</td>
       <td class="r">${fmt(l.qty)}</td>
       <td class="r">${fmt(l.price)}</td>
-      <td class="r b">${fmt(l.supply)}</td>
-      <td class="r">${fmt(slip.vat > 0 ? Math.round(l.supply*0.1) : 0)}</td>
-    </tr>
-  `).join('');
+      <td class="r b">${fmt(sp)}</td>
+      <td class="r">${fmt(vt)}</td>
+    </tr>`;
+  }).join('');
 
   for(let i=0; i<padRows; i++){
-    rowsHtml += `<tr><td class="c">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+    rowsHtml += `<tr><td class="c" style="color:#ccc">${lines.length+i+1}</td><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>`;
   }
 
   return `
-    <div class="doc-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <img src="${ORA_LOGO}" alt="오라테크" style="height:34px;object-fit:contain">
-        <div class="doc-title" style="margin:0">${title}</div>
-        <div style="font-size:11.5px;text-align:right"><b>일자:</b> ${esc(slip.date)}<br><b>문서번호:</b> #${String(slip.id).slice(-6)}</div>
+    <div class="a4-page">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
+          <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
+          <div style="font-size:24px;font-weight:900;letter-spacing:8px;color:#142d4c">${title}</div>
+          <div style="font-size:12px;text-align:right"><b>일자:</b> ${esc(slip.date)}<br><b>문서번호:</b> #${String(slip.id).slice(-6)}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <table>
+            <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 받 는 자 (고객사)</th></tr>
+            <tr><th>상 호 명</th><td colspan="3" class="b" style="font-size:13.5px">${esc(cli.name)} 귀하</td></tr>
+            <tr><th>사업자번호</th><td>${esc(cli.bizNo||'-')}</td><th>대 표 자</th><td>${esc(cli.ceo||'-')}</td></tr>
+            <tr><th>연 락 처</th><td>${esc(cli.tel||'-')}</td><th>이 메 일</th><td>${esc(cli.email||'-')}</td></tr>
+            <tr><th>주 소</th><td colspan="3">${esc(cli.addr||'-')}</td></tr>
+          </table>
+          <table>
+            <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 자 (${esc(comp.name)})</th></tr>
+            <tr><th>등록번호</th><td class="b">${esc(comp.bizNo)}</td><th>상 호</th><td class="b">${esc(comp.name)}</td></tr>
+            <tr><th>대 표 자</th><td><span class="stamp-wrap">${esc(comp.ceo)}<span class="stamp">${esc(comp.name)}<br>대표인</span></span></td><th>연락처</th><td>${esc(comp.tel)}</td></tr>
+            <tr><th>업태/종목</th><td colspan="3">${esc(comp.type)} / ${esc(comp.item)}</td></tr>
+            <tr><th>사업장주소</th><td colspan="3">${esc(comp.addr)}</td></tr>
+          </table>
+        </div>
+        <div style="background:#f1f5f9;border:2px solid #142d4c;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
+          <span><b>합계금액 (부가세 포함):</b> 일금 <b>${fmt(tot)}</b> 원정 (₩${fmt(tot)})</span>
+          <span>공급가액: ${fmt(slip.supply)}원 / 세액: ${fmt(slip.vat)}원</span>
+        </div>
       </div>
-      <div class="doc-meta">
-        <table>
-          <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 받 는 자 (고객사)</th></tr>
-          <tr><th>상 호 명</th><td colspan="3" class="b" style="font-size:14px">${esc(cli.name)} 귀하</td></tr>
-          <tr><th>사업자번호</th><td>${esc(cli.bizNo||'-')}</td><th>대 표 자</th><td>${esc(cli.ceo||'-')}</td></tr>
-          <tr><th>연 락 처</th><td>${esc(cli.tel||'-')}</td><th>이 메 일</th><td>${esc(cli.email||'-')}</td></tr>
-          <tr><th>주 소</th><td colspan="3">${esc(cli.addr||'-')}</td></tr>
-        </table>
-        <table>
-          <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 자 (${esc(comp.name)})</th></tr>
-          <tr><th>등록번호</th><td class="b">${esc(comp.bizNo)}</td><th>상 호</th><td class="b">${esc(comp.name)}</td></tr>
-          <tr><th>대 표 자</th><td>${esc(comp.ceo)} <span class="stamp">인</span></td><th>연락처</th><td>${esc(comp.tel)}</td></tr>
-          <tr><th>업태/종목</th><td colspan="3">${esc(comp.type)} / ${esc(comp.item)}</td></tr>
-          <tr><th>사업장주소</th><td colspan="3">${esc(comp.addr)}</td></tr>
-        </table>
-      </div>
-      <div style="background:#f1f5f9;border:2px solid #000;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
-        <span><b>합계금액 (부가세 포함):</b> 일금 <b>${fmt(tot)}</b> 원정 (₩${fmt(tot)})</span>
-        <span>공급가액: ${fmt(slip.supply)}원 / 세액: ${fmt(slip.vat)}원</span>
-      </div>
-      <table class="doc-tbl">
+      <table class="a4-tbl">
         <thead>
           <tr><th style="width:36px">No</th><th>품목명 (모델/상품명)</th><th style="width:90px">규격</th><th style="width:60px">수량</th><th style="width:95px">단가</th><th style="width:105px">공급가액</th><th style="width:85px">세액</th></tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
         <tfoot>
           <tr style="background:#f8fafc;font-weight:bold">
-            <td colspan="3" class="c">합 계</td>
+            <td colspan="3" class="c">합 계 (${lines.length}종)</td>
             <td class="r">${fmt(lines.reduce((a,b)=>a+(Number(b.qty)||0),0))}</td>
             <td></td>
             <td class="r">${fmt(slip.supply)}</td>
@@ -4752,12 +4866,12 @@ function buildDocHtml(title, slip, isEst){
           </tr>
         </tfoot>
       </table>
-      <div style="margin-top:10px;display:flex;justify-content:space-between;font-size:12px;border-top:1px dashed #666;padding-top:8px">
+      <div style="margin-top:8px;display:flex;justify-content:space-between;font-size:12px;border:1px solid #142d4c;padding:8px;background:#f8fafc">
         <div>
           <b>🏦 입금계좌 안내:</b> ${esc(comp.bank)} (예금주: ${esc(comp.ceo)})<br>
           <b>📝 비고 / 메모:</b> ${esc(slip.memo||'감사합니다.')} ${slip.serialNo ? `| <b>[S/N: ${esc(slip.serialNo)}]</b>` : ''}
         </div>
-        ${!isEst ? `<div style="text-align:right"><b>당일 합계:</b> ${fmt(tot)}원 | <b>당일 수금:</b> ${fmt(slip.paid||0)}원 | <b style="color:#d63031">총 누적 미수잔액: ${fmt(cStats.ar)}원</b></div>` : `<div style="text-align:right">본 견적서는 발행일로부터 15일간 유효합니다.</div>`}
+        ${!isEst ? `<div style="text-align:right"><b>당일 합계:</b> ${fmt(tot)}원 | <b>당일 수금:</b> ${fmt(slip.paid||0)}원<br><b style="color:#d63031">총 누적 미수잔액: ${fmt(cStats.ar)}원</b></div>` : `<div style="text-align:right"><b>유효기간:</b> ${esc(slip.valid||'견적일로부터 15일')}</div>`}
       </div>
     </div>
   `;
@@ -4766,46 +4880,57 @@ function buildDocHtml(title, slip, isEst){
 // ==================== NEW FEATURE #7: A/S 수리 접수증 & 수리내역 청구서 전용 양식 ====================
 function buildAsDocHtml(slip){
   const comp = db.comp || {};
-  const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(slip.client)) || { name: slip.client };
+  const isOt = slip.client === '1회성(기타)거래처' || Boolean(slip.otInfo);
+  const cli = isOt
+    ? (slip.otInfo || { name: '고객' })
+    : ((db.clients||[]).find(c => normSearch(c.name) === normSearch(slip.client)) || { name: slip.client });
   const tot = (Number(slip.supply)||0) + (Number(slip.vat)||0);
   const lines = slip.lines || [];
+  const padRows = Math.max(0, 10 - lines.length);
 
-  const rowsHtml = lines.map((l, i) => `
-    <tr>
+  let rowsHtml = lines.map((l, i) => {
+    const sp = Number(l.sup)||Number(l.supply)||Math.round((Number(l.qty)||1)*(Number(l.price)||0));
+    return `<tr>
       <td class="c">${i+1}</td>
       <td class="b">${esc(l.item)}</td>
       <td class="c">${esc(l.spec||'부품/공임')}</td>
       <td class="r">${fmt(l.qty)}</td>
       <td class="r">${fmt(l.price)}</td>
-      <td class="r b">${fmt(l.supply)}</td>
-    </tr>
-  `).join('');
+      <td class="r b">${fmt(sp)}</td>
+    </tr>`;
+  }).join('');
+
+  for(let i=0; i<padRows; i++){
+    rowsHtml += `<tr><td class="c" style="color:#ccc">${lines.length+i+1}</td><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>`;
+  }
 
   return `
-    <div class="doc-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <img src="${ORA_LOGO}" alt="오라테크" style="height:34px;object-fit:contain">
-        <div class="doc-title" style="margin:0;letter-spacing:3px">🛠️ A/S 수리내역서 및 청구서</div>
-        <div style="font-size:11.5px;text-align:right"><b>접수/출고일:</b> ${esc(slip.date)}<br><b>진행상태:</b> <b>${esc(slip.asStatus||'수리완료')}</b></div>
+    <div class="a4-page">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
+          <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
+          <div style="font-size:22px;font-weight:900;letter-spacing:3px;color:#142d4c">🛠️ A/S 수리내역서 및 청구서</div>
+          <div style="font-size:12px;text-align:right"><b>접수/출고일:</b> ${esc(slip.date)}<br><b>진행상태:</b> <b>${esc(slip.asStatus||'수리완료')}</b></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <table>
+            <tr><th colspan="4" style="background:#142d4c;color:#fff">의 뢰 고 객 사 정 보</th></tr>
+            <tr><th>고객/상호명</th><td colspan="3" class="b" style="font-size:13.5px">${esc(cli.name)} 귀하</td></tr>
+            <tr><th>연 락 처</th><td>${esc(cli.tel||'-')}</td><th>담당/대표</th><td>${esc(cli.ceo||'-')}</td></tr>
+            <tr><th>시리얼(S/N)</th><td colspan="3" class="b" style="color:#0984e3">${esc(slip.serialNo || '미기재 (전표 수정 시 입력가능)')}</td></tr>
+          </table>
+          <table>
+            <tr><th colspan="4" style="background:#142d4c;color:#fff">A/S 시공 및 공급자 (${esc(comp.name)})</th></tr>
+            <tr><th>상 호</th><td class="b">${esc(comp.name)}</td><th>대 표 자</th><td><span class="stamp-wrap">${esc(comp.ceo)}<span class="stamp">${esc(comp.name)}<br>대표인</span></span></td></tr>
+            <tr><th>사업자번호</th><td>${esc(comp.bizNo)}</td><th>고객센터</th><td class="b">${esc(comp.tel)}</td></tr>
+            <tr><th>서비스센터</th><td colspan="3">${esc(comp.addr)}</td></tr>
+          </table>
+        </div>
+        <div style="background:#fffdf5;border:1px solid #f39c12;padding:8px 12px;margin-bottom:8px;font-size:12.5px;line-height:1.6">
+          <b>🔍 입고 증상 및 수리/점검 소견:</b> ${esc(slip.memo || '장비 정기점검 및 소모성 부품 교체 수리 완료 (정상 작동 테스트 필)')}
+        </div>
       </div>
-      <div class="doc-meta">
-        <table>
-          <tr><th colspan="4" style="background:#142d4c;color:#fff">의 뢰 고 객 사 정 보</th></tr>
-          <tr><th>고객/상호명</th><td colspan="3" class="b" style="font-size:14px">${esc(cli.name)} 귀하</td></tr>
-          <tr><th>연 락 처</th><td>${esc(cli.tel||'-')}</td><th>담당/대표</th><td>${esc(cli.ceo||'-')}</td></tr>
-          <tr><th>시리얼(S/N)</th><td colspan="3" class="b" style="color:#0984e3">${esc(slip.serialNo || '미기재 (전표 수정 시 입력가능)')}</td></tr>
-        </table>
-        <table>
-          <tr><th colspan="4" style="background:#142d4c;color:#fff">A/S 시공 및 공급자 (${esc(comp.name)})</th></tr>
-          <tr><th>상 호</th><td class="b">${esc(comp.name)}</td><th>대 표 자</th><td>${esc(comp.ceo)} <span class="stamp">인</span></td></tr>
-          <tr><th>사업자번호</th><td>${esc(comp.bizNo)}</td><th>고객센터</th><td class="b">${esc(comp.tel)}</td></tr>
-          <tr><th>서비스센터</th><td colspan="3">${esc(comp.addr)}</td></tr>
-        </table>
-      </div>
-      <div style="background:#fffdf5;border:1px solid #f39c12;padding:8px 12px;margin-bottom:10px;font-size:12.5px;line-height:1.6">
-        <b>🔍 입고 증상 및 수리/점검 소견:</b> ${esc(slip.memo || '장비 정기점검 및 소모성 부품 교체 수리 완료 (정상 작동 테스트 필)')}
-      </div>
-      <table class="doc-tbl">
+      <table class="a4-tbl">
         <thead>
           <tr><th style="width:40px">No</th><th>교체 부품명 / 기술료(공임) 내역</th><th style="width:100px">구분/규격</th><th style="width:65px">수량</th><th style="width:105px">단가</th><th style="width:115px">금액(공급가)</th></tr>
         </thead>
@@ -4819,7 +4944,7 @@ function buildAsDocHtml(slip){
           </tr>
         </tfoot>
       </table>
-      <div style="margin-top:12px;padding:10px;background:#f8fafc;border:1px solid #cbd5e1;font-size:12px;line-height:1.6">
+      <div style="margin-top:8px;padding:10px;background:#f8fafc;border:1px solid #142d4c;font-size:12px;line-height:1.6">
         <b>🏦 수리비 입금계좌:</b> <b style="color:#142d4c;font-size:13px">${esc(comp.bank)} (예금주: ${esc(comp.ceo)})</b><br>
         • 수리 완료된 부위는 출고일로부터 3개월간 무상 A/S를 보증합니다. (단, 사용자 과실 및 소모품 마모 제외)
       </div>
@@ -4832,7 +4957,7 @@ function openInvoice(id){
   if(!s) return;
   const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(s.client));
   const isDefaultAs = Boolean(s.asStatus || (s.memo && s.memo.includes('수리')));
-  currentDocMeta = { type:'inv', client: s.client, email: cli ? (cli.email||'') : '', docName:'거래명세서', areaId:'invArea', saleId: s.id, isAsDoc: isDefaultAs };
+  currentDocMeta = { type:'inv', client: s.otInfo ? s.otInfo.name : s.client, email: cli ? (cli.email||'') : '', docName: isDefaultAs ? 'AS수리내역서' : '거래명세서', areaId:'invArea', saleId: s.id, isAsDoc: isDefaultAs };
 
   if($('toggleAsDocBtn')){
     $('toggleAsDocBtn').style.display = 'inline-block';
@@ -4857,7 +4982,7 @@ function openEstInvoice(id){
   const e = (db.estimates||[]).find(x => Number(x.id) === Number(id));
   if(!e) return;
   const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(e.client));
-  currentDocMeta = { type:'est', client: e.client, email: cli ? (cli.email||'') : '', docName:'견적서', areaId:'invArea', saleId:0, isAsDoc:false };
+  currentDocMeta = { type:'est', client: e.otInfo ? e.otInfo.name : e.client, email: cli ? (cli.email||'') : '', docName:'견적서', areaId:'invArea', saleId:0, isAsDoc:false };
   if($('toggleAsDocBtn')) $('toggleAsDocBtn').style.display = 'none';
   $('invModalTitle').innerText = '🖨️ 견적서 미리보기 및 발행';
   $('invArea').innerHTML = buildDocHtml('견 적 서 (ESTIMATE)', e, true);
@@ -4892,7 +5017,7 @@ function openLedger(cliName){
     if(ev.paid > 0) sumPaid += ev.paid;
     return `<tr>
       <td class="c">${ev.date==='0000-00-00'?'기초이월':esc(ev.date)}</td>
-      <td class="c"><span class="badge ${ev.type==='매출출고'?'bg-blu':'bg-grn'}">${ev.type}</span></td>
+      <td class="c"><span class="bg ${ev.type==='매출출고'?'bg-b':'bg-g'}">${ev.type}</span></td>
       <td>${esc(ev.desc)}</td>
       <td class="r">${fmt(ev.sale)}</td>
       <td class="r t-grn">${fmt(ev.paid)}</td>
@@ -4902,21 +5027,23 @@ function openLedger(cliName){
 
   $('ledTitle').innerText = `📊 [${cli.name}] 거래처 상세원장`;
   $('ledArea').innerHTML = `
-    <div class="doc-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <img src="${ORA_LOGO}" alt="오라테크" style="height:32px;object-fit:contain">
-        <div class="doc-title" style="margin:0;font-size:20px">거 래 처 원 장 (${esc(cli.name)})</div>
-        <div style="font-size:11.5px;text-align:right">출력일: ${todayStr()}<br>공급자: ${esc(db.comp.name)} (${esc(db.comp.tel)})</div>
+    <div class="a4-page" style="min-height:auto">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:2px solid #142d4c;padding-bottom:8px">
+          <img src="${ORA_LOGO}" alt="오라테크" style="height:32px;object-fit:contain">
+          <div style="font-size:20px;font-weight:900;color:#142d4c">거 래 처 원 장 (${esc(cli.name)})</div>
+          <div style="font-size:11.5px;text-align:right">출력일: ${todayStr()}<br>공급자: ${esc(db.comp.name)} (${esc(db.comp.tel)})</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #142d4c;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;font-size:13px">
+          <span><b>총 매출액:</b> ${fmt(sumSale)}원</span>
+          <span><b>총 수금액:</b> ${fmt(sumPaid)}원</span>
+          <span style="color:#d63031;font-weight:900">현재 미수잔액: ${fmt(runBal)}원</span>
+        </div>
+        <table class="a4-tbl">
+          <thead><tr><th style="width:90px">일자</th><th style="width:75px">구분</th><th>품목 및 상세적요</th><th style="width:110px">매출(청구)액</th><th style="width:110px">수금(입금)액</th><th style="width:120px">미수잔액</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
       </div>
-      <div style="background:#f8fafc;border:1px solid #000;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;font-size:13px">
-        <span><b>총 매출액:</b> ${fmt(sumSale)}원</span>
-        <span><b>총 수금액:</b> ${fmt(sumPaid)}원</span>
-        <span style="color:#d63031;font-weight:900">현재 미수잔액: ${fmt(runBal)}원</span>
-      </div>
-      <table class="doc-tbl">
-        <thead><tr><th style="width:90px">일자</th><th style="width:75px">구분</th><th>품목 및 상세적요</th><th style="width:110px">매출(청구)액</th><th style="width:110px">수금(입금)액</th><th style="width:120px">미수잔액</th></tr></thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
       <div style="margin-top:10px;font-size:12px"><b>🏦 입금계좌:</b> ${esc(db.comp.bank)} (예금주: ${esc(db.comp.ceo)})</div>
     </div>
   `;
@@ -4926,44 +5053,50 @@ function openLedger(cliName){
 // ==================== KAKAO IMAGE COPY & PDF & NAVER EMAIL ====================
 async function copyDocAsImage(areaId, label){
   const el = $(areaId);
-  if(!el || typeof html2canvas === 'undefined'){ alert('이미지 변환 도구를 준비 중입니다.'); return; }
-  try{
-    const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
-    canvas.toBlob(async blob => {
-      try{
-        await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
-        alert(`🟡 [${label}] 이미지가 클립보드에 복사되었습니다!\n\n이제 카카오톡 대화창을 열고 [Ctrl + V] (붙여넣기)만 누르면 사진으로 깔끔하게 전송됩니다!`);
-      }catch(err){
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = `오라테크_${label}_${todayStr()}.png`;
-        a.click();
-        alert(`📸 [${label}] 이미지 파일이 다운로드되었습니다! 카카오톡에 파일을 끌어다 놓으세요.`);
-      }
-    });
-  }catch(e){ alert('이미지 생성 오류: ' + e.message); }
+  if(!el){ alert('영역을 찾을 수 없습니다.'); return; }
+  if(typeof html2pdf !== 'undefined' && window.html2canvas){
+    try{
+      const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
+      canvas.toBlob(async blob => {
+        try{
+          await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+          alert(`🟡 [${label}] 이미지가 클립보드에 복사되었습니다!\n\n이제 카카오톡 대화창을 열고 [Ctrl + V] (붙여넣기)만 누르면 사진으로 깔끔하게 전송됩니다!`);
+        }catch(err){
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = `오라테크_${label}_${todayStr()}.png`;
+          a.click();
+          alert(`📸 [${label}] 이미지 파일이 다운로드되었습니다! 카카오톡에 파일을 끌어다 놓으세요.`);
+        }
+      });
+      return;
+    }catch(e){}
+  }
+  await downloadDocPdf(areaId, `오라테크_${label}`);
 }
 
 async function downloadDocPdf(areaId, filePrefix){
   const el = $(areaId);
-  if(!el || typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined'){
-    alert('PDF 변환 라이브러리를 불러오는 중입니다. 잠시만 기다려주세요.');
-    return false;
-  }
-  try{
-    const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfW = pdf.internal.pageSize.getWidth() - 16;
-    const pdfH = (canvas.height * pdfW) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 8, 8, pdfW, Math.min(pdfH, 280));
-    const safeCli = String(currentDocMeta.client||'고객사').replace(/[\\/:*?"<>|]/g,'_');
-    pdf.save(`${filePrefix}_${safeCli}_${todayStr()}.pdf`);
+  if(!el) return false;
+  const safeCli = String(currentDocMeta.client||'고객사').replace(/[\\/:*?"<>|]/g,'_');
+  const filename = `${filePrefix}_${safeCli}_${todayStr()}.pdf`;
+  if(typeof html2pdf !== 'undefined'){
+    try{
+      await html2pdf().set({
+        margin: 6,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(el).save();
+      return true;
+    }catch(e){
+      alert('PDF 저장 중 오류: ' + e.message);
+      return false;
+    }
+  } else {
+    window.print();
     return true;
-  }catch(e){
-    alert('PDF 저장 중 오류: ' + e.message);
-    return false;
   }
 }
 
@@ -4982,7 +5115,7 @@ async function execEmailSend(mode){
   const sub = ($('emSub').value||'').trim();
   const bodyText = ($('emBody').value||'').trim();
 
-  if(to && currentDocMeta.client){
+  if(to && currentDocMeta.client && (!$('emSaveCli') || $('emSaveCli').checked)){
     const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(currentDocMeta.client));
     if(cli) { cli.email = to; saveDB('이메일저장'); }
   }
@@ -5005,8 +5138,15 @@ async function execEmailSend(mode){
   closeModal('emailModal');
 }
 
-function closeModal(id){ $(id).style.display = 'none'; }
-function printArea(wrapId){ window.print(); }
+function closeModal(id){ if($(id)) $(id).style.display = 'none'; }
+function printArea(wrapId){
+  const el = $(wrapId);
+  if(el){
+    document.querySelectorAll('.print-Now').forEach(x => x.classList.remove('print-Now'));
+    el.classList.add('print-Now');
+  }
+  window.print();
+}
 
 // ==================== EXCEL / JSON BACKUP & RESTORE ====================
 function exportHometaxExcel(){
@@ -5026,7 +5166,7 @@ function exportHometaxExcel(){
       '공급자상호': db.comp.name,
       '공급자성명': db.comp.ceo,
       '공급받는자등록번호': String(cli.bizNo||'').replace(/[^0-9]/g,''),
-      '공급받는자상호': s.client,
+      '공급받는자상호': s.otInfo ? s.otInfo.name : s.client,
       '공급받는자성명': cli.ceo||'',
       '공급받는자이메일': cli.email||'',
       '공급가액': s.supply,
@@ -5046,31 +5186,31 @@ function exportHometaxExcel(){
   XLSX.writeFile(wb, `오라테크_홈택스매출양식_${sDate}_${eDate}.xlsx`);
 }
 
-function exportAllToExcel(){
+window.exportExcelAll = function(){
   if(typeof XLSX === 'undefined') return;
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.sales.map(s => ({
-    일자:s.date, 거래처:s.client, 품목:(s.lines||[]).map(l=>`${l.item}(${l.qty})`).join(', '),
-    공급가액:s.supply, 부가세:s.vat, 합계:(Number(s.supply)||0)+(Number(s.vat)||0), 수금액:s.paid||0, 순이익:s.profit||0, 시리얼번호:s.serialNo||'', 비고:s.memo||''
+    일자:s.date, 거래처:s.otInfo?s.otInfo.name:s.client, 품목:(s.lines||[]).map(l=>`${l.item}(${l.qty})`).join(', '),
+    공급가액:s.supply, 부가세:s.vat, 합계:(Number(s.supply)||0)+(Number(s.vat)||0), 수금액:s.paid||0, 순이익:s.profit||0, 시리얼번호:s.serialNo||'', AS상태:s.asStatus||'', 비고:s.memo||''
   }))), '매출전표');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.purchases.map(p => ({
-    일자:p.date, 매입처:p.client, 통화:p.cur, 품목:(p.lines||[]).map(l=>`${l.item}(${l.qty})`).join(', '),
+    일자:p.date, 매입처:p.client, 통화:p.currency||p.cur||'KRW', 품목:(p.lines||[]).map(l=>`${l.item}(${l.qty})`).join(', '),
     총원가:p.totalCost, 부가세:p.vat, 지급액:p.paid||0, 비고:p.memo||''
   }))), '매입전표');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.clients), '거래처목록');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.items), '품목목록');
   XLSX.writeFile(wb, `오라테크_ERP전체원장_${todayStr()}.xlsx`);
-}
+};
 
-function backupJSON(){
+window.exportJson = function(){
   const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `오라테크_ERP백업_${todayStr()}.json`;
   a.click();
-}
+};
 
-function restoreJSON(e){
+window.importJson = function(e){
   const f = e.target.files[0];
   if(!f) return;
   const r = new FileReader();
@@ -5085,7 +5225,7 @@ function restoreJSON(e){
   };
   r.readAsText(f);
   e.target.value = '';
-}
+};
 
 function saveCompInfo(){
   db.comp = {
@@ -5106,33 +5246,35 @@ function saveCompInfo(){
 
 function loadCompForm(){
   const c = db.comp || {};
-  $('myCorp').value = c.name || '';
-  $('myBizNo').value = c.bizNo || '';
-  $('myCeo').value = c.ceo || '';
-  $('myTel').value = c.tel || '';
-  $('myType').value = c.type || '';
-  $('myItem').value = c.item || '';
-  $('myAddr').value = c.addr || '';
-  $('myBank').value = c.bank || '';
-  $('myPass').value = c.pass || '';
+  if($('myCorp')) $('myCorp').value = c.name || '';
+  if($('myBizNo')) $('myBizNo').value = c.bizNo || '';
+  if($('myCeo')) $('myCeo').value = c.ceo || '';
+  if($('myTel')) $('myTel').value = c.tel || '';
+  if($('myType')) $('myType').value = c.type || '';
+  if($('myItem')) $('myItem').value = c.item || '';
+  if($('myAddr')) $('myAddr').value = c.addr || '';
+  if($('myBank')) $('myBank').value = c.bank || '';
+  if($('myPass')) $('myPass').value = c.pass || '';
 }
 
 // ==================== TABS & PERIOD HELPERS ====================
-function goTab(idx){
+window.goTab = function(target, tabEl){
   const tabs = ['t-sale','t-dash','t-cal','t-est','t-pur','t-cli','t-itm','t-vat','t-cfg'];
+  const idx = (typeof target === 'number') ? target : tabs.indexOf(target);
+  if(idx < 0) return;
   document.querySelectorAll('.page').forEach((el, i) => el.classList.toggle('active', i === idx));
-  document.querySelectorAll('.nav-tabs .tab').forEach((el, i) => el.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav .tab').forEach((el, i) => el.classList.toggle('active', i === idx));
   if(tabs[idx] === 't-dash') renderDashboard();
   if(tabs[idx] === 't-cal') renderCalendar();
-}
+};
 
-function goUnpaidClients(){
-  goTab(5);
+window.goUnpaidClients = function(){
+  goTab('t-cli');
   if($('fCliUnpaidOnly')) $('fCliUnpaidOnly').checked = true;
   renderClients();
-}
+};
 
-function setPeriod(mode){
+window.setPeriod = function(mode){
   const now = new Date();
   const y = now.getFullYear(), m = now.getMonth();
   if(mode === 'today'){
@@ -5159,15 +5301,15 @@ function setPeriod(mode){
     $('fEnd').value = '2099-12-31';
   }
   renderAll();
-}
+};
 
 function loadSampleData(){
   if(!confirm('무역·유통 샘플 데이터를 추가하시겠습니까?')) return;
   ensureClientAndItems('(주)한국산림기계', '매출처', [{item:'PCW-5000', spec:'엔진윈치', price:2600000}], false);
   db.sales.unshift({
-    id: Date.now(), date: todayStr(), client: '(주)한국산림기계', vatMode: 'ex',
-    lines: [{item:'PCW-5000', spec:'엔진윈치', qty:1, price:2600000, supply:2600000, cost:1950000}],
-    supply: 2600000, vat: 260000, profit: 650000, paid: 0, memo: '샘플 출고전표', serialNo: 'SN-2026-8801'
+    id: Date.now(), date: todayStr(), client: '(주)한국산림기계', vatType: 'tax',
+    lines: [{item:'PCW-5000', spec:'엔진윈치', qty:1, price:2600000, sup:2600000, vat:260000, uCost:1950000}],
+    supply: 2600000, vat: 260000, total: 2860000, profit: 650000, paid: 0, memo: '샘플 출고전표', serialNo: 'SN-2026-8801'
   });
   saveDB('샘플로드'); renderAll();
 }
@@ -5193,20 +5335,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   normDB();
   loadCompForm();
-  $('sDate').value = todayStr();
-  $('eDate').value = todayStr();
-  $('pDate').value = todayStr();
-  $('exDate').value = todayStr();
+  if($('sDate')) $('sDate').value = todayStr();
+  if($('esDate')) $('esDate').value = todayStr();
+  if($('pDate')) $('pDate').value = todayStr();
+  if($('exDate')) $('exDate').value = todayStr();
   setPeriod('all');
   resetSaleForm();
   resetEstForm();
   resetPurForm();
-
-  if(!db.comp.pass){
-    $('lockScreen').style.display = 'none';
-  } else {
-    setTimeout(() => { if($('unlockPass')) $('unlockPass').focus(); }, 150);
-  }
+  checkInitialLock();
 });
 </script>
 </body>
