@@ -1524,12 +1524,28 @@ function dedupAllData(showAlert){
 
 function normDB(){
   if(!db || typeof db !== 'object') db = {};
+  if(db.myCompany && typeof db.myCompany === 'object'){
+    db.comp = Object.assign({}, db.comp || {}, {
+      name: db.myCompany.name || (db.comp&&db.comp.name) || '오라테크',
+      bizNo: db.myCompany.bizNo || (db.comp&&db.comp.bizNo) || '104-05-66181',
+      ceo: db.myCompany.ceo || (db.comp&&db.comp.ceo) || '김향래',
+      type: db.myCompany.bizType || db.myCompany.type || (db.comp&&db.comp.type) || '도소매',
+      item: db.myCompany.bizItem || db.myCompany.item || (db.comp&&db.comp.item) || '기계장비,운반하역기계',
+      tel: db.myCompany.tel || (db.comp&&db.comp.tel) || '02-2266-0989',
+      email: db.myCompany.email || (db.comp&&db.comp.email) || 'orawinch@kakao.com',
+      addr: db.myCompany.addr || (db.comp&&db.comp.addr) || '서울특별시 중구 청계천로 110, 1층(수표동)',
+      bank: db.myCompany.bank || (db.comp&&db.comp.bank) || '우리 김향래 011-058791-12-001',
+      pass: db.myCompany.pass !== undefined ? db.myCompany.pass : ((db.comp&&db.comp.pass) || '0000')
+    });
+  }
   db.comp = Object.assign({
     name:'오라테크', bizNo:'104-05-66181', ceo:'김향래',
     type:'도소매', item:'기계장비,운반하역기계', tel:'02-2266-0989',
     email:'orawinch@kakao.com', addr:'서울특별시 중구 청계천로 110, 1층(수표동)',
     bank:'우리 김향래 011-058791-12-001', pass:'0000'
   }, db.comp || {});
+  db.myCompany = Object.assign({}, db.myCompany || {}, db.comp, { bizType: db.comp.type, bizItem: db.comp.item });
+
   if(!Array.isArray(db.clients)) db.clients = [];
   if(!Array.isArray(db.items)) db.items = [];
   if(!Array.isArray(db.sales)) db.sales = [];
@@ -1545,6 +1561,55 @@ function normDB(){
   }
   if(!db.priceMem || typeof db.priceMem !== 'object') db.priceMem = {};
   if(!db.purPriceMem || typeof db.purPriceMem !== 'object') db.purPriceMem = {};
+
+  // v35 <-> v42 필드 완벽 호환 정규화
+  db.clients.forEach(c => {
+    if(!c) return;
+    if(c.initAr === undefined && c.initUnpaid !== undefined) c.initAr = Number(c.initUnpaid)||0;
+    if(c.initAp === undefined && c.initPayable !== undefined) c.initAp = Number(c.initPayable)||0;
+  });
+  db.sales.forEach(s => {
+    if(!s) return;
+    s.supply = Number(s.supply)||0;
+    s.vat = Number(s.vat)||0;
+    s.total = s.supply + s.vat;
+    s.paid = Number(s.paid)||0;
+    if(s.otName && !s.otInfo){
+      s.otInfo = { name: s.otName, ceo: s.otCeo||'', tel: s.otTel||'', addr: s.otAddr||'', bizNo: '' };
+    }
+    (s.lines||[]).forEach(l => {
+      l.qty = Number(l.qty)||1;
+      l.price = Number(l.price)||0;
+      l.sup = Number(l.sup) || Number(l.supply) || Math.round(l.qty * l.price);
+      l.supply = l.sup;
+      if(l.vat === undefined) l.vat = s.vat > 0 ? Math.round(l.sup * 0.1) : 0;
+      l.uCost = Number(l.uCost) || Number(l.cost) || Math.round(l.price * 0.75);
+    });
+    if(s.profit === undefined){
+      const cSum = (s.lines||[]).reduce((a,l) => a + (l.uCost * l.qty), 0);
+      s.profit = s.supply - cSum;
+    }
+  });
+  db.purchases.forEach(p => {
+    if(!p) return;
+    p.totalCost = Number(p.totalCost)||0;
+    p.vat = Number(p.vat)||0;
+    p.paid = Number(p.paid)||0;
+    if(p.goodsKrw === undefined) p.goodsKrw = p.totalCost - ((Number(p.custom)||0) + (Number(p.freight)||0));
+    (p.lines||[]).forEach(l => {
+      l.qty = Number(l.qty)||1;
+      l.price = Number(l.price) || Number(l.unitForeign) || Number(l.unitCost) || 0;
+      l.krwAmt = Number(l.krwAmt) || Number(l.krwBase) || Number(l.totalCost) || Math.round(l.qty * l.price);
+      l.incAmt = Number(l.incAmt) || Number(l.extraAlloc) || 0;
+      l.uCost = Number(l.uCost) || Number(l.unitCost) || l.price;
+    });
+  });
+  db.expenses.forEach(ex => {
+    if(!ex) return;
+    if(ex.sup === undefined && ex.supply !== undefined) ex.sup = Number(ex.supply)||0;
+    if(!ex.acc && ex.cat) ex.acc = ex.cat;
+    if(!ex.proof && ex.method) ex.proof = ex.method;
+  });
 
   if(!db.clients.some(c => c && c.name === '1회성(기타)거래처')){
     db.clients.unshift({id:1, name:'1회성(기타)거래처', bizNo:'', ceo:'', type:'겸용', tier:0, tel:'', email:'', addr:'', initAr:0, initAp:0});
@@ -1562,51 +1627,95 @@ function normDB(){
   db.expenses.sort(sortDesc);
 }
 
-// ==================== INDEXED-DB & LOCAL FOLDER AUTO-BACKUP ====================
-function idbSave(data){
+// ==================== INDEXED-DB & LOCAL AUTO-RECOVERY (v35 + v42 호환) ====================
+function idbOpen(dbName){
+  return new Promise((res, rej) => {
+    try{
+      const req = indexedDB.open(dbName || 'OraErpDB_v26', 1);
+      req.onupgradeneeded = e => {
+        if(!e.target.result.objectStoreNames.contains('store')){
+          e.target.result.createObjectStore('store');
+        }
+      };
+      req.onsuccess = e => res(e.target.result);
+      req.onerror = e => rej(e);
+    }catch(err){ rej(err); }
+  });
+}
+
+async function idbSave(data){
   try{
-    const req = indexedDB.open('OraErpDB_v26', 1);
-    req.onupgradeneeded = e => { e.target.result.createObjectStore('store'); };
-    req.onsuccess = e => {
-      const idb = e.target.result;
-      const tx = idb.transaction('store', 'readwrite');
-      tx.objectStore('store').put(JSON.parse(JSON.stringify(data)), 'main_db');
-    };
+    const idb = await idbOpen('OraErpDB_v26');
+    const tx = idb.transaction('store', 'readwrite');
+    tx.objectStore('store').put(JSON.parse(JSON.stringify(data)), 'main_db');
   }catch(err){}
 }
 
-function idbLoad(){
-  return new Promise(resolve => {
+async function idbLoadFrom(dbName, storeName, key){
+  try{
+    const idb = await idbOpen(dbName);
+    if(!idb.objectStoreNames.contains(storeName)) return null;
+    return await new Promise(res => {
+      const rq = idb.transaction(storeName, 'readonly').objectStore(storeName).get(key);
+      rq.onsuccess = () => res(rq.result || null);
+      rq.onerror = () => res(null);
+    });
+  }catch(e){ return null; }
+}
+
+function scoreDB(o){
+  if(!o || typeof o !== 'object') return 0;
+  const sLen = Array.isArray(o.sales) ? o.sales.length : 0;
+  const pLen = Array.isArray(o.purchases) ? o.purchases.length : 0;
+  const cLen = Array.isArray(o.clients) ? Math.max(0, o.clients.length - 1) : 0;
+  const iLen = Array.isArray(o.items) ? o.items.length : 0;
+  return (sLen * 10) + (pLen * 10) + cLen + iLen;
+}
+
+async function recoverBestLocalDB(){
+  const candidates = [];
+  // 1) localStorage DB_KEY
+  const raw = sGet(DB_KEY);
+  if(raw){
+    try{ candidates.push(JSON.parse(raw)); }catch(e){}
+  }
+  // 2) IndexedDB OraErpDB_v26 & OraErpDB_v25
+  const c26 = await idbLoadFrom('OraErpDB_v26', 'store', 'main_db');
+  if(c26) candidates.push(c26);
+  const c25a = await idbLoadFrom('OraErpDB_v25', 'store', 'main_db');
+  if(c25a) candidates.push(c25a);
+  const c25b = await idbLoadFrom('OraErpDB_v25', 'erp_store', 'main_db');
+  if(c25b) candidates.push(c25b);
+
+  // 3) localStorage ora33_full_cache (v35 gzPack or v42 compressPayload)
+  const fullCache = sGet('ora33_full_cache');
+  if(fullCache){
+    const passCand = [sessionPass, (db.comp&&db.comp.pass), '0000'].filter(Boolean);
+    for(const pw of passCand){
+      try{
+        const unpacked = await gzUnpack(fullCache, pw);
+        const rest = restoreSlimDB(unpacked);
+        if(rest && scoreDB(rest) > 0){ candidates.push(rest); break; }
+      }catch(e){}
+    }
     try{
-      const req = indexedDB.open('OraErpDB_v26', 1);
-      req.onupgradeneeded = e => { e.target.result.createObjectStore('store'); };
-      req.onsuccess = e => {
-        const idb = e.target.result;
-        const tx = idb.transaction('store', 'readonly');
-        const getReq = tx.objectStore('store').get('main_db');
-        getReq.onsuccess = () => {
-          if(getReq.result && ((getReq.result.sales&&getReq.result.sales.length) || (getReq.result.purchases&&getReq.result.purchases.length))){
-            resolve(getReq.result);
-          } else {
-            try{
-              const reqOld = indexedDB.open('OraErpDB_v25', 1);
-              reqOld.onsuccess = ev => {
-                try{
-                  const txOld = ev.target.result.transaction('erp_store', 'readonly');
-                  const gOld = txOld.objectStore('erp_store').get('main_db');
-                  gOld.onsuccess = () => resolve(gOld.result || null);
-                  gOld.onerror = () => resolve(null);
-                }catch(x){ resolve(null); }
-              };
-              reqOld.onerror = () => resolve(null);
-            }catch(x){ resolve(null); }
-          }
-        };
-        getReq.onerror = () => resolve(null);
-      };
-      req.onerror = () => resolve(null);
-    }catch(err){ resolve(null); }
-  });
+      const dec2 = await decompressPayload(fullCache);
+      if(dec2 && scoreDB(dec2) > 0) candidates.push(dec2);
+    }catch(e){}
+  }
+
+  let best = db;
+  for(const cand of candidates){
+    if(scoreDB(cand) > scoreDB(best)) best = cand;
+  }
+  if(best !== db && scoreDB(best) > 0){
+    db = Object.assign(db, best);
+    normDB();
+    await idbSave(db);
+    try{ sSet(DB_KEY, JSON.stringify(db)); }catch(e){}
+    return true;
+  }
+  return false;
 }
 
 let autoBakDirHandle = null;
@@ -1681,21 +1790,23 @@ async function writeAutoBackupFiles(reason){
 }
 
 let cloudPushTimer = null;
-function saveDB(reason){
+async function saveDB(reason, skipTg){
   normDB();
   try{ sSet(DB_KEY, JSON.stringify(db)); }catch(e){}
-  idbSave(db);
+  await idbSave(db);
+  try{
+    const p = String(sessionPass || (db.comp && db.comp.pass) || '0000').trim();
+    sSet('ora33_full_cache', await gzPack(buildSlimDB(db), p));
+  }catch(e){}
   if(autoBakDirHandle) writeAutoBackupFiles(reason || '자동저장');
-  if(sGet('erp_tg_auto') !== '0' && !isMobileDevice){
+  if(!skipTg && sGet('erp_tg_auto') !== '0' && !isMobileDevice){
     clearTimeout(cloudPushTimer);
-    cloudPushTimer = setTimeout(() => { tgPush(false); }, 15000);
+    cloudPushTimer = setTimeout(() => { tgPush(false); }, 3500);
   }
 }
 
-// ==================== ULTRA-LIGHTWEIGHT CLOUD SYNC (v42, RATE-LIMIT PROOF) ====================
-const DEF_TOK = String.fromCharCode(56,57,55,48,49,53,50,56,56,49,58,65,65,72,68,57,49,88,118,72,105,72,83,106,55,86,98,49,74,117,77,53,71,67,88,100,100,101,66,51,103,77,85,113,48).length === 45
-  ? String.fromCharCode(56,57,55,48,49,53,50,56,56,49,58,65,65,72,68,57,49,88,118,72,105,72,83,106,55,86,98,49,74,117,76,77,53,71,67,88,100,100,101,66,51,103,77,85,113,48)
-  : '8970152881:AAHD91XvHiHSj7Vb1JuLM5GCXddeB3gMUq0';
+// ==================== ULTRA-LIGHTWEIGHT CLOUD SYNC (ORA33 & ORA35 완벽 호환) ====================
+const DEF_TOK = String.fromCharCode(56,57,55,48,49,53,50,56,56,49,58,65,65,72,68,57,49,88,118,72,105,72,83,106,55,86,98,49,74,117,76,77,53,71,67,88,100,100,101,66,51,103,77,85,113,48);
 const DEF_CID = '1604642202';
 
 function getTgConfig(){
@@ -1704,7 +1815,7 @@ function getTgConfig(){
   if(!t){ t = DEF_TOK; sSet('erp_tg_token', t); }
   if(!c){ c = DEF_CID; sSet('erp_tg_chat', c); }
   if(sGet('erp_tg_auto') === null) sSet('erp_tg_auto', '1');
-  return { token:t, cid:c, auto:sGet('erp_tg_auto') !== '0' };
+  return { token:t, tok:t, cid:c, auto:sGet('erp_tg_auto') !== '0' };
 }
 function saveTgConfig(){
   if($('tgToken')) sSet('erp_tg_token', $('tgToken').value.trim() || DEF_TOK);
@@ -1781,22 +1892,59 @@ function hashStr(str){
   return (h2 >>> 0).toString(16).padStart(8,'0') + (h1 >>> 0).toString(16).padStart(8,'0');
 }
 
-function getKeyBytes(){
-  const p = sessionPass || (db && db.comp && db.comp.pass) || sGet('ora33_pass') || '0000';
-  const h = hashStr('KEY_' + p) + hashStr('SALT_' + p);
-  const b = new Uint8Array(16);
-  for(let i=0; i<16; i++) b[i] = parseInt(h.substr(i*2, 2), 16);
-  return b;
+function parseStoredIds(raw){
+  if(!raw) return [];
+  const s = String(raw).trim();
+  if(!s) return [];
+  if(s.startsWith('[')){
+    try{ return JSON.parse(s).map(Number).filter(Boolean); }catch(e){ return []; }
+  }
+  return s.split(',').map(x => Number(x.trim())).filter(Boolean);
 }
-function xorBytes(u8){
-  const k = getKeyBytes(), out = new Uint8Array(u8.length);
+
+// v35 호환 gzPack / gzUnpack
+async function gzPack(obj, pass){
+  const str = JSON.stringify(obj), k = String(pass || '0000').trim() || '0000';
+  if(typeof CompressionStream !== 'undefined'){
+    const stream = new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));
+    const u8 = new Uint8Array(await new Response(stream).arrayBuffer());
+    for(let i=0; i<u8.length; i++) u8[i] ^= (k.charCodeAt(i % k.length) & 0xFF);
+    let bin = '';
+    for(let j=0; j<u8.length; j+=8192) bin += String.fromCharCode.apply(null, u8.subarray(j, j+8192));
+    return 'GZ3:' + btoa(bin);
+  }
+  return str;
+}
+
+async function gzUnpack(enc, pass){
+  if(!enc) throw new Error('빈 데이터');
+  const cleanEnc = enc.trim(), k = String(pass || '0000').trim() || '0000';
+  if(cleanEnc.startsWith('GZ3:') || cleanEnc.startsWith('GZ2:') || cleanEnc.startsWith('GZ1:')){
+    const raw = atob(cleanEnc.slice(4));
+    const u8 = new Uint8Array(raw.length);
+    for(let i=0; i<raw.length; i++) u8[i] = raw.charCodeAt(i) ^ (k.charCodeAt(i % k.length) & 0xFF);
+    if(u8[0] === 0x1f && u8[1] === 0x8b){
+      const stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(stream).text());
+    }
+    // 혹시 v42 hash 키로 암호화된 GZ3인 경우 폴백 복호화
+    const u8Alt = xorBytesV42(b64ToU8(cleanEnc.slice(4)), k);
+    if(u8Alt[0] === 0x1f && u8Alt[1] === 0x8b){
+      const stream2 = new Blob([u8Alt]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(stream2).text());
+    }
+    throw new Error('WRONG_PASS');
+  }
+  return JSON.parse(cleanEnc);
+}
+
+function xorBytesV42(u8, p){
+  const h = hashStr('KEY_' + p) + hashStr('SALT_' + p);
+  const k = new Uint8Array(16);
+  for(let i=0; i<16; i++) k[i] = parseInt(h.substr(i*2, 2), 16);
+  const out = new Uint8Array(u8.length);
   for(let i=0; i<u8.length; i++) out[i] = u8[i] ^ k[i & 15] ^ (i & 255);
   return out;
-}
-function u8ToB64(u8){
-  let bin = '', CHUNK = 8192;
-  for(let i=0; i<u8.length; i+=CHUNK) bin += String.fromCharCode.apply(null, u8.subarray(i, i+CHUNK));
-  return btoa(bin);
 }
 function b64ToU8(b64){
   const bin = atob(String(b64||'').replace(/\s/g,''));
@@ -1805,464 +1953,424 @@ function b64ToU8(b64){
   return u8;
 }
 
+async function decompressPayload(str){
+  const pass = sessionPass || (db && db.comp && db.comp.pass) || '0000';
+  const unpacked = await gzUnpack(str, pass);
+  return restoreSlimDB(unpacked);
+}
+
 function buildSlimDB(src){
-  const cMap = new Map(), cList = [];
-  const iMap = new Map(), iList = [];
-  const spMap = new Map(), spList = [];
-  const getC = n => { const s=String(n||''); if(!cMap.has(s)){ cMap.set(s,cList.length); cList.push(s); } return cMap.get(s); };
-  const getI = n => { const s=String(n||''); if(!iMap.has(s)){ iMap.set(s,iList.length); iList.push(s); } return iMap.get(s); };
-  const getSp = n => { const s=String(n||''); if(!spMap.has(s)){ spMap.set(s,spList.length); spList.push(s); } return spMap.get(s); };
-
-  const slimSales = (src.sales||[]).map(s => {
-    const row = [
-      String(s.date||'').replace(/-/g,''),
-      getC(s.client),
-      Number(s.supply)||0,
-      Number(s.vat)||0,
-      Number(s.paid)||0,
-      s.memo || '',
-      (s.lines||[]).map(l => {
-        const uc = Number(l.uCost)||0, pr = Number(l.price)||0;
-        return (uc > 0 && uc !== Math.round(pr*0.75))
-          ? [getI(l.item), getSp(l.spec), Number(l.qty)||1, pr, uc]
-          : [getI(l.item), getSp(l.spec), Number(l.qty)||1, pr];
-      }),
-      s.otInfo || 0
-    ];
-    if(s.asStatus || s.serialNo || (s.payLog && s.payLog.length)){
-      row.push({ as: s.asStatus||'', sn: s.serialNo||'', pl: s.payLog||[] });
+  const cMap = {}, cList = [], iMap = {}, iList = [], spMap = {}, spList = [];
+  const getIdx = (val, map, list) => {
+    const v = String(val || '');
+    if(map[v] === undefined){ map[v] = list.length; list.push(v); }
+    return map[v];
+  };
+  const slimSales = (src.sales || []).map(s => {
+    let m = String(s.memo||'').replace(/우리\s*김향래\s*011-058791-12-001/g,'').replace(/\[홈택스\]/g,'').trim();
+    if(m.indexOf('당초 승인번호') !== -1) m = '수정세금계산서';
+    const L = (s.lines || []).map(l => [getIdx(l.item, iMap, iList), getIdx(l.spec, spMap, spList), Number(l.qty)||1, Number(l.price)||0]);
+    const row = [String(s.date||'').replace(/-/g,'').slice(2), getIdx(s.client, cMap, cList), Number(s.supply)||0, Number(s.vat)||0, Number(s.paid)||0, m, L];
+    const ot = s.otInfo || {};
+    if(s.otName || ot.name || s.asStatus || s.serialNo){
+      row.push([ot.name||s.otName||'', ot.ceo||s.otCeo||'', ot.tel||s.otTel||'', '', ot.addr||s.otAddr||'', s.asStatus||'', s.serialNo||'']);
     }
     return row;
   });
-
-  const slimPur = (src.purchases||[]).map(p => {
-    const row = [
-      String(p.date||'').replace(/-/g,''),
-      getC(p.client),
-      Number(p.totalCost)||0,
-      Number(p.vat)||0,
-      Number(p.paid)||0,
-      (p.lines||[]).map(l => [getI(l.item), getSp(l.spec), Number(l.qty)||1, Number(l.price)||0])
-    ];
-    if((p.currency && p.currency !== 'KRW') || p.custom || p.freight || (p.payLog && p.payLog.length)){
-      row.push({ cur:p.currency||'KRW', rt:p.rate||1, cs:p.custom||0, fr:p.freight||0, mm:p.memo||'', pl:p.payLog||[] });
-    }
-    return row;
+  const slimPur = (src.purchases || []).map(p => {
+    const L = (p.lines || []).map(l => [getIdx(l.item, iMap, iList), getIdx(l.spec, spMap, spList), Number(l.qty)||1, Number(l.uCost||l.unitCost||l.price||l.unitForeign)||0]);
+    return [String(p.date||'').replace(/-/g,'').slice(2), getIdx(p.client, cMap, cList), Number(p.totalCost)||0, Number(p.vat)||0, Number(p.paid)||0, p.type||'국내매입', L];
   });
-
+  const slimCli = (src.clients || []).map(c => [
+    c.code||'', c.type||'매출처', c.name||'', c.bizNo||'', c.ceo||'', c.bizType||'', c.bizItem||'', c.tel||'', c.email||'', c.addr||'', Number(c.initAr||c.initUnpaid)||0, Number(c.initAp||c.initPayable)||0, c.memo||''
+  ]);
+  const slimItm = (src.items || []).map(it => [
+    it.code||'', it.cat||'일반', it.name||'', it.spec||'', it.taxType||'과세', Number(it.buyPrice)||0, Number(it.sellPrice)||0, Number(it.initQty)||0, Number(it.safeQty)||5, it.loc||'창고'
+  ]);
   return {
-    comp: src.comp,
-    clients: (src.clients||[]).map(c => [c.id, c.name, c.bizNo||'', c.ceo||'', c.type||'매출처', c.tier||0, c.tel||'', c.email||'', c.addr||'', c.initAr||0, c.initAp||0]),
-    items: (src.items||[]).map(i => [i.id, i.name, i.spec||'', i.buyPrice||0, i.sellPrice||0, i.initQty||0, i.safeQty||5, i.cat||'']),
-    sd: { cl: cList, il: iList, spl: spList, r: slimSales, pr: slimPur },
-    estimates: src.estimates || [],
-    expenses: src.expenses || [],
-    bomSets: src.bomSets || [],
-    deletedFp: (src.deletedFp||[]).slice(-200)
+    mc: src.comp || src.myCompany, c: slimCli, i: slimItm,
+    es: src.estimates || [], ex: src.expenses || [], bomSets: src.bomSets || [],
+    sd: { cl:cList, il:iList, spl:spList, r:slimSales, pr:slimPur }
   };
 }
 
 function restoreSlimDB(slim){
-  if(!slim || !slim.sd) return slim;
-  const cl = slim.sd.cl || [], il = slim.sd.il || [], spl = slim.sd.spl || [];
-  let baseId = Date.now() - 1000000;
-  const restoredItems = (slim.items||[]).map(i => Array.isArray(i) ? {id:i[0],name:i[1],spec:i[2],buyPrice:i[3],sellPrice:i[4],initQty:i[5]||0,safeQty:i[6]||5,cat:i[7]||''} : i);
-  const itemCostMap = {};
-  restoredItems.forEach(it => { if(it && it.name) itemCostMap[it.name] = Number(it.buyPrice)||0; });
-
-  return {
-    comp: slim.comp || db.comp,
-    clients: (slim.clients||[]).map(c => Array.isArray(c) ? {id:c[0],name:c[1],bizNo:c[2],ceo:c[3],type:c[4],tier:c[5],tel:c[6],email:c[7],addr:c[8],initAr:c[9]||0,initAp:c[10]||0} : c),
-    items: restoredItems,
-    sales: (slim.sd.r||[]).map(r => {
-      const ds = String(r[0]||'');
-      const dt = ds.length===8 ? (ds.slice(0,4)+'-'+ds.slice(4,6)+'-'+ds.slice(6,8)) : ds;
-      const sup = Number(r[2])||0, vat = Number(r[3])||0, ex = r[8] || {};
-      const lines = (r[6]||[]).map(l => {
-        const itName = il[l[0]]||'', qty = Number(l[2])||1, prc = Number(l[3])||0;
-        const uCost = (l[4] !== undefined && Number(l[4]) > 0) ? Number(l[4]) : (itemCostMap[itName] || Math.round(prc*0.75));
-        return { item:itName, spec:spl[l[1]]||'', qty, price:prc, sup:qty*prc, vat:Math.round(qty*prc*0.1), uCost };
-      });
-      const calcProfit = lines.reduce((acc,l) => acc + (l.sup - l.uCost * l.qty), 0);
-      return {
-        id: ex.id || (baseId++), date: dt, client: cl[r[1]]||'',
-        vatType: vat===0 ? 'zero' : 'tax', lines,
-        supply: sup, vat, total: sup+vat, paid: Number(r[4])||0,
-        payMethod: '외상(미수)', memo: r[5]||'',
-        profit: calcProfit, otInfo: r[7]||null,
-        asStatus: ex.as||'', serialNo: ex.sn||'', payLog: ex.pl||[]
-      };
-    }),
-    purchases: (slim.sd.pr||[]).map(p => {
-      const ds = String(p[0]||'');
-      const dt = ds.length===8 ? (ds.slice(0,4)+'-'+ds.slice(4,6)+'-'+ds.slice(6,8)) : ds;
-      const sup = Number(p[2])||0, vat = Number(p[3])||0, ex = p[6] || {};
-      return {
-        id: ex.id || (baseId++), date: dt, client: cl[p[1]]||'',
-        currency: ex.cur||'KRW', rate: ex.rt||1, custom: ex.cs||0, freight: ex.fr||0,
-        lines: (p[5]||[]).map(l => ({
-          item: il[l[0]]||'', spec: spl[l[1]]||'', qty: l[2], price: l[3],
-          krwAmt: l[2]*l[3], incAmt: 0, uCost: l[3]
-        })),
-        goodsKrw: sup - ((Number(ex.cs)||0)+(Number(ex.fr)||0)), totalCost: sup, vat, paid: Number(p[4])||0,
-        memo: ex.mm||'', payLog: ex.pl||[]
-      };
-    }),
-    estimates: slim.estimates || [],
-    expenses: slim.expenses || [],
-    bomSets: slim.bomSets || db.bomSets || [],
-    deletedFp: slim.deletedFp || []
+  if(!slim) return slim;
+  if(slim.sales && Array.isArray(slim.sales)) return slim;
+  const compObj = slim.mc || slim.comp || db.comp;
+  const out = {
+    comp: compObj, myCompany: compObj,
+    estimates: slim.es || slim.estimates || [],
+    expenses: slim.ex || slim.expenses || [],
+    bomSets: slim.bomSets || db.bomSets || []
   };
+  const rawClients = slim.c || slim.clients || [];
+  out.clients = rawClients.map((a, i) => {
+    if(!Array.isArray(a)) return a;
+    if(a.length >= 12){
+      return {id:1000+i, code:a[0], type:a[1], name:a[2], bizNo:a[3], ceo:a[4], bizType:a[5], bizItem:a[6], tel:a[7], email:a[8], addr:a[9], initAr:Number(a[10])||0, initAp:Number(a[11])||0, initUnpaid:Number(a[10])||0, initPayable:Number(a[11])||0, memo:a[12]||''};
+    }
+    return {id:a[0]||(1000+i), name:a[1], bizNo:a[2], ceo:a[3], type:a[4], tier:a[5]||0, tel:a[6], email:a[7], addr:a[8], initAr:Number(a[9])||0, initAp:Number(a[10])||0};
+  });
+  const rawItems = slim.i || slim.items || [];
+  out.items = rawItems.map((a, i) => {
+    if(!Array.isArray(a)) return a;
+    if(a.length >= 9){
+      return {id:10000+i, code:a[0], cat:a[1], name:a[2], spec:a[3], taxType:a[4], buyPrice:Number(a[5])||0, sellPrice:Number(a[6])||0, initQty:Number(a[7])||0, safeQty:Number(a[8])||5, loc:a[9]||'창고'};
+    }
+    return {id:a[0]||(10000+i), name:a[1], spec:a[2], buyPrice:Number(a[3])||0, sellPrice:Number(a[4])||0, initQty:Number(a[5])||0, safeQty:Number(a[6])||5, cat:a[7]||''};
+  });
+
+  const dObj = slim.sd || {}, cList = dObj.cl || [], iList = dObj.il || [], spList = dObj.spl || [];
+  out.sales = (dObj.r || []).map((a, idx) => {
+    const rawDt = String(a[0]||'');
+    const dt = rawDt.length === 6 ? ('20' + rawDt.slice(0,2) + '-' + rawDt.slice(2,4) + '-' + rawDt.slice(4,6))
+             : (rawDt.length === 8 ? (rawDt.slice(0,4) + '-' + rawDt.slice(4,6) + '-' + rawDt.slice(6,8)) : rawDt);
+    const sup = Number(a[2])||0, vat = Number(a[3])||0, tot = sup + vat, paid = Number(a[4])||0;
+    const L = (a[6]||[]).map(x => {
+      const itm = iList[x[0]] || '품목', sp = spList[x[1]] || '', q = Number(x[2])||1, p = Number(x[3])||0;
+      const ls = q * p, lv = vat > 0 ? Math.round(ls * 0.1) : 0, uc = Number(x[4]) || Math.round(p * 0.75);
+      return { item:itm, spec:sp, qty:q, price:p, sup:ls, supply:ls, vat:lv, total:ls+lv, uCost:uc, profit:ls-uc*q };
+    });
+    const ot = Array.isArray(a[7]) ? a[7] : [];
+    const exObj = (a[8] && typeof a[8] === 'object') ? a[8] : {};
+    const otInfo = ot[0] ? { name:ot[0], ceo:ot[1]||'', tel:ot[2]||'', addr:ot[4]||'', bizNo:'' } : (a[7] && typeof a[7]==='object' ? a[7] : null);
+    return {
+      id: 100000 + idx, date: dt, client: cList[a[1]] || '', vatType: vat===0?'zero':'tax',
+      payMethod: (tot - paid) > 0 ? '외상(미수)' : '계좌이체', memo: a[5]||'',
+      supply: sup, vat: vat, total: tot, paid: paid, unpaid: tot - paid, profit: Math.round(sup * 0.25),
+      lines: L, otInfo, asStatus: ot[5]||exObj.as||'', serialNo: ot[6]||exObj.sn||''
+    };
+  });
+
+  if(dObj.pr && Array.isArray(dObj.pr)){
+    out.purchases = dObj.pr.map((a, idx) => {
+      const rawDt = String(a[0]||'');
+      const dt = rawDt.length === 6 ? ('20' + rawDt.slice(0,2) + '-' + rawDt.slice(2,4) + '-' + rawDt.slice(4,6))
+               : (rawDt.length === 8 ? (rawDt.slice(0,4) + '-' + rawDt.slice(4,6) + '-' + rawDt.slice(6,8)) : rawDt);
+      const sup = Number(a[2])||0, vat = Number(a[3])||0, tot = sup + vat, paid = Number(a[4])||0;
+      const rawLines = Array.isArray(a[6]) ? a[6] : (Array.isArray(a[5]) ? a[5] : []);
+      const L = rawLines.map(x => {
+        const itm = iList[x[0]] || '품목', sp = spList[x[1]] || '', q = Number(x[2])||1, p = Number(x[3])||0;
+        const ls = q * p;
+        return { item:itm, spec:sp, qty:q, price:p, unitForeign:p, krwAmt:ls, krwBase:ls, incAmt:0, totalCost:ls, uCost:p, unitCost:p };
+      });
+      return {
+        id: 500000 + idx, date: dt, type: typeof a[5]==='string' ? a[5] : '국내매입', client: cList[a[1]] || '',
+        currency: 'KRW', rate: 1, custom: 0, freight: 0,
+        goodsKrw: sup, totalCost: sup, vat: vat, total: tot, paid: paid, payable: tot - paid, lines: L
+      };
+    });
+  } else {
+    out.purchases = slim.p || slim.purchases || [];
+  }
+  return out;
 }
 
-function mergeCloudWithLocal(cloudDb){
-  if(!cloudDb) return;
-  const delSet = new Set([...(db.deletedFp||[]), ...(cloudDb.deletedFp||[])]);
-  db.deletedFp = Array.from(delSet).slice(-300);
-
-  db.sales = [...(cloudDb.sales||[]), ...(db.sales||[])].filter(s => s && !delSet.has('S_' + getSaleFp(s)));
-  db.purchases = [...(cloudDb.purchases||[]), ...(db.purchases||[])].filter(p => p && !delSet.has('P_' + getPurFp(p)));
-  db.clients = [...(cloudDb.clients||[]), ...(db.clients||[])];
-  db.items = [...(cloudDb.items||[]), ...(db.items||[])];
-
-  const estMap = new Map();
-  [...(cloudDb.estimates||[]), ...(db.estimates||[])].forEach(e => { if(e && e.id) estMap.set(e.id, e); });
-  db.estimates = Array.from(estMap.values());
-
-  const expMap = new Map();
-  [...(cloudDb.expenses||[]), ...(db.expenses||[])].forEach(ex => { if(ex && ex.id) expMap.set(ex.id, ex); });
-  db.expenses = Array.from(expMap.values());
-
-  const bomMap = new Map();
-  [...(cloudDb.bomSets||[]), ...(db.bomSets||[])].forEach(b => { if(b && b.name) bomMap.set(b.name, b); });
-  db.bomSets = Array.from(bomMap.values());
-  normDB();
-}
-
-async function compressPayload(obj){
-  const jsonStr = JSON.stringify(buildSlimDB(obj));
-  if(typeof CompressionStream !== 'undefined'){
+async function tgCall(tok, method, body, showModalWait){
+  for(let retry=0; retry<6; retry++){
     try{
-      const u8 = new TextEncoder().encode(jsonStr);
-      const cs = new CompressionStream('gzip');
-      const w = cs.writable.getWriter(); w.write(u8); w.close();
-      const gzBytes = new Uint8Array(await new Response(cs.readable).arrayBuffer());
-      return 'GZ3:' + u8ToB64(xorBytes(gzBytes));
-    }catch(e){}
-  }
-  const u8Raw = new TextEncoder().encode(jsonStr);
-  return 'ENC1:' + u8ToB64(xorBytes(u8Raw));
-}
-
-async function decompressPayload(str){
-  if(str.startsWith('GZ3:') || str.startsWith('GZ2:')){
-    const rawGz = str.startsWith('GZ3:') ? xorBytes(b64ToU8(str.slice(4))) : b64ToU8(str.slice(4));
-    const ds = new DecompressionStream('gzip');
-    const w = ds.writable.getWriter(); w.write(rawGz); w.close();
-    const out = await new Response(ds.readable).arrayBuffer();
-    return restoreSlimDB(JSON.parse(new TextDecoder().decode(out)));
-  }
-  if(str.startsWith('GZ1:')){
-    const rawGz = b64ToU8(str.slice(4));
-    const ds = new DecompressionStream('gzip');
-    const w = ds.writable.getWriter(); w.write(rawGz); w.close();
-    const out = await new Response(ds.readable).arrayBuffer();
-    return JSON.parse(new TextDecoder().decode(out));
-  }
-  if(str.startsWith('ENC1:')){
-    const rawU8 = xorBytes(b64ToU8(str.slice(5)));
-    return restoreSlimDB(JSON.parse(new TextDecoder().decode(rawU8)));
-  }
-  return JSON.parse(str);
-}
-
-function checkTgRateLimit(j){
-  if(j && !j.ok){
-    const retryAfter = (j.parameters && j.parameters.retry_after) ? Number(j.parameters.retry_after) : 0;
-    if(retryAfter > 0 || (j.description && j.description.includes('Too Many Requests'))){
-      const waitSec = retryAfter || parseInt((j.description.match(/retry after (\d+)/i)||[])[1]||'60', 10);
-      setCooldownSec(waitSec);
-      const err = new Error(`텔레그램 서버 일시 호출 제한(과부하 방지) 중입니다.\n• 약 ${waitSec}초 후에 다시 클라우드 전송이 가능합니다.\n• 걱정하지 마세요! 현재 입력하신 모든 장부 데이터는 내 컴퓨터(브라우저/자동백업폴더)에 100% 안전하게 저장되어 있습니다.`);
-      err.isRateLimit = true;
-      throw err;
+      const r = await fetch('https://api.telegram.org/bot' + tok + '/' + method, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body || {})
+      });
+      const j = await r.json();
+      if(j.ok) return j;
+      if(j.description && j.description.indexOf('not modified') !== -1) return {ok:true, notModified:true, result: body};
+      if(j.error_code === 429 && j.parameters && j.parameters.retry_after){
+        const waitSec = Number(j.parameters.retry_after) + 1;
+        setCooldownSec(waitSec);
+        if(waitSec > 35 && !showModalWait) return j;
+        for(let s=waitSec; s>0; s--){
+          updateCloudBadge('cool', `대기(${s}초)...`);
+          if(showModalWait && $('oraSyncModal') && $('oraSyncModal').style.display !== 'none'){
+            $('osmSub').innerText = `⏳ 텔레그램 서버 도배방지 대기 중... (${s}초 후 자동 재개됩니다!)`;
+          }
+          await new Promise(res => setTimeout(res, 1000));
+        }
+        continue;
+      }
+      return j;
+    }catch(e){
+      await new Promise(res => setTimeout(res, 1200));
     }
   }
+  return {ok:false, description:'네트워크 통신 대기 중 (내 컴퓨터에는 이미 안전하게 저장되어 있습니다)'};
 }
 
-async function tgPostText(token, cid, text){
-  const res = await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ chat_id: cid, text, disable_notification: true })
-  });
-  const j = await res.json();
-  checkTgRateLimit(j);
-  if(!j.ok) throw new Error(j.description || 'sendMessage error');
-  return j.result.message_id;
-}
-async function tgEditText(token, cid, msgId, text){
-  const res = await fetch('https://api.telegram.org/bot' + token + '/editMessageText', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ chat_id: cid, message_id: msgId, text })
-  });
-  const j = await res.json();
-  checkTgRateLimit(j);
-  if(!j.ok){
-    if(j.description && j.description.includes('message is not modified')) return true;
-    return false;
+async function fetchCloudMeta(tok){
+  const j = await tgCall(tok, 'getMyDescription', {}, false);
+  const s = (j && j.ok && j.result && j.result.description) ? j.result.description.trim() : '';
+  if(s.startsWith('ORA33:')){
+    const p = s.split(':');
+    return { ver:'ORA33', cid:p[1], idxMsgId:Number(p[2]), passHash:p[3]||'' };
   }
-  return true;
-}
-async function tgReadMsgText(token, cid, msgId){
-  const fd = new FormData();
-  fd.append('chat_id', cid); fd.append('text', '⏳');
-  fd.append('reply_to_message_id', String(msgId)); fd.append('disable_notification', 'true');
-  const res = await fetch('https://api.telegram.org/bot' + token + '/sendMessage', { method:'POST', body:fd });
-  const j = await res.json();
-  checkTgRateLimit(j);
-  if(!j.ok || !j.result) throw new Error('메시지 조회 실패 (ID:' + msgId + ')');
-  const tempId = j.result.message_id;
-  const origText = (j.result.reply_to_message && j.result.reply_to_message.text) ? j.result.reply_to_message.text : '';
-  fetch('https://api.telegram.org/bot' + token + '/deleteMessage?chat_id=' + cid + '&message_id=' + tempId).catch(()=>{});
-  return origText;
-}
-
-async function fetchCloudMeta(token){
-  const r = await fetch('https://api.telegram.org/bot' + token + '/getMyDescription');
-  const j = await r.json();
-  if(!j.ok || !j.result || !j.result.description) return null;
-  const desc = j.result.description.trim();
-  if(desc.startsWith('ORA35:')){
-    const p = desc.split(':');
+  if(s.startsWith('ORA35:')){
+    const p = s.split(':');
     return {
-      ver: 35, cid: p[1], passHash: p[2]||'', dbHash: p[3]||'',
-      mIds: (p[4]||'').split(',').map(Number).filter(Boolean),
+      ver:'ORA35', cid:p[1], passHash:p[2]||'', dbHash:p[3]||'',
+      mIds: parseStoredIds(p[4]||''),
       bHashes: (p[5]||'').split(',').filter(Boolean)
     };
-  }
-  if(desc.startsWith('ORA33:')){
-    const p = desc.split(':');
-    return { ver: 33, cid: p[1], idxMsgId: Number(p[2]), passHash: p[3]||'' };
   }
   return null;
 }
 
-async function pullCloudDBInternal(c, meta){
-  let mIds = [], hList = [], remoteDbHash = '';
-  if(meta.ver === 35){
-    mIds = meta.mIds || [];
-    hList = meta.bHashes || [];
-    remoteDbHash = meta.dbHash || '';
-  } else {
-    const idxText = await tgReadMsgText(c.token, meta.cid, meta.idxMsgId);
-    if(!idxText || !idxText.startsWith('ORA33_IDX:')){
-      const fallbackCache = sGet('ora33_full_cache');
-      if(fallbackCache){
-        const dec = await decompressPayload(fallbackCache);
-        return { restored: dec, mIds: JSON.parse(sGet('ora33_ids')||'[]'), dbHash: sGet('ora33_db_hash')||'' };
-      }
-      return null;
-    }
-    const idx = JSON.parse(idxText.slice(10));
-    mIds = idx.m || [];
-    hList = idx.h || [];
-    remoteDbHash = idx.dbHash || '';
-  }
-
-  if(!mIds.length) return null;
-  const fullParts = new Array(mIds.length);
-  const toFetch = [];
-  for(let i=0; i<mIds.length; i++){
-    const mId = mIds[i], expH = hList[i];
-    const cH = sGet('ora33_bh_' + mId), cB = sGet('ora33_blk_' + mId);
-    if(cB && (!expH || !cH || cH === expH || cH.startsWith(expH))) fullParts[i] = cB;
-    else toFetch.push(i);
-  }
-
-  for(let k=0; k<toFetch.length; k++){
-    const idxPos = toFetch[k];
-    const mId = mIds[idxPos];
-    if(k > 0) await new Promise(r => setTimeout(r, 320));
-    const txt = await tgReadMsgText(c.token, meta.cid, mId);
-    const raw = txt.replace(/^B\d+:/, '');
-    fullParts[idxPos] = raw;
-    sSet('ora33_blk_' + mId, raw);
-    if(hList[idxPos]) sSet('ora33_bh_' + mId, hList[idxPos]);
-  }
-  const joined = fullParts.join('');
-  sSet('ora33_full_cache', joined);
-  const restored = await decompressPayload(joined);
-  return { restored, mIds, dbHash: remoteDbHash };
+async function readSingleMsg(tok, cid, mId){
+  const cached = sGet('ora33_blk_' + mId);
+  if(cached) return cached;
+  const j = await tgCall(tok, 'editMessageReplyMarkup', {
+    chat_id:cid, message_id:Number(mId),
+    reply_markup:{inline_keyboard:[[{text:'🔒 오라테크 블록 #'+mId, callback_data:'p'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}]]}
+  }, true);
+  if(!j.ok || !j.result || !j.result.text) throw new Error('메시지 #' + mId + ' 읽기 실패');
+  const t = j.result.text, nl = t.indexOf('\n');
+  const raw = nl !== -1 ? t.slice(nl+1) : t.replace(/^B\d+:/, '');
+  sSet('ora33_blk_' + mId, raw);
+  return raw;
 }
 
+let pushPending = false;
 window.tgPush = async function(manual){
-  if(isSyncBusy) return;
-  const remainCool = getCooldownRemainSec();
-  if(remainCool > 0){
-    updateCloudBadge('cool', `대기중(${remainCool}초·PC저장됨)`);
-    if(manual) alert(`⏳ 텔레그램 서버 과부하 방지 대기시간이 ${remainCool}초 남았습니다.\n\n현재 입력/수정하신 장부 데이터는 이미 내 컴퓨터(브라우저 및 자동백업)에 100% 안전하게 저장되어 있으니 안심하시고 ${remainCool}초 후에 다시 눌러주세요!`);
-    return;
-  }
-  const c = getTgConfig();
-  if(!c.token || !c.cid) return;
+  const silent = !manual;
+  if(isSyncBusy){ pushPending = true; return; }
   isSyncBusy = true;
-  try{
-    updateCloudBadge('work', '백업 중...');
-    if(manual) showSyncProgress('☁️ 클라우드 초경량 백업 중...', '데이터를 초고속 압축하고 있습니다...', 20);
-    normDB();
+  const c = getTgConfig();
+  const pass = String((db.comp && db.comp.pass) || sessionPass || '0000').trim() || '0000';
+  sessionPass = pass;
+  const pHash = hashStr(pass);
 
-    let payload = await compressPayload(db);
-    let dbHash = hashStr(payload).slice(0, 12);
-    if(!manual && sGet('ora33_db_hash') === dbHash){
-      updateCloudBadge('ok', '최신상태');
+  try{
+    if((!db.sales || db.sales.length === 0) && (!db.purchases || db.purchases.length === 0)){
+      await recoverBestLocalDB();
+    }
+    normDB();
+    const sCnt = (db.sales||[]).length, pCnt = (db.purchases||[]).length, cCnt = (db.clients||[]).length, iCnt = (db.items||[]).length;
+
+    const meta = await fetchCloudMeta(c.token);
+    if(sCnt === 0 && pCnt === 0 && meta && (meta.idxMsgId || (meta.mIds && meta.mIds.length))){
+      if(silent){ isSyncBusy = false; return; }
+      if(confirm('💡 현재 화면에 전표가 0건입니다!\n클라우드에 저장된 기존 장부를 먼저 불러오시겠습니까?\n([확인] 클릭 시 클라우드 장부 복구 / [취소] 클릭 시 중단)')){
+        isSyncBusy = false;
+        await tgPull(false);
+        return;
+      }
       isSyncBusy = false;
       return;
     }
 
-    const meta = await fetchCloudMeta(c.token);
-    if(meta && meta.ver === 35 && meta.dbHash && meta.dbHash !== sGet('ora33_db_hash') && sGet('ora33_db_hash')){
+    updateCloudBadge('work', '백업 중...');
+    if(!silent){
+      showSyncProgress('📤 오라테크 클라우드 저장 중...', `중복 제거 및 초고속 압축 중...\n(매출 ${fmt(sCnt)}건 / 매입 ${fmt(pCnt)}건 / 거래처 ${fmt(cCnt)}곳)`, 15);
+    }
+
+    const slimObj = buildSlimDB(db);
+    const fullEnc = await gzPack(slimObj, pass);
+    sSet('ora33_full_cache', fullEnc);
+    sSet('ora33_pass', pHash);
+    await idbSave(db);
+
+    const chunks = [];
+    for(let i=0; i<fullEnc.length; i+=3900) chunks.push(fullEnc.slice(i, i+3900));
+
+    let oldIds = parseStoredIds(sGet('ora33_ids'));
+    if(!oldIds.length && meta && meta.idxMsgId){
       try{
-        if(manual) showSyncProgress('🔄 타 기기 변경사항 병합 중...', '다른 기기에서 입력된 최신 전표를 합칩니다.', 35);
-        const pulled = await pullCloudDBInternal(c, meta);
-        if(pulled && pulled.restored){
-          mergeCloudWithLocal(pulled.restored);
-          payload = await compressPayload(db);
-          dbHash = hashStr(payload).slice(0, 12);
-        }
+        const oldIdxTxt = await readSingleMsg(c.token, meta.cid, meta.idxMsgId);
+        const bp = oldIdxTxt.indexOf('{');
+        if(bp !== -1) oldIds = (JSON.parse(oldIdxTxt.slice(bp)).ids || []).map(Number).filter(Boolean);
       }catch(e){}
+    } else if(!oldIds.length && meta && meta.mIds){
+      oldIds = meta.mIds;
     }
 
-    const CHUNK = 3950, blocks = [], bHashes = [];
-    for(let i=0; i<payload.length; i+=CHUNK){
-      const part = payload.slice(i, i+CHUNK);
-      blocks.push(part);
-      bHashes.push(hashStr(part).slice(0, 8));
-    }
-
-    let prevIds = (meta && meta.ver === 35 && meta.mIds && meta.mIds.length)
-      ? meta.mIds
-      : JSON.parse(sGet('ora33_ids')||'[]');
     const newIds = [];
-
-    for(let b=0; b<blocks.length; b++){
-      if(manual){
-        const pct = Math.round(40 + ((b+1)/blocks.length)*50);
-        showSyncProgress('☁️ 클라우드 전송 (' + (b+1) + '/' + blocks.length + '블록)', '변경된 블록만 스마트 전송 중...', pct);
+    for(let idx=0; idx<chunks.length; idx++){
+      const chk = chunks[idx], chkHash = hashStr(chk);
+      const pct = Math.round(((idx + 1) / (chunks.length + 1)) * 90);
+      updateCloudBadge('work', `저장중 (${idx+1}/${chunks.length})...`);
+      if(!silent){
+        showSyncProgress(`📤 클라우드 블록 저장 중 (${idx+1} / ${chunks.length})`, `저장 내역: 매출 ${fmt(sCnt)}건 | 매입 ${fmt(pCnt)}건 | 거래처 ${fmt(cCnt)}곳`, pct);
       }
-      const msgText = 'B' + b + ':' + blocks[b];
-      const existId = prevIds[b];
-      const prevHash = existId ? sGet('ora33_bh_' + existId) : null;
 
-      if(existId && prevHash && prevHash.startsWith(bHashes[b])){
-        newIds.push(existId);
-      } else if(existId){
-        const ok = await tgEditText(c.token, c.cid, existId, msgText);
-        if(ok){
-          newIds.push(existId);
-          sSet('ora33_bh_' + existId, bHashes[b]);
-          sSet('ora33_blk_' + existId, blocks[b]);
-        } else {
-          const nid = await tgPostText(c.token, c.cid, msgText);
-          newIds.push(nid);
-          sSet('ora33_bh_' + nid, bHashes[b]);
-          sSet('ora33_blk_' + nid, blocks[b]);
-        }
-      } else {
-        const nid2 = await tgPostText(c.token, c.cid, msgText);
-        newIds.push(nid2);
-        sSet('ora33_bh_' + nid2, bHashes[b]);
-        sSet('ora33_blk_' + nid2, blocks[b]);
+      const mId = oldIds[idx] ? Number(oldIds[idx]) : 0;
+      let ok = false;
+      if(mId && sGet('ora33_bh_' + mId) === chkHash){
+        newIds.push(mId); continue;
       }
+      const payload = '🔒ORA33_BLK#' + (idx+1) + '/' + chunks.length + '\n' + chk;
+      if(mId){
+        const jEd = await tgCall(c.token, 'editMessageText', {chat_id:c.cid, message_id:mId, text:payload, reply_markup:{inline_keyboard:[[{text:'🔒 오라테크 데이터 #'+(idx+1), callback_data:'s'+Date.now()}]]}}, !silent);
+        if(jEd && jEd.ok){ newIds.push(mId); sSet('ora33_bh_' + mId, chkHash); sSet('ora33_blk_' + mId, chk); ok = true; }
+      }
+      if(!ok){
+        const jSn = await tgCall(c.token, 'sendMessage', {chat_id:c.cid, text:payload, disable_notification:true, reply_markup:{inline_keyboard:[[{text:'🔒 오라테크 데이터 #'+(idx+1), callback_data:'s'+Date.now()}]]}}, !silent);
+        if(jSn && jSn.ok && jSn.result){
+          const nid = jSn.result.message_id;
+          newIds.push(nid); sSet('ora33_bh_' + nid, chkHash); sSet('ora33_blk_' + nid, chk);
+        } else throw new Error((jSn && jSn.description) || ('블록 #' + (idx+1) + ' 전송 실패'));
+      }
+      await new Promise(r => setTimeout(r, 260));
     }
 
-    const pHash = hashStr((db.comp && db.comp.pass) || '0000').slice(0, 10);
-    const descStr = `ORA35:${c.cid}:${pHash}:${dbHash}:${newIds.join(',')}:${bHashes.join(',')}`;
-    await fetch('https://api.telegram.org/bot' + c.token + '/setMyDescription', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ description: descStr.slice(0, 510) })
-    });
+    const dbHash = hashStr(fullEnc);
+    const idxPayload = '🗂️ORA33_INDEX\n' + JSON.stringify({ ids:newIds, hash:dbHash, passHash:pHash, sCnt, pCnt, cCnt, iCnt, time:new Date().toLocaleString() });
+    const prevIdxId = (meta && meta.idxMsgId) ? meta.idxMsgId : Number(sGet('ora33_idx_id')||0);
+    let idxMsgId = 0;
+    if(prevIdxId){
+      const jIdxEd = await tgCall(c.token, 'editMessageText', {chat_id:c.cid, message_id:prevIdxId, text:idxPayload, reply_markup:{inline_keyboard:[[{text:'🗂️ 오라테크 마스터목차', callback_data:'i'+Date.now()}]]}}, !silent);
+      if(jIdxEd && jIdxEd.ok) idxMsgId = prevIdxId;
+    }
+    if(!idxMsgId){
+      const jIdxSn = await tgCall(c.token, 'sendMessage', {chat_id:c.cid, text:idxPayload, disable_notification:true, reply_markup:{inline_keyboard:[[{text:'🗂️ 오라테크 마스터목차', callback_data:'i'+Date.now()}]]}}, !silent);
+      if(jIdxSn && jIdxSn.ok && jIdxSn.result) idxMsgId = jIdxSn.result.message_id;
+      else throw new Error('마스터 목차 저장 실패');
+    }
 
-    sSet('ora33_ids', JSON.stringify(newIds));
+    const shortPtr = 'ORA33:' + c.cid + ':' + idxMsgId + ':' + pHash;
+    await tgCall(c.token, 'setMyDescription', { description: shortPtr }, !silent);
+
+    sSet('ora33_ids', newIds.join(','));
+    sSet('ora33_idx_id', String(idxMsgId));
     sSet('ora33_db_hash', dbHash);
-    sSet('ora33_full_cache', payload);
+
     hideSyncProgress();
-    updateCloudBadge('ok', '백업완료(' + new Date().toTimeString().slice(0,5) + ')');
-    if(manual){
+    updateCloudBadge('ok', '저장완료(' + new Date().toTimeString().slice(0,5) + ')');
+    if(!silent){
       renderAll();
-      alert('✅ 텔레그램 초경량 클라우드 백업 완료! (총 ' + blocks.length + '블록)\n• 매출전표: ' + fmt(db.sales.length) + '건 / 매입전표: ' + fmt(db.purchases.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳 / 품목: ' + fmt(db.items.length) + '종');
+      alert('✅ [클라우드 백업 완료!]\n\n• 매출전표: ' + fmt(sCnt) + '건\n• 매입전표: ' + fmt(pCnt) + '건\n• 거래처: ' + fmt(cCnt) + '곳 / 품목: ' + fmt(iCnt) + '종\n• 총 압축블록: ' + newIds.length + '개');
     }
-  }catch(err){
+  }catch(e){
     hideSyncProgress();
-    if(!err.isRateLimit) updateCloudBadge('err', '백업대기');
-    if(manual) alert(err.message);
+    updateCloudBadge('err', '저장대기');
+    if(!silent) alert('클라우드 저장 안내: ' + e.message);
   }finally{
     isSyncBusy = false;
+    if(pushPending){ pushPending = false; setTimeout(() => { tgPush(false); }, 1500); }
   }
 };
 
 window.tgPull = async function(silent){
   if(isSyncBusy) return false;
-  const remainCool = getCooldownRemainSec();
-  if(remainCool > 0){
-    updateCloudBadge('cool', `대기중(${remainCool}초·PC저장됨)`);
-    if(!silent) alert(`⏳ 텔레그램 서버 일시 호출 제한 해제까지 ${remainCool}초 남았습니다.\n내 컴퓨터에 저장된 최신 장부는 그대로 정상 사용하실 수 있습니다!`);
-    return false;
-  }
-  const c = getTgConfig();
-  if(!c.token) return false;
   isSyncBusy = true;
+  const c = getTgConfig();
+  const pass = String(sessionPass || ($('lockPassIn') && $('lockPassIn').value.trim()) || (db.comp && db.comp.pass) || '0000').trim() || '0000';
+
   try{
+    updateCloudBadge('work', '클라우드 확인중...');
+    if(!silent) showSyncProgress('📥 클라우드 장부 확인 중...', '클라우드 서버에서 목차를 읽고 있습니다...', 12);
+
+    // 1) 만약 로컬 캐시나 IndexedDB에 이미 데이터가 있다면 우선 복구 준비
+    await recoverBestLocalDB();
+
     const meta = await fetchCloudMeta(c.token);
-    if(!meta){
-      updateCloudBadge('ready');
-      if(!silent) alert('클라우드에 저장된 백업 정보가 없습니다.');
-      isSyncBusy = false; return false;
-    }
-
-    const localHash = sGet('ora33_db_hash') || '';
-    if(meta.ver === 35 && meta.dbHash && meta.dbHash === localHash && db.sales && db.sales.length > 0){
-      updateCloudBadge('ok', '최신상태');
-      if(!silent) alert('✅ 이미 클라우드의 최신 장부와 100% 동일한 최신 상태입니다!\n• 매출전표: ' + fmt(db.sales.length) + '건 / 매입전표: ' + fmt(db.purchases.length) + '건');
-      isSyncBusy = false; return true;
-    }
-
-    updateCloudBadge('work', '불러오는 중...');
-    if(!silent) showSyncProgress('📥 클라우드 장부 동기화 중...', '클라우드 서버에서 변경된 블록만 가져옵니다...', 25);
-
-    const pulled = await pullCloudDBInternal(c, meta);
-    if(!pulled || !pulled.restored){
+    if(!meta || (!meta.idxMsgId && (!meta.mIds || !meta.mIds.length))){
       hideSyncProgress();
-      updateCloudBadge('ok', '로컬장부사용중');
-      if(!silent) alert('ℹ️ 클라우드 인덱스 전환 중이거나 변경사항이 없어 현재 PC의 최신 장부를 유지합니다.');
-      isSyncBusy = false; return false;
+      if(scoreDB(db) > 0){
+        normDB(); loadCompForm(); renderAll();
+        updateCloudBadge('ok', '로컬복구완료');
+        if(!silent) alert(`✅ 내 컴퓨터 금고(IndexedDB/캐시)에서 기존 장부를 완벽 복구했습니다!\n• 매출전표: ${fmt(db.sales.length)}건 / 매입전표: ${fmt(db.purchases.length)}건`);
+        return true;
+      }
+      updateCloudBadge('ready');
+      if(!silent) alert('⚠️ 클라우드에 저장된 백업 목차가 없습니다.');
+      return false;
     }
 
-    const { restored, mIds, dbHash } = pulled;
-    if((db.sales&&db.sales.length) || (db.purchases&&db.purchases.length)){
-      mergeCloudWithLocal(restored);
+    let ids = [], idxHash = '', sCntHint = 0, pCntHint = 0, cCntHint = 0;
+    if(meta.ver === 'ORA35' && meta.mIds && meta.mIds.length){
+      ids = meta.mIds;
+      idxHash = meta.dbHash || '';
     } else {
-      db = Object.assign(db, restored);
-      normDB();
+      const jIdx = await tgCall(c.token, 'editMessageReplyMarkup', {
+        chat_id:meta.cid, message_id:Number(meta.idxMsgId),
+        reply_markup:{inline_keyboard:[[{text:'🗂️ 목차확인됨', callback_data:'r'+Date.now()+'_'+Math.random().toString(36).slice(2,6)}]]}
+      }, !silent);
+      if(!jIdx || !jIdx.ok || !jIdx.result || !jIdx.result.text){
+        // 목차 호출 실패 시 로컬 캐시 폴백
+        if(sGet('ora33_full_cache')){
+          const cachedSlim = await gzUnpack(sGet('ora33_full_cache'), pass);
+          db = Object.assign(db, restoreSlimDB(cachedSlim));
+          normDB(); loadCompForm(); renderAll();
+          hideSyncProgress();
+          updateCloudBadge('ok', '캐시복구됨');
+          if(!silent) alert(`✅ 클라우드 캐시에서 장부를 즉시 복구했습니다!\n• 매출: ${fmt(db.sales.length)}건 / 매입: ${fmt(db.purchases.length)}건`);
+          return true;
+        }
+        throw new Error('클라우드 목차 메시지 읽기 실패 (잠시 후 다시 시도해주세요)');
+      }
+      let idxTxt = jIdx.result.text;
+      const bp = idxTxt.indexOf('{');
+      if(bp !== -1) idxTxt = idxTxt.slice(bp);
+      const idxObj = JSON.parse(idxTxt);
+      ids = idxObj.ids || idxObj.m || [];
+      idxHash = idxObj.hash || idxObj.dbHash || '';
+      sCntHint = idxObj.sCnt || 0; pCntHint = idxObj.pCnt || 0; cCntHint = idxObj.cCnt || 0;
     }
-    if(mIds && mIds.length) sSet('ora33_ids', JSON.stringify(mIds));
-    if(dbHash) sSet('ora33_db_hash', dbHash);
+
+    if(!ids.length) throw new Error('클라우드에 저장된 블록이 없습니다.');
+
+    if(idxHash && sGet('ora33_db_hash') === idxHash && sGet('ora33_full_cache')){
+      const cachedSlim = await gzUnpack(sGet('ora33_full_cache'), pass);
+      db = Object.assign(db, restoreSlimDB(cachedSlim));
+      normDB(); loadCompForm(); renderAll();
+      hideSyncProgress();
+      updateCloudBadge('ok', '최신동기화됨');
+      if(!silent) alert(`✅ 클라우드 최신 데이터 복구 완료!\n• 매출전표: ${fmt(db.sales.length)}건\n• 매입전표: ${fmt(db.purchases.length)}건\n• 거래처: ${fmt(db.clients.length)}곳 / 품목: ${fmt(db.items.length)}종`);
+      return true;
+    }
+
+    const parts = [];
+    for(let i=0; i<ids.length; i++){
+      const mId = ids[i];
+      const pct = Math.round(((i + 1) / ids.length) * 90);
+      updateCloudBadge('work', `수신중 (${i+1}/${ids.length})...`);
+      if(!silent){
+        showSyncProgress(
+          `📥 클라우드 데이터 수신 중 (${i+1} / ${ids.length} 블록)`,
+          sCntHint ? `수신 중인 장부: 매출 ${fmt(sCntHint)}건 | 매입 ${fmt(pCntHint)}건 | 거래처 ${fmt(cCntHint)}곳` : '클라우드 블록 데이터를 결합하고 있습니다...',
+          pct
+        );
+      }
+      const chunkStr = await readSingleMsg(c.token, meta.cid, mId);
+      parts.push(chunkStr);
+      await new Promise(r => setTimeout(r, 240));
+    }
+
+    const fullEnc = parts.join('');
+    const slimData = await gzUnpack(fullEnc, pass);
+    const restored = restoreSlimDB(slimData);
+
+    db = Object.assign(db, restored);
+    if(db.comp) db.comp.pass = pass;
+    normDB();
+
+    sSet('ora33_full_cache', fullEnc);
+    sSet('ora33_ids', ids.join(','));
+    sSet('ora33_db_hash', idxHash || hashStr(fullEnc));
+    sSet('ora33_pass', meta.passHash || hashStr(pass));
     try{ sSet(DB_KEY, JSON.stringify(db)); }catch(e){}
-    idbSave(db);
+    await idbSave(db);
     loadCompForm();
-    renderAll();
+    setPeriod('all');
+
     hideSyncProgress();
-    updateCloudBadge('ok', '동기화완료');
+    updateCloudBadge('ok', '불러오기완료!');
     if(!silent){
-      alert('🎉 클라우드 최신 장부 복구 및 병합 완료!\n\n'
-        + '• 매출전표: ' + fmt(db.sales.length) + '건\n'
-        + '• 매입전표: ' + fmt(db.purchases.length) + '건\n'
-        + '• 거래처: ' + fmt(db.clients.length) + '곳 / 품목: ' + fmt(db.items.length) + '종');
+      alert('🎉 [클라우드 불러오기 100% 완료!]\n\n• 매출전표: ' + fmt(db.sales.length) + '건\n• 매입전표: ' + fmt(db.purchases.length) + '건\n• 거래처: ' + fmt(db.clients.length) + '곳\n• 품목: ' + fmt(db.items.length) + '종');
     }
-    isSyncBusy = false; return true;
-  }catch(err){
+    return true;
+  }catch(e){
     hideSyncProgress();
-    if(!err.isRateLimit) updateCloudBadge('err', '대기중');
-    if(!silent) alert(err.message);
-    isSyncBusy = false; return false;
+    if(e.message === 'WRONG_PASS'){
+      updateCloudBadge('err', '암호불일치');
+      alert('❌ 클라우드 복호화 비밀번호가 일치하지 않습니다!');
+    } else {
+      updateCloudBadge('err', '재시도필요');
+      if(!silent) alert('불러오기 상세 확인: ' + e.message);
+    }
+    return false;
+  }finally{
+    isSyncBusy = false;
   }
 };
 
@@ -2299,38 +2407,23 @@ window.unlockERP = async function(){
   const v = ($('lockPassIn').value || '').trim();
   if(!v){ alert('비밀번호를 입력하세요.'); return; }
   const localPass = (db.comp && db.comp.pass) ? String(db.comp.pass) : '0000';
-  const hasLocalData = (db.sales && db.sales.length > 0) || (db.purchases && db.purchases.length > 0);
   const c = getTgConfig();
+  const inpHash = hashStr(v);
+  const expHash10 = inpHash.slice(0, 10);
 
-  if(!hasLocalData){
-    showSyncProgress('🔐 보안 인증 및 클라우드 확인 중...', '클라우드 서버와 통신하고 있습니다...', 15);
-    const meta = await fetchCloudMeta(c.token);
-    const expHash10 = hashStr(v).slice(0, 10);
-    const expHash16 = hashStr(v);
-    if(meta && meta.passHash && meta.passHash !== expHash10 && meta.passHash !== expHash16 && v !== localPass){
-      hideSyncProgress();
-      failCnt++;
-      if(failCnt >= 5){ lockUntil = Date.now() + 30000; failCnt = 0; }
-      alert('❌ 비밀번호가 일치하지 않습니다!');
-      $('lockPassIn').value = ''; $('lockPassIn').focus();
-      return;
-    }
-    sessionPass = v; sSet('ora33_pass', v);
+  const meta = await fetchCloudMeta(c.token);
+  const isMatched = (meta && meta.passHash)
+    ? (inpHash === meta.passHash || expHash10 === meta.passHash || v === localPass)
+    : (sGet('ora33_pass') ? (inpHash === sGet('ora33_pass') || v === sGet('ora33_pass') || v === localPass) : (v === localPass));
+
+  if(isMatched){
+    failCnt = 0; sessionPass = v;
+    sSet('ora33_pass', inpHash);
     sessionStorage.setItem('erp_unlocked', '1');
     $('lockScreen').style.display = 'none';
-    if(meta) await tgPull(true);
-    else hideSyncProgress();
-    return;
-  }
-
-  if(v === localPass){
-    failCnt = 0; sessionPass = v; sSet('ora33_pass', v);
-    sessionStorage.setItem('erp_unlocked', '1');
-    $('lockScreen').style.display = 'none';
-    if(getCooldownRemainSec() === 0){
-      const meta2 = await fetchCloudMeta(c.token);
-      if(meta2) tgPull(true);
-    }
+    await recoverBestLocalDB();
+    normDB(); loadCompForm(); renderAll();
+    if(meta) tgPull(true);
   } else {
     failCnt++;
     if(failCnt >= 5){ lockUntil = Date.now() + 30000; failCnt = 0; }
@@ -3247,199 +3340,235 @@ window.renderDashboard = function(){
   }
 };
 
-// ==================== HOMETAX MULTI-FILE PARSER ====================
+// ==================== HOMETAX MULTI-FILE PARSER (v35 다중시트·품목순번 완벽 호환) ====================
 var isImportingHtx = false;
+function normItemStr(s){
+  return String(s||'').replace(/\r|\n/g,' ').replace(/\s+/g,' ').trim();
+}
+function matchStandardItem(iName, spec, price){
+  return extractPureCode(iName, spec);
+}
 window.importHometaxFiles = async function(fileList){
-  if(!fileList || !fileList.length) return;
-  if(typeof XLSX === 'undefined'){ alert('엑셀 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.'); return; }
   if(isImportingHtx) return;
+  var files = Array.from(fileList || []);
+  if(!files.length) return;
   isImportingHtx = true;
+  try{
+    var sAdd = 0, pAdd = 0, cAdd = 0, dupSkip = 0;
+    var existKeys = {};
+    (db.sales || []).forEach(function(s){
+      existKeys['FP_S_' + getSaleFp(s)] = true;
+      if(s.htxKey) existKeys['APV_S_' + s.htxKey] = true;
+    });
+    (db.purchases || []).forEach(function(p){
+      existKeys['FP_P_' + getPurFp(p)] = true;
+      if(p.htxKey) existKeys['APV_P_' + p.htxKey] = true;
+    });
 
-  const files = Array.from(fileList);
-  let sAdd = 0, pAdd = 0, cAdd = 0, iAdd = 0, skipCnt = 0;
+    for(var f=0; f<files.length; f++){
+      var file = files[f], buf = await file.arrayBuffer();
+      showSyncProgress('🏛️ 국세청 홈택스 엑셀 정밀 분석 중...', '(' + (f+1) + '/' + files.length + ') ' + file.name, Math.round(((f+1)/files.length)*85));
+      var invSheets = [], itmSheets = [];
+      var fileForcePur = file.name.indexOf('매입') !== -1;
 
-  const existingSaleFps = {};
-  (db.sales||[]).forEach(s => { existingSaleFps[getSaleFp(s)] = true; if(s.htxKey) existingSaleFps[s.htxKey] = true; });
-  const existingPurFps = {};
-  (db.purchases||[]).forEach(p => { existingPurFps[getPurFp(p)] = true; if(p.htxKey) existingPurFps[p.htxKey] = true; });
-
-  const myBizClean = String((db.comp && db.comp.bizNo) || '1040566181').replace(/[^0-9]/g,'');
-
-  for(let fIdx=0; fIdx<files.length; fIdx++){
-    const file = files[fIdx];
-    showSyncProgress('🏛️ 국세청 홈택스 엑셀 정밀 분석 중...', '(' + (fIdx+1) + '/' + files.length + ') ' + file.name, Math.round(((fIdx+1)/files.length)*85));
-    try{
-      const buf = await file.arrayBuffer();
-      const wb = XLSX.read(buf, {type:'array'});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-
-      let hRow = -1, col = {};
-      let docMode = (file.name.indexOf('매입') !== -1) ? 'PUR' : 'SALE';
-
-      for(let r=0; r<Math.min(rows.length, 25); r++){
-        const lineStr = rows[r].join(' ');
-        if(lineStr.indexOf('공급자') !== -1 && (lineStr.indexOf('작성일자') !== -1 || lineStr.indexOf('승인번호') !== -1 || lineStr.indexOf('합계금액') !== -1)){
-          hRow = r;
-          let seenBiz = 0, seenName = 0, seenCeo = 0, seenAddr = 0, seenEmail = 0;
-          rows[r].forEach((h, idx) => {
-            const s = String(h||'').replace(/\s+/g,'');
-            if(s.indexOf('작성일')!==-1 || s.indexOf('발급일')!==-1) col.date = idx;
-            else if(s.indexOf('승인번호')!==-1) col.appNo = idx;
-            else if(s.indexOf('전송일')!==-1 || s.indexOf('전자세금계산서종류')!==-1) { if(!col.kind) col.kind = idx; }
-            else if(s.indexOf('사업자등록번호')!==-1 || s.indexOf('등록번호')!==-1){
-              seenBiz++; if(seenBiz === 1) col.sBiz = idx; else if(seenBiz === 2) col.bBiz = idx;
+      if(typeof XLSX !== 'undefined'){
+        try{
+          var wb = XLSX.read(buf, {type:'array'});
+          wb.SheetNames.forEach(function(sn){
+            var arr = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:''});
+            if(!arr || !arr.length) return;
+            for(var r=0; r<Math.min(arr.length, 15); r++){
+              var jn = (arr[r]||[]).join('|').replace(/\s+/g,'');
+              if(jn.indexOf('작성일자')!==-1 && (jn.indexOf('승인번호')!==-1 || jn.indexOf('공급가액')!==-1)){ invSheets.push(arr); break; }
+              else if(jn.indexOf('품목순번')!==-1 && jn.indexOf('승인번호')!==-1){ itmSheets.push(arr); break; }
             }
-            else if(s === '상호' || s.indexOf('상호')!==-1 || s.indexOf('법인명')!==-1){
-              seenName++; if(seenName === 1) col.sName = idx; else if(seenName === 2) col.bName = idx;
-            }
-            else if(s === '대표자명' || s.indexOf('대표자')!==-1){
-              seenCeo++; if(seenCeo === 1) col.sCeo = idx; else if(seenCeo === 2) col.bCeo = idx;
-            }
-            else if(s.indexOf('주소')!==-1 || s.indexOf('사업장')!==-1){
-              seenAddr++; if(seenAddr === 1) col.sAddr = idx; else if(seenAddr === 2) col.bAddr = idx;
-            }
-            else if(s.indexOf('이메일')!==-1){
-              seenEmail++; if(seenEmail === 1) col.sEmail = idx; else if(seenEmail === 2) col.bEmail = idx;
-            }
-            else if(s === '공급가액' || s.indexOf('공급가액')!==-1){ if(col.sup === undefined) col.sup = idx; else col.itemSup = idx; }
-            else if(s === '세액' || s.indexOf('부가세')!==-1){ if(col.vat === undefined) col.vat = idx; else col.itemVat = idx; }
-            else if(s.indexOf('품목명')!==-1 || s === '품목') col.item = idx;
-            else if(s.indexOf('규격')!==-1) col.spec = idx;
-            else if(s.indexOf('수량')!==-1) col.qty = idx;
-            else if(s.indexOf('단가')!==-1) col.price = idx;
-            else if(s.indexOf('영수')!==-1 || s.indexOf('청구')!==-1) col.rcp = idx;
-            else if(s.indexOf('비고')!==-1) col.memo = idx;
           });
-          break;
-        }
+        }catch(e){}
       }
-
-      if(hRow === -1) continue;
-
-      for(let i = hRow + 1; i < rows.length; i++){
-        const row = rows[i];
-        if(!row || !row.length) continue;
-        let rawDate = String(row[col.date]||'').trim().replace(/\./g,'-').replace(/\//g,'-');
-        if(/^\d{8}$/.test(rawDate)) rawDate = rawDate.slice(0,4)+'-'+rawDate.slice(4,6)+'-'+rawDate.slice(6,8);
-        if(!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) continue;
-
-        const sBizClean = String(row[col.sBiz]||'').replace(/[^0-9]/g,'');
-        const bBizClean = String(row[col.bBiz]||'').replace(/[^0-9]/g,'');
-        let rowMode = docMode;
-        if(sBizClean === myBizClean) rowMode = 'SALE';
-        else if(bBizClean === myBizClean) rowMode = 'PUR';
-
-        const isPur = (rowMode === 'PUR');
-        const cliName = String(row[isPur ? col.sName : col.bName]||'').trim();
-        if(!cliName) continue;
-
-        let bizNo = String(row[isPur ? col.sBiz : col.bBiz]||'').trim();
-        if(/^\d{10}$/.test(bizNo)) bizNo = bizNo.slice(0,3)+'-'+bizNo.slice(3,5)+'-'+bizNo.slice(5);
-        const ceo = String(row[isPur ? col.sCeo : col.bCeo]||'').trim();
-        const addr = String(row[isPur ? col.sAddr : col.bAddr]||'').trim();
-        const email = String(row[isPur ? col.sEmail : col.bEmail]||'').trim();
-
-        const sup = num(row[col.sup]);
-        const vat = (col.vat !== undefined) ? num(row[col.vat]) : 0;
-        if(sup === 0 && vat === 0) continue;
-
-        const rawItem = String(row[col.item]||'').trim() || (isPur ? '수입/매입품목' : '기계장비 외');
-        const rawSpec = String(row[col.spec]||'').trim();
-        const cleanCode = extractPureCode(rawItem, rawSpec);
-        const cleanSpec = rawSpec ? rawSpec.toUpperCase() : '';
-        const qty = num(row[col.qty]) || 1;
-        const price = num(row[col.price]) || Math.round(sup / qty);
-        const rcp = String(row[col.rcp]||'').trim();
-        const appNo = String(row[col.appNo]||'').trim();
-        const memo = String(row[col.memo]||'').trim();
-
-        const bzDigits = bizNo.replace(/[^0-9]/g,'');
-        let exCli = (db.clients||[]).find(c => {
-          const cbz = String(c.bizNo||'').replace(/[^0-9]/g,'');
-          return (bzDigits.length===10 && cbz===bzDigits) || normSearch(c.name)===normSearch(cliName);
+      if(!invSheets.length){
+        var txt = new TextDecoder('utf-8').decode(buf);
+        if(txt.indexOf('\uFFFD') !== -1) txt = new TextDecoder('euc-kr').decode(buf);
+        var rows = [];
+        txt.replace(/\r/g,'').split('\n').forEach(function(l){
+          if(l.trim()) rows.push(l.split(l.indexOf('\t')!==-1?'\t':',').map(function(x){ return x.trim().replace(/^"|"$/g,''); }));
         });
-        if(!exCli){
-          db.clients.push({
-            id: Date.now() + Math.floor(Math.random()*100000),
-            name: cliName, bizNo, ceo,
-            type: isPur ? '매입처' : '매출처', tier: 0, tel: '', email, addr, initAr: 0, initAp: 0
-          });
-          cAdd++;
-        } else {
-          if(!exCli.bizNo && bizNo) exCli.bizNo = bizNo;
-          if(!exCli.ceo && ceo) exCli.ceo = ceo;
-          if(!exCli.addr && addr) exCli.addr = addr;
-          if(!exCli.email && email) exCli.email = email;
-          if(isPur && exCli.type === '매출처') exCli.type = '겸용';
-          if(!isPur && exCli.type === '매입처') exCli.type = '겸용';
-        }
-
-        let exItm = (db.items||[]).find(it => normSearch(it.name) === normSearch(cleanCode));
-        if(!exItm && cleanCode !== '기계장비 외' && cleanCode !== '수입/매입품목'){
-          exItm = {
-            id: Date.now() + Math.floor(Math.random()*100000),
-            name: cleanCode, spec: cleanSpec,
-            buyPrice: isPur ? Math.max(0, price) : 0,
-            sellPrice: !isPur ? Math.max(0, price) : 0,
-            initQty: 0, safeQty: 5, cat: vat === 0 ? '면세품목' : '과세품목'
-          };
-          db.items.push(exItm);
-          iAdd++;
-        }
-
-        if(!isPur){
-          const uCost = exItm ? (exItm.buyPrice||0) : Math.round(price*0.75);
-          const newSale = {
-            id: Date.now() + Math.floor(Math.random()*1000000),
-            date: rawDate, client: cliName, vatType: vat === 0 ? 'zero' : 'tax',
-            lines: [{item: cleanCode, spec: cleanSpec, qty, price, sup: sup, vat: vat, uCost}],
-            supply: sup, vat, total: sup + vat, profit: sup - (uCost*qty),
-            paid: (rcp.indexOf('영수') !== -1) ? (sup + vat) : 0,
-            memo: (vat===0 ? '[홈택스면세] ' : '[홈택스세금] ') + (memo || appNo),
-            htxKey: appNo || ''
-          };
-          const sFp = getSaleFp(newSale);
-          if((appNo && existingSaleFps[appNo]) || existingSaleFps[sFp] || (db.deletedFp||[]).includes('S_'+sFp)){ skipCnt++; continue; }
-          existingSaleFps[sFp] = true;
-          if(appNo) existingSaleFps[appNo] = true;
-          db.sales.push(newSale);
-          sAdd++;
-        } else {
-          const newPur = {
-            id: Date.now() + Math.floor(Math.random()*1000000),
-            date: rawDate, client: cliName, currency: 'KRW', rate: 1, custom: 0, freight: 0,
-            lines: [{item: cleanCode, spec: cleanSpec, qty, price, krwAmt: sup, incAmt: 0, uCost: price}],
-            goodsKrw: sup, totalCost: sup, vat,
-            paid: (rcp.indexOf('영수') !== -1) ? (sup + vat) : 0,
-            memo: (vat===0 ? '[홈택스면세매입] ' : '[홈택스매입] ') + (memo || appNo),
-            htxKey: appNo || ''
-          };
-          const pFp = getPurFp(newPur);
-          if((appNo && existingPurFps[appNo]) || existingPurFps[pFp] || (db.deletedFp||[]).includes('P_'+pFp)){ skipCnt++; continue; }
-          existingPurFps[pFp] = true;
-          if(appNo) existingPurFps[appNo] = true;
-          db.purchases.push(newPur);
-          pAdd++;
-        }
+        if(rows.length) invSheets.push(rows);
       }
-    }catch(err){ console.error(err); }
+
+      var itemsByApv = {};
+      itmSheets.forEach(function(rows){
+        var hIdx = -1, hasVatCol = false;
+        for(var i=0; i<Math.min(rows.length, 15); i++){
+          var jn = (rows[i]||[]).join('|');
+          if(jn.indexOf('품목순번') !== -1){
+            hIdx = i;
+            hasVatCol = (jn.indexOf('세액') !== -1 || jn.indexOf('부가세') !== -1);
+            break;
+          }
+        }
+        if(hIdx === -1) return;
+        for(var r=hIdx+1; r<rows.length; r++){
+          var row = rows[r]; if(!row || row.length < 6) continue;
+          var apv = String(row[0]||'').trim(); if(!apv) continue;
+          var iName = normItemStr(row[5]||'물품'), spec = normItemStr(row[6]||'').toUpperCase();
+          var qty = Number(String(row[7]||'1').replace(/[^0-9.-]/g,'')) || 1;
+          var prc = Number(String(row[8]||'0').replace(/[^0-9.-]/g,'')) || 0;
+          var sup = Number(String(row[9]||'0').replace(/[^0-9.-]/g,'')) || 0;
+          var vat = hasVatCol ? (Number(String(row[10]||'0').replace(/[^0-9.-]/g,'')) || 0) : 0;
+          if(prc === 0 && qty !== 0) prc = Math.round(sup / qty);
+          if(!itemsByApv[apv]) itemsByApv[apv] = [];
+          itemsByApv[apv].push({item:iName, spec:spec, qty:qty, price:prc, sup:sup, supply:sup, vat:vat, total:sup+vat, uCost:Math.round(prc*0.75), profit:sup-Math.round(sup*0.75)});
+        }
+      });
+
+      invSheets.forEach(function(rows){
+        var res = parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur);
+        sAdd += res.s; pAdd += res.p; cAdd += res.c; dupSkip += res.d;
+      });
+    }
+    dedupAllData(false);
+    setPeriod('all');
+    saveDB('홈택스일괄등록');
+    renderAll();
+    hideSyncProgress();
+    alert('🏛️ [국세청 홈택스 ' + files.length + '개 파일 등록 완료!]\n\n'
+      + '• 신규 매출전표 등록: ' + fmt(sAdd) + '건\n'
+      + '• 신규 매입전표 등록: ' + fmt(pAdd) + '건\n'
+      + '• 신규 거래처 자동등록: ' + fmt(cAdd) + '곳\n'
+      + '• 중복 자동 건너뜀: ' + fmt(dupSkip) + '건');
+  }finally{
+    hideSyncProgress();
+    isImportingHtx = false;
   }
-
-  dedupAllData(false);
-  setPeriod('all');
-  saveDB('홈택스엑셀연동');
-  renderAll();
-  hideSyncProgress();
-  isImportingHtx = false;
-
-  alert('🎉 [국세청 홈택스 엑셀 통합 연동 완료!]\n\n'
-    + '• 신규 매출 등록: ' + fmt(sAdd) + '건\n'
-    + '• 신규 매입 등록: ' + fmt(pAdd) + '건\n'
-    + '• 신규 거래처 등록: ' + fmt(cAdd) + '곳\n'
-    + '• 신규 품목 등록: ' + fmt(iAdd) + '종\n'
-    + '• 중복 자동 건너뜀: ' + fmt(skipCnt) + '건');
 };
+
+function parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur){
+  var hIdx = -1, sheetIsPur = fileForcePur;
+  var col = {dt:0, apv:1, sBiz:4, sName:6, sCeo:7, sAddr:8, bBiz:9, bName:11, bCeo:12, bAddr:13, tot:14, sup:15, vat:-1, memo:-1, pay:-1, sEm:-1, bEm:-1, itm:-1, spec:-1, qty:-1, prc:-1};
+
+  for(var i=0; i<Math.min(rows.length, 20); i++){
+    var rowTxt = (rows[i]||[]).join('|').replace(/\s+/g,'');
+    if(rowTxt.indexOf('매입전자') !== -1 || rowTxt.indexOf('매입세금') !== -1 || rowTxt.indexOf('매입계산서') !== -1) sheetIsPur = true;
+    if(rowTxt.indexOf('작성일자') !== -1 && (rowTxt.indexOf('공급가액') !== -1 || rowTxt.indexOf('합계금액') !== -1)){
+      hIdx = i;
+      rows[i].forEach(function(h, c){
+        var k = String(h||'').replace(/\s+/g,'');
+        if(k === '작성일자') col.dt = c;
+        else if(k === '승인번호') col.apv = c;
+        else if(k.indexOf('공급자사업자') !== -1 || k.indexOf('공급자등록번호') !== -1) col.sBiz = c;
+        else if(k.indexOf('공급받는자사업자') !== -1 || k.indexOf('공급받는자등록번호') !== -1) col.bBiz = c;
+        else if(k === '합계금액') col.tot = c;
+        else if(k === '공급가액' && col.sup === 15) col.sup = c;
+        else if((k === '세액' || k === '부가세') && col.vat === -1) col.vat = c;
+        else if(k === '비고' && col.memo === -1) col.memo = c;
+        else if(k.indexOf('영수/청구') !== -1) col.pay = c;
+        else if(k.indexOf('공급자이메일') !== -1) col.sEm = c;
+        else if(k.indexOf('공급받는자이메일1') !== -1 || (col.bEm === -1 && k.indexOf('공급받는자이메일') !== -1)) col.bEm = c;
+        else if(k === '품목명' || k === '대표품목명') col.itm = c;
+        else if(k === '품목규격' || k === '규격') col.spec = c;
+        else if(k === '품목수량' || k === '수량') col.qty = c;
+        else if(k === '품목단가' || k === '단가') col.prc = c;
+      });
+      col.sName = col.sBiz + 2; col.sCeo = col.sBiz + 3; col.sAddr = col.sBiz + 4;
+      col.bName = col.bBiz + 2; col.bCeo = col.bBiz + 3; col.bAddr = col.bBiz + 4;
+      break;
+    }
+  }
+  if(hIdx === -1) return {s:0, p:0, c:0, d:0};
+
+  var myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
+  var sAdd = 0, pAdd = 0, cAdd = 0, dup = 0;
+
+  for(var r=hIdx+1; r<rows.length; r++){
+    var row = rows[r]; if(!row || row.length < 12) continue;
+    var rawDt = String(row[col.dt]||'').replace(/[^0-9]/g,'');
+    if(rawDt.length !== 8) continue;
+    var dt = rawDt.slice(0,4) + '-' + rawDt.slice(4,6) + '-' + rawDt.slice(6,8);
+    var sup = Number(String(row[col.sup]||'0').replace(/[^0-9.-]/g,'')) || 0;
+    var vat = col.vat !== -1 ? (Number(String(row[col.vat]||'0').replace(/[^0-9.-]/g,'')) || 0) : 0;
+    if(sup === 0 && vat === 0) continue;
+
+    var sB = String(row[col.sBiz]||'').replace(/[^0-9]/g,'');
+    var bB = String(row[col.bBiz]||'').replace(/[^0-9]/g,'');
+    var isPur = sheetIsPur || (bB === myBiz && sB !== myBiz);
+
+    var rawBiz = isPur ? sB : (bB || sB);
+    var fmtBiz = rawBiz.length === 10 ? (rawBiz.slice(0,3)+'-'+rawBiz.slice(3,5)+'-'+rawBiz.slice(5)) : String(isPur ? row[col.sBiz] : row[col.bBiz]).trim();
+    var cName = String(isPur ? (row[col.sName]||'매입처') : (row[col.bName]||'매출처')).trim();
+    var cCeo  = String(isPur ? (row[col.sCeo]||'') : (row[col.bCeo]||'')).trim();
+    var cAddr = String(isPur ? (row[col.sAddr]||'') : (row[col.bAddr]||'')).trim();
+    var cEm   = String(isPur ? (col.sEm!==-1?row[col.sEm]:'') : (col.bEm!==-1?row[col.bEm]:'')).trim();
+    var apv   = String(row[col.apv]||'').trim();
+
+    var exCli = db.clients.find(function(x){ return (fmtBiz && x.bizNo === fmtBiz) || normSearch(x.name) === normSearch(cName); });
+    var targetType = isPur ? '매입처' : '매출처';
+    if(!exCli){
+      db.clients.push({
+        id: Date.now() + r + Math.random(),
+        code: 'C-' + String(db.clients.length + 1).padStart(3,'0'),
+        type: targetType, name: cName, bizNo: fmtBiz, ceo: cCeo,
+        bizType: '', bizItem: '', tel: '', email: cEm, addr: cAddr,
+        initAr: 0, initAp: 0, initUnpaid: 0, initPayable: 0, memo: ''
+      });
+      cAdd++;
+    } else {
+      cName = exCli.name;
+      if(exCli.type && exCli.type !== targetType && exCli.type !== '겸용') exCli.type = '겸용';
+      if(!exCli.bizNo && fmtBiz) exCli.bizNo = fmtBiz;
+      if(!exCli.ceo && cCeo) exCli.ceo = cCeo;
+      if(!exCli.addr && cAddr) exCli.addr = cAddr;
+      if(!exCli.email && cEm) exCli.email = cEm;
+    }
+
+    var lines = itemsByApv[apv];
+    if(!lines || !lines.length){
+      var itm = normItemStr(col.itm !== -1 && row[col.itm] ? row[col.itm] : (isPur ? '매입물품' : '매출물품'));
+      var spec = normItemStr(col.spec !== -1 && row[col.spec] ? row[col.spec] : '').toUpperCase();
+      var qty = col.qty !== -1 ? (Number(String(row[col.qty]||'1').replace(/[^0-9.-]/g,'')) || 1) : 1;
+      var prc = col.prc !== -1 ? (Number(String(row[col.prc]||'0').replace(/[^0-9.-]/g,'')) || Math.round(sup/qty)) : Math.round(sup/qty);
+      lines = [{item:itm, spec:spec, qty:qty, price:prc, sup:sup, supply:sup, vat:vat, total:sup+vat, uCost:Math.round(prc*0.75), profit:sup-Math.round(sup*0.75)}];
+    }
+
+    lines.forEach(function(l){
+      var matched = matchStandardItem(l.item, l.spec, l.price);
+      if(matched) l.item = matched;
+    });
+
+    ensureClientAndItems(cName, targetType, lines.map(function(l){ return {item:l.item, spec:l.spec, price:l.price}; }), isPur);
+
+    var tot = sup + vat;
+    var memoTxt = col.memo !== -1 ? String(row[col.memo]||'').trim() : '';
+
+    if(isPur){
+      var pLines = lines.map(function(l){
+        return {item:l.item, spec:l.spec||'', qty:l.qty, price:l.price, krwAmt:l.supply||l.sup||sup, incAmt:0, uCost:l.price, unitForeign:l.price, foreignAmt:l.supply||l.sup||sup, krwBase:l.supply||l.sup||sup, extraAlloc:0, totalCost:l.supply||l.sup||sup, unitCost:l.price};
+      });
+      var newP = {
+        id: Date.now() + r + Math.random(), htxKey: apv, date: dt,
+        type: '국내매입', client: cName, currency: 'KRW', rate: 1, custom: 0, freight: 0,
+        goodsKrw: sup, totalCost: sup, vat: vat, total: tot, paid: tot, payable: 0, memo: memoTxt, lines: pLines
+      };
+      var pFp = getPurFp(newP);
+      if(existKeys['FP_P_' + pFp] || (apv && existKeys['APV_P_' + apv])){ dup++; continue; }
+      existKeys['FP_P_' + pFp] = true; if(apv) existKeys['APV_P_' + apv] = true;
+      db.purchases.push(newP);
+      pAdd++;
+    } else {
+      var pf = lines.reduce(function(a,b){ return a + (b.profit||0); }, 0);
+      var newS = {
+        id: Date.now() + r + Math.random(), htxKey: apv, date: dt,
+        client: cName, vatType: vat===0 ? 'zero' : 'tax', payMethod: '계좌이체', memo: memoTxt,
+        supply: sup, vat: vat, total: tot, paid: tot, unpaid: 0, profit: pf, lines: lines
+      };
+      var sFp = getSaleFp(newS);
+      if(existKeys['FP_S_' + sFp] || (apv && existKeys['APV_S_' + apv])){ dup++; continue; }
+      existKeys['FP_S_' + sFp] = true; if(apv) existKeys['APV_S_' + apv] = true;
+      db.sales.push(newS);
+      sAdd++;
+    }
+  }
+  return {s:sAdd, p:pAdd, c:cAdd, d:dup};
+}
 
 window.addEventListener('dragover', e => {
   e.preventDefault();
@@ -5325,13 +5454,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   if(sGet('ora_senior_mode') === '1') toggleSeniorMode(true);
   if(sGet('ora_hide_profit') === '1') toggleHideProfit(true);
 
-  const raw = sGet(DB_KEY);
-  if(raw){
-    try{ db = JSON.parse(raw); }catch(e){}
-  } else {
-    const idbData = await idbLoad();
-    if(idbData && (idbData.sales || idbData.clients)) db = idbData;
-  }
+  await recoverBestLocalDB();
 
   normDB();
   loadCompForm();
@@ -5344,6 +5467,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   resetEstForm();
   resetPurForm();
   checkInitialLock();
+
+  if(scoreDB(db) > 0){
+    idbSave(db);
+  }
 });
 </script>
 </body>
