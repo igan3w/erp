@@ -8574,5 +8574,202 @@ window.clearDoneFamilyMemos = function(){
   };
 })();
 </script>
+  <script>
+// ==================== 🌐 홈페이지·신형웹 버튼 생성 및 모달 연결 패치 ====================
+(function(){
+  function attachWebSyncButtons(){
+    // 1) 상단바에 [🌐 홈페이지·신형웹] 버튼 장착
+    var topRight = document.querySelector('.topbar > div:last-child');
+    if(topRight && !document.getElementById('btnTopWebSync')){
+      var wb = document.createElement('button');
+      wb.id = 'btnTopWebSync';
+      wb.className = 'btn-s';
+      wb.style.cssText = 'background:linear-gradient(90deg,#0052d4,#4364f7);border:2px solid #fff;font-weight:900;color:#fff';
+      wb.innerHTML = '🌐 홈페이지·신형웹';
+      wb.title = 'orawinch.co.kr 시리즈 제원표 개별품목 자동분해 & 신형 반응형 홈페이지 생성';
+      wb.onclick = function(){ window.openWebSyncModal(); };
+      topRight.insertBefore(wb, topRight.firstChild);
+    }
+
+    // 2) [📦 품목·세트·단가이력] 탭 상단에도 버튼 장착
+    var itmHdr = document.querySelector('#t-itm .panel:nth-child(2) .ph div');
+    if(itmHdr && !document.getElementById('btnItmWebSync')){
+      var ib = document.createElement('button');
+      ib.id = 'btnItmWebSync';
+      ib.className = 'btn-s';
+      ib.style.cssText = 'background:#0052d4;border:1px solid #fff;font-weight:900;color:#fff';
+      ib.innerHTML = '🌐 홈페이지품목가져오기';
+      ib.onclick = function(){ window.openWebSyncModal(); };
+      itmHdr.insertBefore(ib, itmHdr.firstChild);
+    }
+  }
+
+  window.openWebSyncModal = function(){
+    if(typeof window.renderWebSyncTable === 'function') window.renderWebSyncTable();
+    var m = document.getElementById('webSyncModal');
+    if(m) m.style.display = 'flex';
+  };
+
+  window.toggleAllWebSyncChk = function(checked){
+    document.querySelectorAll('.wsChk').forEach(function(el){ el.checked = checked; });
+  };
+
+  function buildModernHomepageHtmlString(){
+    var comp = (window.db && window.db.comp) ? window.db.comp : { name:'오라테크', ceo:'김향래', bizNo:'104-05-66181', email:'orawinch@kakao.com' };
+    var merged = (window.ORAWINCH_WEB_CATALOG || []).slice();
+    ((window.db && window.db.items) || []).forEach(function(it){
+      if(!it || !it.name) return;
+      var ex = merged.find(function(m){ return normSearch(m.code) === normSearch(it.name); });
+      if(ex){
+        if(it.sellPrice > 0) ex.price = it.sellPrice;
+        if(it.photo) ex.img = it.photo;
+      } else {
+        merged.push({
+          cat: it.cat || '운반하역장비',
+          code: it.name,
+          name: it.specNote ? it.specNote.split(']')[0].replace('[','') : (it.name + ' 장비'),
+          cap: it.spec || '표준사양',
+          rope: '-',
+          power: it.specNote || '오라테크 정품 보증',
+          price: it.sellPrice || 0,
+          img: it.photo || 'http://www.orawinch.co.kr/main/images/mvi/mvi02.png'
+        });
+      }
+    });
+
+    var catalogJson = JSON.stringify(merged).replace(/<\/script/gi, '<\\/script');
+
+    return '<!DOCTYPE html>\n<html lang="ko">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n'
+      + '<title>' + esc(comp.name) + ' (ORATECH) - 윈치·호이스트·운반하역기계 공식 홈페이지</title>\n'
+      + '<style>\n'
+      + ':root{--pri:#0f2027;--sec:#203a43;--acc:#e67e22;--blu:#0984e3;--bg:#f4f7f9}\n'
+      + '*{box-sizing:border-box;margin:0;padding:0;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}\n'
+      + 'body{background:var(--bg);color:#111;line-height:1.6}\n'
+      + 'header{background:linear-gradient(90deg,#0f2027,#203a43,#2c5364);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 4px 15px rgba(0,0,0,0.25)}\n'
+      + '.hdr-in{max-width:1320px;margin:0 auto;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}\n'
+      + '.logo{font-size:24px;font-weight:900;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}\n'
+      + '.logo span{background:var(--acc);font-size:12px;padding:3px 8px;border-radius:4px}\n'
+      + '.call-box{display:flex;gap:10px;align-items:center;flex-wrap:wrap}\n'
+      + '.btn{padding:9px 16px;border-radius:6px;font-weight:900;cursor:pointer;border:none;font-size:13.5px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s}\n'
+      + '.btn-acc{background:var(--acc);color:#fff}.btn-blu{background:var(--blu);color:#fff}.btn-w{background:#fff;color:#111;border:1px solid #cbd5e1}\n'
+      + '.hero{background:linear-gradient(135deg,rgba(15,32,39,0.92),rgba(44,83,100,0.88)),url("http://www.orawinch.co.kr/main/images/mvi/mvi02.png") center/cover;color:#fff;padding:54px 20px;text-align:center}\n'
+      + '.hero h1{font-size:34px;font-weight:900;margin-bottom:10px;color:#ffd32a}\n'
+      + '.hero p{font-size:16.5px;max-width:780px;margin:0 auto 22px auto;color:#e2e8f0}\n'
+      + '.wrap{max-width:1320px;margin:0 auto;padding:24px 20px}\n'
+      + '.cat-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;justify-content:center}\n'
+      + '.cat-pill{padding:9px 16px;border-radius:25px;background:#fff;border:1.5px solid #cbd5e1;font-weight:900;font-size:13.5px;cursor:pointer;transition:.15s}\n'
+      + '.cat-pill.active,.cat-pill:hover{background:#142d4c;color:#fff;border-color:#142d4c}\n'
+      + '.search-bar{max-width:640px;margin:0 auto 24px auto;display:flex;gap:8px}\n'
+      + '.search-bar input{flex:1;padding:12px 16px;font-size:15px;border:2px solid #142d4c;border-radius:8px;outline:none}\n'
+      + '.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}\n'
+      + '.card{background:#fff;border-radius:10px;overflow:hidden;border:1px solid #dce3eb;box-shadow:0 3px 10px rgba(0,0,0,0.05);display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s}\n'
+      + '.card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,0.12);border-color:var(--blu)}\n'
+      + '.card-img{height:200px;background:#fff;display:flex;align-items:center;justify-content:center;padding:12px;border-bottom:1px solid #eee;position:relative}\n'
+      + '.card-img img{max-height:100%;max-width:100%;object-fit:contain}\n'
+      + '.card-cat{position:absolute;top:10px;left:10px;background:#142d4c;color:#fff;font-size:11px;font-weight:bold;padding:3px 9px;border-radius:12px}\n'
+      + '.card-body{padding:15px}\n'
+      + '.card-code{font-size:19px;font-weight:900;color:#142d4c}\n'
+      + '.card-name{font-size:13.5px;font-weight:bold;color:#555;margin-bottom:8px}\n'
+      + '.spec-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;font-size:12.5px;margin-bottom:10px}\n'
+      + '.card-ft{padding:12px 15px;background:#f8fafc;border-top:1px solid #edf2f7;display:flex;justify-content:space-between;align-items:center}\n'
+      + 'footer{background:#0f2027;color:#cbd5e1;padding:36px 20px;margin-top:50px;font-size:13.5px}\n'
+      + '.admin-bar{display:none;background:#fff8e6;border:2px solid #f39c12;padding:15px;border-radius:10px;margin-bottom:20px}\n'
+      + '</style>\n</head>\n<body>\n'
+      + '<header><div class="hdr-in">\n'
+      + '  <div class="logo">🌐 오라테크 ORATECH <span>운반하역기계·윈치·호이스트 전문</span></div>\n'
+      + '  <div class="call-box">\n'
+      + '    <a href="tel:1600-5157" class="btn btn-acc">📞 대표전화 1600-5157</a>\n'
+      + '    <a href="tel:02-2266-0989" class="btn btn-blu">☎️ 매장 02-2266-0989</a>\n'
+      + '    <button class="btn btn-w" onclick="openCartModal()">🛒 견적바구니 (<span id="cartCnt">0</span>)</button>\n'
+      + '    <button class="btn btn-w" onclick="toggleAdminMode()">🔑 관리자모드</button>\n'
+      + '  </div>\n'
+      + '</div></header>\n'
+      + '<section class="hero">\n'
+      + '  <h1>대한민국 윈치·호이스트·운반하역기계 NO.1 파트너</h1>\n'
+      + '  <p>포터블 엔진윈치(PCW), 파워업·컴업 전동윈치, 호이스트, 체인블럭, 전동스태커 직수입·제작·설치·A/S 전문기업 오라테크입니다.</p>\n'
+      + '</section>\n'
+      + '<div class="wrap" id="prodSec">\n'
+      + '  <div class="admin-bar" id="adminPanel">\n'
+      + '    <h3 style="color:#d35400;margin-bottom:8px">🔑 오라테크 홈페이지 관리자 페이지 (신제품 등록 / 삭제 / 파일 저장)</h3>\n'
+      + '    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:8px">\n'
+      + '      <input id="admCat" placeholder="분류 (예: 엔진윈치)" style="padding:8px">\n'
+      + '      <input id="admCode" placeholder="모델코드 (예: PCW-5000)" style="padding:8px">\n'
+      + '      <input id="admName" placeholder="제품명 (예: 포터블 엔진윈치)" style="padding:8px">\n'
+      + '      <input id="admCap" placeholder="정격용량 (예: 직선 1톤)" style="padding:8px">\n'
+      + '      <input id="admPower" placeholder="상세제원 (로프/전원/중량)" style="padding:8px">\n'
+      + '      <input id="admImg" placeholder="사진 이미지 URL" style="padding:8px">\n'
+      + '    </div>\n'
+      + '    <div style="display:flex;gap:8px;justify-content:flex-end">\n'
+      + '      <button class="btn btn-acc" onclick="adminSaveProduct()">➕ 제품 추가/수정 반영</button>\n'
+      + '      <button class="btn btn-blu" onclick="adminDownloadUpdatedSite()">💾 수정된 홈페이지 HTML 통째로 저장</button>\n'
+      + '    </div>\n'
+      + '  </div>\n'
+      + '  <div class="search-bar">\n'
+      + '    <input id="qIn" placeholder="찾으시는 모델명(예: YT-180, PCW-5000, PU-300, 호이스트, 1톤)을 입력하세요..." oninput="renderCards()">\n'
+      + '  </div>\n'
+      + '  <div class="cat-bar" id="catBar"></div>\n'
+      + '  <div class="grid" id="prodGrid"></div>\n'
+      + '</div>\n'
+      + '<footer><div style="max-width:1320px;margin:0 auto;display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px">\n'
+      + '  <div><b style="font-size:18px;color:#fff">오라테크 (ORATECH)</b> | 대표자: ' + esc(comp.ceo) + ' | 사업자등록번호: ' + esc(comp.bizNo) + '<br>\n'
+      + '  본사/매장: 서울특별시 중구 청계천로 110, 1층(수표동 11-9)<br>\n'
+      + '  대표전화: 1600-5157, 02-2266-0989 | 팩스: 02-2264-8272 | 이메일: orawinch@naver.com</div>\n'
+      + '  <div style="text-align:right">Copyright © 2026 ORATECH All rights reserved.</div>\n'
+      + '</div></footer>\n'
+      + '<script>\n'
+      + 'var ITEMS = ' + catalogJson + ';\n'
+      + 'var curCat = "ALL", isAdmin = false, cart = [];\n'
+      + 'function renderCats(){\n'
+      + '  var cats = ["ALL","엔진윈치","전동윈치","미니/특수윈치","수동/DC/유압윈치","호이스트","수동하역제품","크레인/구조물","운반하역유압"];\n'
+      + '  document.getElementById("catBar").innerHTML = cats.map(function(c){\n'
+      + '    return "<div class=\\"cat-pill "+(curCat===c?"active":"")+"\\" onclick=\\"curCat=\'"+c+"\';renderCats();renderCards()\\">"+(c==="ALL"?"전체 제품보기 ("+ITEMS.length+")":c)+"</div>";\n'
+      + '  }).join("");\n'
+      + '}\n'
+      + 'function renderCards(){\n'
+      + '  var kw = (document.getElementById("qIn").value||"").toLowerCase();\n'
+      + '  var list = ITEMS.filter(function(x){ return (curCat==="ALL" || x.cat===curCat) && (!kw || (x.code+" "+x.name+" "+x.cap+" "+x.power).toLowerCase().indexOf(kw)!==-1); });\n'
+      + '  document.getElementById("prodGrid").innerHTML = list.map(function(x){\n'
+      + '    return "<div class=\\"card\\"><div><div class=\\"card-img\\"><span class=\\"card-cat\\">"+x.cat+"</span><img src=\\""+x.img+"\\"></div>"\n'
+      + '      + "<div class=\\"card-body\\"><div class=\\"card-code\\">"+x.code+"</div><div class=\\"card-name\\">"+x.name+"</div>"\n'
+      + '      + "<div class=\\"spec-box\\"><div>• <b>사용용량:</b> <span style=\\"color:#d63031;font-weight:bold\\">"+x.cap+"</span></div><div>• <b>와이어/로프:</b> "+(x.rope||"-")+"</div><div>• <b>상세사양:</b> "+(x.power||"-")+"</div></div></div></div>"\n'
+      + '      + "<div class=\\"card-ft\\"><span style=\\"font-weight:900;color:#0984e3\\">📞 단가문의</span>"\n'
+      + '      + "<div style=\\"display:flex;gap:4px\\"><button class=\\"btn btn-acc\\" style=\\"padding:6px 12px;font-size:12px\\" onclick=\\"addToCart(\'"+x.code+"\')\\">🛒 견적담기</button>"\n'
+      + '      + (isAdmin ? "<button class=\\"btn btn-w\\" style=\\"padding:6px 8px;font-size:12px;color:red\\" onclick=\\"ITEMS.splice("+ITEMS.indexOf(x)+",1);renderCards()\\">삭제</button>" : "") + "</div></div></div>";\n'
+      + '  }).join("");\n'
+      + '}\n'
+      + 'function addToCart(code){ cart.push(code); document.getElementById("cartCnt").innerText = cart.length; alert("["+code+"] 모델이 견적바구니에 담겼습니다!"); }\n'
+      + 'function openCartModal(){ if(!cart.length){ alert("담긴 제품이 없습니다."); return; } prompt("아래 내용을 복사해 문의주세요:", "[오라테크 견적문의] 모델: "+cart.join(", ")); }\n'
+      + 'function toggleAdminMode(){ if(!isAdmin && prompt("관리자 암호(0000):")!=="0000") return; isAdmin=!isAdmin; document.getElementById("adminPanel").style.display=isAdmin?"block":"none"; renderCards(); }\n'
+      + 'function adminSaveProduct(){ var c=document.getElementById("admCode").value.trim(); if(!c)return; ITEMS.unshift({cat:document.getElementById("admCat").value||"전동윈치",code:c,name:document.getElementById("admName").value||c,cap:document.getElementById("admCap").value||"표준",rope:"-",power:document.getElementById("admPower").value||"-",img:document.getElementById("admImg").value||""}); renderCards(); }\n'
+      + 'function adminDownloadUpdatedSite(){ var h=document.documentElement.outerHTML.replace(/var ITEMS = \\[.*?\\];/,"var ITEMS = "+JSON.stringify(ITEMS)+";"); var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([h],{type:"text/html"})); a.download="index.html"; a.click(); }\n'
+      + 'renderCats(); renderCards();\n'
+      + '<\/script>\n</body>\n</html>';
+  }
+
+  window.previewModernHomepageModal = function(){
+    var html = buildModernHomepageHtmlString();
+    var frame = document.getElementById('webPreviewFrame');
+    if(frame){
+      frame.srcdoc = html;
+      document.getElementById('webPreviewModal').style.display = 'flex';
+    }
+  };
+
+  window.generateModernHomepageFile = function(){
+    var html = buildModernHomepageHtmlString();
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'orawinch_new_website.html';
+    a.click();
+  };
+
+  if(document.readyState === 'loading'){
+    window.addEventListener('DOMContentLoaded', attachWebSyncButtons);
+  } else {
+    attachWebSyncButtons();
+  }
+})();
+</script>
 </body>
 </html>
