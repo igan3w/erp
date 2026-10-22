@@ -8574,10 +8574,41 @@ window.clearDoneFamilyMemos = function(){
   };
 })();
 </script>
- <script>
-// ==================== 🌐 오라테크 2026 플래그십 신형 홈페이지 & ERP 동기화 엔진 (v47 Premium Design) ====================
+<script>
+// ==================== 🌐 오라테크 ERP 리브랜딩(로고+명칭) & 정통 B2B 기업 공식 홈페이지 빌더 (v48 Corporate Trust Edition) ====================
 (function(){
-  // 1) http:// 이미지를 https:// 환경(github.io)에서도 깨짐 없이 고화질로 불러오는 헬퍼
+  // 1) ERP 전체 이름을 "오라테크 ERP"로 변경하고 공식 로고(ORA_LOGO)를 상단바·잠금화면에 부착
+  function applyOratechErpBranding(){
+    document.title = '오라테크 ERP';
+
+    // 상단바 브랜드 영역에 공식 로고 + "오라테크 ERP" 적용 (기존 클라우드/백업/환율 배지는 그대로 보존)
+    var brandEl = document.querySelector('.topbar .brand');
+    if(brandEl && !document.getElementById('oraBrandLogoImg')){
+      var badges = Array.from(brandEl.querySelectorAll('span[id]'));
+      brandEl.innerHTML = '';
+
+      var logoWrap = document.createElement('div');
+      logoWrap.style.cssText = 'display:inline-flex;align-items:center;gap:10px;margin-right:6px';
+      logoWrap.innerHTML = '<img id="oraBrandLogoImg" src="' + ORA_LOGO + '" alt="오라테크" style="height:30px;background:#fff;padding:3px 8px;border-radius:6px;border:1.5px solid #cbd5e1;object-fit:contain;box-shadow:0 2px 6px rgba(0,0,0,0.2)">'
+        + '<strong style="font-size:17px;font-weight:900;color:#fff;letter-spacing:-0.5px">오라테크 ERP</strong>';
+      brandEl.appendChild(logoWrap);
+
+      badges.forEach(function(b){ brandEl.appendChild(b); });
+    }
+
+    // 보안 잠금화면에도 공식 로고 + "오라테크 ERP" 적용
+    var lockBox = document.querySelector('#lockScreen > div');
+    if(lockBox && !document.getElementById('oraLockLogoImg')){
+      var firstIcon = lockBox.querySelector('div');
+      if(firstIcon){
+        firstIcon.innerHTML = '<img id="oraLockLogoImg" src="' + ORA_LOGO + '" alt="오라테크" style="height:44px;object-fit:contain;margin-bottom:4px">';
+      }
+      var h2 = lockBox.querySelector('h2');
+      if(h2) h2.innerText = '오라테크 ERP';
+    }
+  }
+
+  // 2) http:// 이미지를 https:// 환경(github.io)에서도 깨짐 없이 불러오는 헬퍼
   window.toSafeHttpsImg = function(url){
     if(!url) return '';
     var u = String(url).trim();
@@ -8588,7 +8619,6 @@ window.clearDoneFamilyMemos = function(){
     return u;
   };
 
-  // 기존 카탈로그 이미지들을 HTTPS 안전 주소 및 시리즈별 실제 이미지로 보강
   function upgradeCatalogImages(){
     if(!Array.isArray(window.ORAWINCH_WEB_CATALOG)) return;
     var imgMap = {
@@ -8616,15 +8646,17 @@ window.clearDoneFamilyMemos = function(){
   }
 
   function attachWebSyncButtons(){
+    applyOratechErpBranding();
     upgradeCatalogImages();
+
     var topRight = document.querySelector('.topbar > div:last-child');
     if(topRight && !document.getElementById('btnTopWebSync')){
       var wb = document.createElement('button');
       wb.id = 'btnTopWebSync';
       wb.className = 'btn-s';
-      wb.style.cssText = 'background:linear-gradient(90deg,#2563eb,#1d4ed8);border:2px solid #fff;font-weight:900;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.4)';
+      wb.style.cssText = 'background:linear-gradient(90deg,#0A2463,#1D4ED8);border:2px solid #fff;font-weight:900;color:#fff;box-shadow:0 2px 8px rgba(10,36,99,0.4)';
       wb.innerHTML = '🌐 홈페이지·신형웹';
-      wb.title = 'orawinch.co.kr 제품 ERP 동기화 & 2026 플래그십 신형 홈페이지 빌더';
+      wb.title = 'orawinch.co.kr 제품 ERP 동기화 & 오라테크 공식 기업 홈페이지 빌더';
       wb.onclick = function(){ window.openWebSyncModal(); };
       topRight.insertBefore(wb, topRight.firstChild);
     }
@@ -8634,7 +8666,7 @@ window.clearDoneFamilyMemos = function(){
       var ib = document.createElement('button');
       ib.id = 'btnItmWebSync';
       ib.className = 'btn-s';
-      ib.style.cssText = 'background:#2563eb;border:1px solid #fff;font-weight:900;color:#fff';
+      ib.style.cssText = 'background:#0A2463;border:1px solid #fff;font-weight:900;color:#fff';
       ib.innerHTML = '🌐 홈페이지품목가져오기';
       ib.onclick = function(){ window.openWebSyncModal(); };
       itmHdr.insertBefore(ib, itmHdr.firstChild);
@@ -8653,11 +8685,16 @@ window.clearDoneFamilyMemos = function(){
   };
 
   // =========================================================================
-  // 🎨 2026 플래그십 B2B 산업장비 홈페이지 생성기 (Hilti / KITO / Modern Tech 스타일)
+  // 🏢 오라테크 정통 B2B 기업 공식 홈페이지 생성기 (밝고 신뢰감 있는 화이트·로얄블루·그린·레드 톤앤매너)
   // =========================================================================
   function buildModernHomepageHtmlString(){
     upgradeCatalogImages();
-    var comp = (window.db && window.db.comp) ? window.db.comp : { name:'오라테크', ceo:'김향래', bizNo:'104-05-66181', email:'orawinch@kakao.com', tel:'02-2266-0989', addr:'서울특별시 중구 청계천로 110, 1층(수표동)' };
+    var comp = (window.db && window.db.comp) ? window.db.comp : {
+      name:'오라테크', ceo:'김향래', bizNo:'104-05-66181',
+      email:'orawinch@kakao.com', tel:'02-2266-0989',
+      addr:'서울특별시 중구 청계천로 110, 1층(수표동)',
+      bank:'우리은행 011-058791-12-001 (예금주: 김향래)'
+    };
     var merged = (window.ORAWINCH_WEB_CATALOG || []).slice();
 
     ((window.db && window.db.items) || []).forEach(function(it){
@@ -8687,364 +8724,521 @@ window.clearDoneFamilyMemos = function(){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${esc(comp.name)} (ORATECH) — 대한민국 윈치·호이스트·운반하역기계 공식 솔루션</title>
+<title>${esc(comp.name)} (ORATECH) — 윈치·호이스트·운반하역기계 전문기업</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <style>
 :root {
-  --bg-main: #F8FAFC;
-  --bg-dark: #090D16;
-  --bg-navy: #0F172A;
-  --pri: #FF5500;
-  --pri-hover: #E04800;
-  --blu: #2563EB;
-  --txt-main: #0F172A;
-  --txt-sub: #475569;
-  --txt-muted: #94A3B8;
-  --bdr: #E2E8F0;
-  --radius-lg: 16px;
-  --radius-md: 12px;
-  --shadow-sm: 0 2px 8px rgba(15,23,42,0.04);
-  --shadow-md: 0 10px 30px rgba(15,23,42,0.08);
-  --shadow-lg: 0 20px 40px rgba(15,23,42,0.14);
+  /* 오라테크 공식 로고(네이비·그린·레드) 기반의 밝고 신뢰감 있는 기업 컬러 시스템 */
+  --ora-navy: #001B5E;
+  --ora-blue: #1D4ED8;
+  --ora-light-blue: #EFF6FF;
+  --ora-green: #15803D;
+  --ora-red: #C81E1E;
+  --bg-white: #FFFFFF;
+  --bg-soft: #F4F7FB;
+  --txt-dark: #0F172A;
+  --txt-body: #334155;
+  --txt-muted: #64748B;
+  --bdr: #DCE3EE;
+  --shadow-sm: 0 2px 10px rgba(0,27,94,0.05);
+  --shadow-md: 0 10px 28px rgba(0,27,94,0.09);
+  --shadow-lg: 0 20px 45px rgba(0,27,94,0.14);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; }
-body { background: var(--bg-main); color: var(--txt-main); line-height: 1.5; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-a { text-decoration: none; color: inherit; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
+body { background: var(--bg-white); color: var(--txt-dark); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 button, input, select, textarea { font-family: inherit; outline: none; }
 
-/* 1. Top Utility Bar */
-.util-bar { background: var(--bg-dark); color: #CBD5E1; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.util-in { max-width: 1400px; margin: 0 auto; padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-.util-badge { background: var(--pri); color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 6px; }
+/* 1. 상단 기업 안내 바 */
+.top-info-bar { background: var(--ora-navy); color: #E2E8F0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.top-info-in { max-width: 1360px; margin: 0 auto; padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.top-badge { background: var(--ora-green); color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 11.5px; margin-right: 8px; }
 
-/* 2. Glassmorphism Header */
-header { position: sticky; top: 0; z-index: 500; background: rgba(255,255,255,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--bdr); transition: .2s; }
-.hdr-in { max-width: 1400px; margin: 0 auto; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.brand-box { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-.brand-mark { background: linear-gradient(135deg, #0F172A, #1E293B); color: #fff; font-weight: 900; font-size: 22px; padding: 8px 14px; border-radius: 10px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px; border-left: 4px solid var(--pri); }
-.brand-mark span { color: var(--pri); }
-.brand-sub { font-size: 12px; color: var(--txt-sub); font-weight: 700; line-height: 1.3; }
-.nav-links { display: flex; gap: 28px; font-weight: 700; font-size: 15px; color: var(--txt-main); }
-.nav-links a:hover { color: var(--pri); }
-.hdr-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 10px; font-weight: 800; font-size: 13.5px; cursor: pointer; border: none; transition: all .18s ease; white-space: nowrap; }
-.btn-pri { background: var(--pri); color: #fff; box-shadow: 0 4px 14px rgba(255,85,0,0.3); }
-.btn-pri:hover { background: var(--pri-hover); transform: translateY(-1px); }
-.btn-navy { background: var(--bg-navy); color: #fff; }
-.btn-navy:hover { background: #1E293B; transform: translateY(-1px); }
-.btn-outline { background: #fff; color: var(--txt-main); border: 1.5px solid #CBD5E1; }
-.btn-outline:hover { border-color: var(--txt-main); background: #F8FAFC; }
-.cart-pill { background: var(--pri); color: #fff; font-size: 11.5px; padding: 2px 7px; border-radius: 20px; margin-left: 2px; }
+/* 2. 화이트 공식 헤더 (로고 일체형) */
+header { position: sticky; top: 0; z-index: 500; background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); border-bottom: 2px solid var(--ora-navy); box-shadow: var(--shadow-sm); }
+.hdr-in { max-width: 1360px; margin: 0 auto; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo-area { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.logo-area img { height: 46px; object-fit: contain; }
+.logo-divider { width: 1.5px; height: 32px; background: #CBD5E1; }
+.logo-sub { font-size: 12.5px; font-weight: 800; color: var(--ora-navy); line-height: 1.35; }
+.logo-sub span { color: var(--ora-red); font-weight: 900; }
 
-/* 3. Cinematic Hero Section */
-.hero { background: radial-gradient(circle at 80% 20%, #1E293B 0%, #090D16 70%); color: #fff; padding: 64px 24px 96px 24px; position: relative; overflow: hidden; }
-.hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,85,0,0.08) 1px, transparent 1px), linear-gradient(rgba(255,85,0,0.08) 1px, transparent 1px); background-size: 48px 48px; opacity: 0.35; pointer-events: none; }
-.hero-in { max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 40px; align-items: center; }
-@media(max-width: 960px) { .hero-in { grid-template-columns: 1fr; } .nav-links { display: none; } }
-.hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,85,0,0.15); border: 1px solid rgba(255,85,0,0.4); color: #FF7A33; font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 30px; margin-bottom: 18px; }
-.hero h1 { font-size: clamp(28px, 4vw, 46px); font-weight: 900; line-height: 1.2; letter-spacing: -1px; margin-bottom: 16px; }
-.hero h1 em { font-style: normal; color: #FF6B2B; }
-.hero p { font-size: 16.5px; color: #94A3B8; max-width: 620px; margin-bottom: 28px; line-height: 1.65; }
-.hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 24px; max-width: 640px; }
-.stat-num { font-size: 24px; font-weight: 900; color: #fff; }
-.stat-num span { color: var(--pri); }
-.stat-lbl { font-size: 12px; color: #94A3B8; font-weight: 600; margin-top: 2px; }
-.hero-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.14); border-radius: 20px; padding: 26px; box-shadow: 0 25px 50px rgba(0,0,0,0.4); }
-.hero-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 6px; color: #fff; display: flex; align-items: center; gap: 8px; }
-.hero-card p { font-size: 13px; color: #CBD5E1; margin-bottom: 16px; }
-.quick-finder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.qf-item { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 12px; }
-.qf-item label { display: block; font-size: 11px; color: #94A3B8; font-weight: 700; margin-bottom: 4px; }
-.qf-item select { width: 100%; background: transparent; color: #fff; border: none; font-size: 13.5px; font-weight: 800; cursor: pointer; }
-.qf-item select option { color: #000; }
+/* 상단 메뉴 (iframe 내에서도 절대 ERP로 튕기지 않는 안전한 버튼 네비게이션) */
+.gnb { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.gnb-btn { background: transparent; border: none; padding: 10px 16px; font-size: 15.5px; font-weight: 800; color: var(--txt-dark); cursor: pointer; border-radius: 8px; transition: .18s; position: relative; }
+.gnb-btn:hover { color: var(--ora-blue); background: var(--ora-light-blue); }
+.gnb-btn.active { color: var(--ora-navy); background: var(--ora-light-blue); font-weight: 900; }
+.gnb-btn.active::after { content: ""; position: absolute; bottom: 0; left: 14px; right: 14px; height: 3px; background: var(--ora-red); border-radius: 3px; }
 
-/* 4. Floating Smart Filter Console */
-.console-wrap { max-width: 1400px; margin: -48px auto 32px auto; padding: 0 24px; position: relative; z-index: 10; }
-.console-box { background: #fff; border-radius: 20px; padding: 24px; box-shadow: var(--shadow-lg); border: 1px solid var(--bdr); }
-.search-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
-.search-input-wrap { flex: 1; min-width: 260px; position: relative; }
-.search-input-wrap input { width: 100%; padding: 14px 18px 14px 44px; font-size: 15.5px; font-weight: 600; border: 2px solid #E2E8F0; border-radius: 12px; transition: .2s; background: #F8FAFC; }
-.search-input-wrap input:focus { border-color: var(--pri); background: #fff; box-shadow: 0 0 0 4px rgba(255,85,0,0.1); }
-.search-ico { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #64748B; }
-.view-toggle { display: flex; background: #F1F5F9; padding: 4px; border-radius: 12px; gap: 4px; }
-.vt-btn { padding: 10px 16px; border-radius: 9px; font-size: 13px; font-weight: 800; border: none; cursor: pointer; background: transparent; color: var(--txt-sub); transition: .15s; }
-.vt-btn.active { background: #fff; color: var(--txt-main); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; font-weight: 800; font-size: 13.5px; cursor: pointer; border: none; transition: all .18s ease; white-space: nowrap; text-decoration: none; }
+.btn-navy { background: var(--ora-navy); color: #fff; }
+.btn-navy:hover { background: #002B8F; transform: translateY(-1px); }
+.btn-blue { background: var(--ora-blue); color: #fff; box-shadow: 0 4px 12px rgba(29,78,216,0.22); }
+.btn-blue:hover { background: #1E40AF; transform: translateY(-1px); }
+.btn-red { background: var(--ora-red); color: #fff; }
+.btn-red:hover { background: #991B1B; transform: translateY(-1px); }
+.btn-white { background: #fff; color: var(--txt-dark); border: 1.5px solid #CBD5E1; }
+.btn-white:hover { border-color: var(--ora-navy); color: var(--ora-navy); background: #F8FAFC; }
 
-/* Category Icon Cards */
-.cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 10px; margin-bottom: 16px; }
-.cat-card { background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 12px 10px; text-align: center; cursor: pointer; transition: all .16s ease; }
-.cat-card:hover { border-color: #94A3B8; transform: translateY(-2px); }
-.cat-card.active { background: var(--bg-navy); color: #fff; border-color: var(--bg-navy); box-shadow: 0 8px 20px rgba(15,23,42,0.18); }
-.cat-card .c-ico { font-size: 22px; margin-bottom: 4px; display: block; }
-.cat-card .c-tit { font-size: 13px; font-weight: 800; display: block; }
-.cat-card .c-cnt { font-size: 11px; color: var(--txt-muted); font-weight: 700; }
-.cat-card.active .c-cnt { color: #FF7A33; }
+/* 3. 밝고 신뢰감 넘치는 기업 메인 비주얼 (Hero) */
+.hero { background: linear-gradient(135deg, #F0F6FF 0%, #E6F0FF 55%, #F8FAFC 100%); border-bottom: 1px solid var(--bdr); padding: 60px 24px 68px 24px; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; right: -120px; top: -120px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(29,78,216,0.08) 0%, transparent 70%); pointer-events: none; }
+.hero-in { max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: center; position: relative; z-index: 2; }
+@media(max-width: 960px) { .hero-in { grid-template-columns: 1fr; } }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid #BFDBFE; color: var(--ora-navy); font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 30px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
+.hero-badge i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ora-red); }
+.hero h1 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 900; color: var(--ora-navy); line-height: 1.25; letter-spacing: -1px; margin-bottom: 16px; }
+.hero h1 em { font-style: normal; color: var(--ora-blue); border-bottom: 4px solid rgba(200,30,30,0.25); }
+.hero p { font-size: 16.5px; color: var(--txt-body); margin-bottom: 28px; line-height: 1.7; max-width: 640px; }
+.motto-pills { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+.motto-pill { background: #fff; border-left: 4px solid var(--ora-navy); padding: 10px 16px; border-radius: 6px; box-shadow: var(--shadow-sm); font-weight: 800; font-size: 14px; color: var(--txt-dark); }
+.motto-pill.grn { border-left-color: var(--ora-green); }
+.motto-pill.red { border-left-color: var(--ora-red); }
 
-/* Sub-filter Chips (Capacity & Power) */
-.chip-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid #F1F5F9; font-size: 12.5px; }
-.chip-lbl { font-weight: 800; color: var(--txt-sub); margin-right: 4px; }
-.chip { padding: 6px 13px; border-radius: 20px; background: #F1F5F9; color: var(--txt-sub); font-weight: 700; cursor: pointer; border: 1px solid transparent; transition: .15s; }
-.chip:hover { background: #E2E8F0; }
-.chip.active { background: #FFF0E6; color: var(--pri); border-color: var(--pri); font-weight: 800; }
+/* 우측 대표 제품 쇼케이스 & 빠른 기술검색 박스 */
+.hero-showcase { background: #fff; border-radius: 18px; border: 2px solid #DBEAFE; padding: 26px; box-shadow: var(--shadow-lg); }
+.hs-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #F1F5F9; padding-bottom: 14px; margin-bottom: 18px; }
+.hs-title { font-size: 18px; font-weight: 900; color: var(--ora-navy); }
+.hs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.hs-field { background: var(--bg-soft); border: 1px solid var(--bdr); border-radius: 10px; padding: 10px 12px; }
+.hs-field label { display: block; font-size: 11.5px; font-weight: 800; color: var(--txt-muted); margin-bottom: 4px; }
+.hs-field select { width: 100%; border: none; background: transparent; font-size: 14px; font-weight: 800; color: var(--ora-navy); cursor: pointer; }
+.hs-contact-banner { background: var(--ora-light-blue); border: 1px solid #BFDBFE; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
 
-/* 5. Product Grid & Cards */
-.main-wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px 60px 24px; }
-.sec-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-.sec-title { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
-.sec-title span { color: var(--pri); }
+/* 4. 섹션 공통 레이아웃 */
+.sec { padding: 72px 24px; }
+.sec.soft { background: var(--bg-soft); border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr); }
+.sec-in { max-width: 1360px; margin: 0 auto; }
+.sec-hdr { text-align: center; margin-bottom: 44px; }
+.sec-eng { color: var(--ora-blue); font-weight: 900; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+.sec-tit { font-size: 30px; font-weight: 900; color: var(--ora-navy); letter-spacing: -0.5px; margin-bottom: 10px; }
+.sec-desc { font-size: 15.5px; color: var(--txt-muted); max-width: 680px; margin: 0 auto; }
 
-.prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px; }
-.p-card { background: #fff; border-radius: var(--radius-lg); border: 1px solid var(--bdr); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; transition: all .22s ease; box-shadow: var(--shadow-sm); position: relative; }
-.p-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: #CBD5E1; }
-.p-img-box { height: 220px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; border-bottom: 1px solid #F1F5F9; cursor: pointer; overflow: hidden; }
-.p-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .3s ease; }
-.p-card:hover .p-img-box img { transform: scale(1.06); }
-.p-badge-cat { position: absolute; top: 14px; left: 14px; background: rgba(15,23,42,0.85); backdrop-filter: blur(6px); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; }
-.p-badge-cap { position: absolute; top: 14px; right: 14px; background: #FFF0E6; color: var(--pri); border: 1px solid #FFD6BF; font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 6px; }
-.p-body { padding: 20px; cursor: pointer; }
-.p-series { font-size: 12px; font-weight: 700; color: var(--blu); margin-bottom: 4px; }
-.p-code { font-size: 22px; font-weight: 900; color: var(--txt-main); letter-spacing: -0.5px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-.p-specs { background: #F8FAFC; border: 1px solid #EDF2F7; border-radius: 10px; padding: 12px; display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 12.5px; }
-.p-spec-row { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed #E2E8F0; padding-bottom: 5px; }
-.p-spec-row:last-child { border-bottom: none; padding-bottom: 0; }
-.p-spec-k { color: var(--txt-sub); font-weight: 700; white-space: nowrap; }
-.p-spec-v { color: var(--txt-main); font-weight: 800; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.p-foot { padding: 14px 20px; background: #F8FAFC; border-top: 1px solid #EDF2F7; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.p-price { font-size: 14px; font-weight: 900; color: var(--txt-main); }
+/* 5. 회사소개 (Company Overview & CEO Greeting) */
+.comp-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 36px; align-items: stretch; }
+@media(max-width: 960px) { .comp-grid { grid-template-columns: 1fr; } }
+.ceo-card { background: #fff; border: 1px solid var(--bdr); border-top: 5px solid var(--ora-navy); border-radius: 16px; padding: 32px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between; }
+.info-tbl { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--bdr); }
+.info-tbl th { background: #F1F5F9; color: var(--ora-navy); font-weight: 800; width: 135px; padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--bdr); font-size: 14px; }
+.info-tbl td { padding: 14px 16px; border-bottom: 1px solid var(--bdr); color: var(--txt-body); font-size: 14px; font-weight: 600; }
 
-/* 6. Series Table View Mode */
-.series-section { background: #fff; border-radius: 16px; border: 1px solid var(--bdr); margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow-sm); }
-.series-hdr { background: linear-gradient(90deg, #0F172A, #1E293B); color: #fff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-.series-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-.series-tbl th { background: #F1F5F9; color: var(--txt-main); font-weight: 800; padding: 12px 14px; text-align: left; border-bottom: 2px solid var(--bdr); }
-.series-tbl td { padding: 12px 14px; border-bottom: 1px solid #EDF2F7; vertical-align: middle; }
-.series-tbl tr:hover { background: #F8FAFC; }
+/* 6. 4대 핵심 사업영역 카드 */
+.biz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 22px; }
+.biz-card { background: #fff; border: 1px solid var(--bdr); border-radius: 16px; padding: 28px 24px; box-shadow: var(--shadow-sm); transition: .22s; position: relative; overflow: hidden; cursor: pointer; }
+.biz-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--ora-blue); }
+.biz-num { font-size: 12px; font-weight: 900; color: var(--ora-blue); background: var(--ora-light-blue); padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 12px; }
+.biz-card h3 { font-size: 19px; font-weight: 900; color: var(--ora-navy); margin-bottom: 10px; }
+.biz-card p { font-size: 14px; color: var(--txt-body); margin-bottom: 16px; line-height: 1.65; }
+.biz-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.biz-tag { font-size: 11.5px; font-weight: 700; background: #F1F5F9; color: var(--txt-body); padding: 4px 9px; border-radius: 6px; }
 
-/* 7. Modals (Product Detail & Quote Cart & Admin CMS) */
-.m-bg { position: fixed; inset: 0; background: rgba(9,13,22,0.72); backdrop-filter: blur(6px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; }
-.m-box { background: #fff; border-radius: 20px; width: 920px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.4); }
-.m-hdr { background: var(--bg-navy); color: #fff; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 17px; }
+/* 7. 전자 카탈로그 (제품소개) */
+.cat-nav-box { background: #fff; border: 1.5px solid var(--bdr); border-radius: 16px; padding: 22px; margin-bottom: 28px; box-shadow: var(--shadow-sm); }
+.cat-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 8px; margin-bottom: 16px; }
+.cat-tab { background: var(--bg-soft); border: 1.5px solid var(--bdr); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: .15s; }
+.cat-tab:hover { border-color: var(--ora-blue); background: #fff; }
+.cat-tab.active { background: var(--ora-navy); color: #fff; border-color: var(--ora-navy); box-shadow: 0 6px 16px rgba(0,27,94,0.2); }
+.cat-tab .ico { font-size: 20px; display: block; margin-bottom: 3px; }
+.cat-tab .tit { font-size: 13px; font-weight: 800; display: block; }
+.cat-tab .cnt { font-size: 11px; opacity: 0.8; font-weight: 700; }
+
+.filter-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid #E2E8F0; }
+.cap-pills { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.cap-pill { padding: 6px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 700; background: #F1F5F9; color: var(--txt-body); cursor: pointer; border: 1px solid transparent; }
+.cap-pill.active { background: #FEE2E2; color: var(--ora-red); border-color: #FCA5A5; font-weight: 900; }
+
+/* 기업용 제품 사양 카드 (쇼핑몰 가격표 대신 정통 B2B 기술 카탈로그 디자인) */
+.prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(295px, 1fr)); gap: 20px; }
+.p-card { background: #fff; border-radius: 14px; border: 1.5px solid var(--bdr); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; transition: .2s; box-shadow: var(--shadow-sm); }
+.p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--ora-blue); }
+.p-img { height: 205px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 18px; border-bottom: 1px solid #F1F5F9; position: relative; cursor: pointer; }
+.p-img img { max-width: 100%; max-height: 100%; object-fit: contain; transition: .25s; }
+.p-card:hover .p-img img { transform: scale(1.05); }
+.p-cat-tag { position: absolute; top: 12px; left: 12px; background: var(--ora-navy); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 5px; }
+.p-cap-tag { position: absolute; top: 12px; right: 12px; background: #FEF2F2; color: var(--ora-red); border: 1px solid #FECACA; font-size: 11.5px; font-weight: 900; padding: 3px 9px; border-radius: 5px; }
+.p-info { padding: 18px; cursor: pointer; }
+.p-series-name { font-size: 12px; font-weight: 800; color: var(--ora-blue); margin-bottom: 3px; }
+.p-model-code { font-size: 21px; font-weight: 900; color: var(--ora-navy); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.p-spec-tbl { width: 100%; font-size: 12.5px; border-top: 1px solid #E2E8F0; }
+.p-spec-tbl td { padding: 6px 2px; border-bottom: 1px dashed #E2E8F0; }
+.p-spec-tbl td.k { color: var(--txt-muted); font-weight: 700; width: 80px; }
+.p-spec-tbl td.v { color: var(--txt-dark); font-weight: 800; text-align: right; }
+.p-actions { padding: 12px 18px; background: var(--bg-soft); border-top: 1px solid #E2E8F0; display: flex; gap: 8px; }
+
+/* 시리즈 통합 제원표 */
+.series-box { background: #fff; border: 1.5px solid var(--bdr); border-radius: 14px; margin-bottom: 22px; overflow: hidden; box-shadow: var(--shadow-sm); }
+.series-bar { background: var(--ora-navy); color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+.spec-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.spec-table th { background: #F1F5F9; color: var(--ora-navy); font-weight: 800; padding: 11px 14px; text-align: left; border-bottom: 2px solid var(--bdr); }
+.spec-table td { padding: 11px 14px; border-bottom: 1px solid #E2E8F0; }
+.spec-table tr:hover { background: #F8FAFC; }
+
+/* 모달 */
+.m-bg { position: fixed; inset: 0; background: rgba(0,27,94,0.65); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 16px; }
+.m-box { background: #fff; border-radius: 16px; width: 920px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg); border: 2px solid var(--ora-navy); }
+.m-hdr { background: var(--ora-navy); color: #fff; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 16.5px; }
 .m-body { padding: 24px; overflow-y: auto; flex: 1; }
-.m-ft { padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--bdr); display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.m-ft { padding: 14px 22px; background: var(--bg-soft); border-top: 1px solid var(--bdr); display: flex; justify-content: flex-end; gap: 8px; }
 
-/* Admin Panel */
-.admin-panel { display: none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+.admin-box { display: none; background: #FFFBEB; border: 2px solid #F59E0B; border-radius: 14px; padding: 18px; margin-bottom: 22px; }
 
-/* Footer */
-footer { background: var(--bg-dark); color: #94A3B8; padding: 56px 24px; font-size: 13.5px; border-top: 4px solid var(--pri); }
-.ft-in { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; }
-@media(max-width: 860px) { .ft-in { grid-template-columns: 1fr; gap: 24px; } }
+footer { background: #071330; color: #CBD5E1; padding: 52px 24px; font-size: 13.5px; border-top: 4px solid var(--ora-red); }
+.ft-in { max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 36px; }
+@media(max-width: 860px) { .ft-in { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
-<!-- 1. 상단 유틸리티 바 -->
-<div class="util-bar">
-  <div class="util-in">
-    <div><span class="util-badge">공식인증</span>포터블윈치(PCW) · 파워업 · 컴업 · KIO · DUKE 직수입 및 지정 A/S 서비스센터</div>
-    <div style="display:flex;gap:16px;font-weight:700">
-      <span>📍 서울 청계천로 110 (을지로3가역)</span>
-      <span style="color:#FF7A33">📞 대표상담 1600-5157 / 02-2266-0989</span>
+<!-- 1. 상단 공식 기업 안내바 -->
+<div class="top-info-bar">
+  <div class="top-info-in">
+    <div><span class="top-badge">OFFICIAL</span>대한민국 윈치 · 호이스트 · 크레인 · 운반하역기계 직수입 및 주문제작 전문기업</div>
+    <div style="display:flex;gap:18px;font-weight:700">
+      <span>📍 본사/전시장: 서울 중구 청계천로 110, 1층</span>
+      <span style="color:#FCD34D">📞 대표전화: 1600-5157 / 02-2266-0989</span>
     </div>
   </div>
 </div>
 
-<!-- 2. 메인 헤더 -->
+<!-- 2. 화이트 공식 헤더 (보내주신 오라테크 로고 완벽 조화) -->
 <header>
   <div class="hdr-in">
-    <div class="brand-box" onclick="resetAllFilters()">
-      <div class="brand-mark">ORATECH <span>오라테크</span></div>
-      <div class="brand-sub">윈치 · 호이스트 · 크레인<br>운반하역기계 종합솔루션</div>
+    <div class="logo-area" onclick="navToSec('secHome')">
+      <img src="${ORA_LOGO}" alt="오라테크 ORA Winch & hoist">
+      <div class="logo-divider"></div>
+      <div class="logo-sub">윈치·호이스트·운반하역기계<br><span>품질만족 · 가격만족 · A/S만족</span></div>
     </div>
-    <nav class="nav-links">
-      <a href="#catalogSec" onclick="resetAllFilters()">전체 제품카탈로그</a>
-      <a href="#catalogSec" onclick="setViewMode('series')">시리즈별 제원표</a>
-      <a href="#trustSec">정품인증·A/S센터</a>
-      <a href="#footerSec">매장위치·오시는길</a>
+
+    <nav class="gnb">
+      <button type="button" class="gnb-btn active" id="nav_secHome" onclick="navToSec('secHome')">홈</button>
+      <button type="button" class="gnb-btn" id="nav_secComp" onclick="navToSec('secComp')">회사소개</button>
+      <button type="button" class="gnb-btn" id="nav_secBiz" onclick="navToSec('secBiz')">사업분야</button>
+      <button type="button" class="gnb-btn" id="nav_secProd" onclick="navToSec('secProd')">제품소개(카탈로그)</button>
+      <button type="button" class="gnb-btn" id="nav_secAs" onclick="navToSec('secAs')">기술지원·A/S</button>
+      <button type="button" class="gnb-btn" id="nav_secContact" onclick="navToSec('secContact')">오시는길·문의</button>
     </nav>
-    <div class="hdr-actions">
-      <a href="tel:1600-5157" class="btn btn-outline">📞 1600-5157</a>
-      <button class="btn btn-pri" onclick="openCartModal()">🛒 견적바구니 <span class="cart-pill" id="cartCnt">0</span></button>
-      <button class="btn btn-navy" onclick="toggleAdminMode()">🔑 관리자</button>
+
+    <div class="hdr-right">
+      <button type="button" class="btn btn-blue" onclick="openCartModal()">✉️ 견적문의함 (<span id="cartCnt">0</span>)</button>
+      <button type="button" class="btn btn-white" onclick="toggleAdminMode()">🔑 관리자</button>
     </div>
   </div>
 </header>
 
-<!-- 3. 시네마틱 히어로 & 10초 맞춤 장비 파인더 -->
-<section class="hero">
+<!-- 3. 메인 비주얼 (밝고 신뢰감 있는 기업 히어로 섹션) -->
+<section class="hero" id="secHome">
   <div class="hero-in">
     <div>
-      <div class="hero-tag">⚡ INDUSTRIAL LIFTING & PULLING LEADER</div>
-      <h1>어떤 현장, 어떤 중량물이든<br><em>가장 안전하고 강력한 힘</em>으로 움직입니다.</h1>
-      <p>산림조합 벌목·송전선 포설용 <b>포터블 엔진/배터리 윈치</b>부터 산업용 <b>전동윈치·호이스트·전동스태커</b>까지. 오라테크의 검증된 정품 라인업과 직영 A/S 기술력을 만나보세요.</p>
-      <div class="hero-stats">
-        <div><div class="stat-num" id="heroTotalCnt">240<span>+</span></div><div class="stat-lbl">세부 모델 라인업</div></div>
-        <div><div class="stat-num">100<span>%</span></div><div class="stat-lbl">정품 보증 & 직영 A/S</div></div>
-        <div><div class="stat-num">당일<span>출고</span></div><div class="stat-lbl">전국 화물·택배 발송</div></div>
-        <div><div class="stat-num">1:1<span>맞춤</span></div><div class="stat-lbl">현장 하중 엔지니어링</div></div>
+      <div class="hero-badge"><i></i> 대한민국 운반하역·견인·인양 기술의 기준</div>
+      <h1>신뢰할 수 있는 정품 기술력,<br>현장의 안전을 책임지는 <em>오라테크</em></h1>
+      <p>산림조합·한국전력·건설플랜트 현장에서 검증된 <b>포터블 엔진/배터리 윈치, 파워업·컴업 전동윈치, 전동호이스트, 체인블럭, 유압스태커</b>까지 직수입 공급과 본사 직영 A/S를 원스톱으로 제공합니다.</p>
+      <div class="motto-pills">
+        <div class="motto-pill">🛡️ <b>품질만족</b> · 검증된 글로벌 정품 직수입</div>
+        <div class="motto-pill grn">💎 <b>가격만족</b> · 유통거품 없는 직공급 체제</div>
+        <div class="motto-pill red">🔧 <b>A/S만족</b> · 청계천 본사 직영 수리센터</div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button type="button" class="btn btn-navy" style="padding:14px 26px;font-size:15px" onclick="navToSec('secProd')">📖 전체 제품 전자카탈로그 보기</button>
+        <button type="button" class="btn btn-white" style="padding:14px 24px;font-size:15px" onclick="navToSec('secComp')">🏢 오라테크 기업소개 보기</button>
       </div>
     </div>
 
-    <!-- 우측 10초 스마트 파인더 카드 -->
-    <div class="hero-card">
-      <h3>🧭 10초 맞춤 장비 파인더</h3>
-      <p>찾으시는 작업 종류와 무게를 선택하시면 딱 맞는 모델을 즉시 추려드립니다.</p>
-      <div class="quick-finder-grid">
-        <div class="qf-item">
-          <label>① 장비 대분류</label>
+    <!-- 우측 빠른 사양 검색 박스 -->
+    <div class="hero-showcase">
+      <div class="hs-top">
+        <div class="hs-title">🧭 현장 맞춤 제품 빠른 찾기</div>
+        <span style="font-size:12px;font-weight:800;color:var(--ora-green);background:#DCFCE7;padding:3px 9px;border-radius:12px">총 <b id="heroTotalCnt">240</b>+ 세부모델</span>
+      </div>
+      <div class="hs-grid">
+        <div class="hs-field">
+          <label>① 제품군 선택</label>
           <select id="qfCat" onchange="applyQuickFinder()">
-            <option value="ALL">전체 장비 보기</option>
-            <option value="엔진윈치">⛽ 산림/야외 엔진·배터리윈치</option>
-            <option value="전동윈치">⚡ 산업/현장 전동윈치</option>
-            <option value="미니/특수윈치">🔌 단상 미니/고층 특수윈치</option>
-            <option value="수동/DC/유압윈치">🚗 수동핸드 & 차량용 DC윈치</option>
-            <option value="호이스트">🏗️ 전동 체인/와이어 호이스트</option>
-            <option value="수동하역제품">⛓️ 체인·레바블럭/트롤리/자석</option>
-            <option value="운반하역유압">🚜 전동스태커/파레트/리프트</option>
+            <option value="ALL">전체 제품군</option>
+            <option value="엔진윈치">⛽ 현장작업용 엔진·배터리윈치</option>
+            <option value="전동윈치">⚡ 현장작업용 전동윈치</option>
+            <option value="미니/특수윈치">🔌 미니윈치 & 특수윈치</option>
+            <option value="수동/DC/유압윈치">🚗 수동윈치 & DC윈치</option>
+            <option value="호이스트">🏗️ 전동/단상 호이스트</option>
+            <option value="수동하역제품">⛓️ 체인·레바·트롤리·자석</option>
+            <option value="운반하역유압">🚜 전동스태커·파레트·리프트</option>
           </select>
         </div>
-        <div class="qf-item">
-          <label>② 필요 사용용량 (하중)</label>
+        <div class="hs-field">
+          <label>② 필요 하중(사용용량)</label>
           <select id="qfCap" onchange="applyQuickFinder()">
-            <option value="ALL">전체 용량 (하중 무관)</option>
-            <option value="LIGHT">~ 250kg 이하 (경량/소형)</option>
-            <option value="MID">300kg ~ 500kg (중형 주력)</option>
+            <option value="ALL">전체 용량</option>
+            <option value="LIGHT">~ 250kg 이하 (소형/경량)</option>
+            <option value="MID">300kg ~ 500kg (중형 표준)</option>
             <option value="HEAVY1">700kg ~ 1.5톤 (산림/현장 주력)</option>
             <option value="HEAVY2">2톤 ~ 10톤 이상 (초중량물)</option>
           </select>
         </div>
       </div>
-      <button class="btn btn-pri" style="width:100%;padding:13px;font-size:15px" onclick="document.getElementById('catalogSec').scrollIntoView({behavior:'smooth'})">🔍 조건에 맞는 모델 바로 보기</button>
+      <button type="button" class="btn btn-blue" style="width:100%;padding:13px;font-size:15px" onclick="applyQuickFinder();navToSec('secProd')">🔍 선택 조건으로 제품 제원표 조회하기</button>
+      <div class="hs-contact-banner">
+        <div>
+          <div style="font-size:11.5px;color:var(--txt-muted);font-weight:700">모델 선정이나 특수 주문제작이 고민되시나요?</div>
+          <div style="font-size:15px;font-weight:900;color:var(--ora-navy)">기술영업부 직통: 1600-5157 / 02-2266-0989</div>
+        </div>
+        <button type="button" class="btn btn-red" style="padding:8px 14px;font-size:12.5px" onclick="navToSec('secContact')">문의하기</button>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- 4. 스마트 검색 & 카테고리 콘솔 -->
-<div class="console-wrap" id="catalogSec">
-  <div class="console-box">
-    <!-- 🔑 관리자 CMS 패널 -->
-    <div class="admin-panel" id="adminPanel">
+<!-- 4. 회사소개 섹션 (COMPANY) -->
+<section class="sec" id="secComp">
+  <div class="sec-in">
+    <div class="sec-hdr">
+      <div class="sec-eng">COMPANY OVERVIEW</div>
+      <h2 class="sec-tit">오라테크 회사소개</h2>
+      <p class="sec-desc">오랜 현장 경험과 기술 노하우를 바탕으로 대한민국 산업현장에 가장 안전하고 효율적인 윈치·호이스트 솔루션을 공급합니다.</p>
+    </div>
+
+    <div class="comp-grid">
+      <div class="ceo-card">
+        <div>
+          <img src="${ORA_LOGO}" alt="오라테크" style="height:42px;object-fit:contain;margin-bottom:18px">
+          <h3 style="font-size:22px;font-weight:900;color:var(--ora-navy);margin-bottom:14px;line-height:1.35">
+            "고객의 안전과 신뢰를 최우선으로,<br>품질·가격·A/S 모두 만족하는 파트너가 되겠습니다."
+          </h3>
+          <p style="font-size:14.5px;color:var(--txt-body);line-height:1.8;margin-bottom:14px">
+            안녕하십니까. <b>오라테크(ORATECH)</b> 홈페이지를 방문해 주신 고객 여러분께 진심으로 감사드립니다.
+          </p>
+          <p style="font-size:14.5px;color:var(--txt-body);line-height:1.8;margin-bottom:14px">
+            당사는 캐나다 포터블윈치(PCW), 대만 컴업(COMEUP)·키오(KIO)·듀크(DUKE), 이탈리아 독마(DOCMA), 파워업(POWER-UP) 등 세계적으로 검증된 윈치·호이스트 및 유압 운반하역기계를 직수입·공급하고 있으며, 현장 여건에 맞춘 특수 윈치 설계·제작과 직영 A/S 센터를 함께 운영하고 있습니다.
+          </p>
+          <p style="font-size:14.5px;color:var(--txt-body);line-height:1.8">
+            앞으로도 철저한 품질 검수와 신속한 사후관리로 전국 산림조합, 관공서, 건설·플랜트 현장의 든든한 동반자가 될 것을 약속드립니다.
+          </p>
+        </div>
+        <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--txt-muted);font-weight:700">오라테크 임직원 일동</span>
+          <span style="font-size:17px;font-weight:900;color:var(--ora-navy)">대표자 김 향 래</span>
+        </div>
+      </div>
+
+      <div>
+        <table class="info-tbl">
+          <tr><th>상 호 명</th><td><b style="color:var(--ora-navy);font-size:15.5px">${esc(comp.name)} (ORATECH)</b></td></tr>
+          <tr><th>대 표 자</th><td>${esc(comp.ceo)}</td></tr>
+          <tr><th>사업자등록번호</th><td>${esc(comp.bizNo)}</td></tr>
+          <tr><th>업태 / 종목</th><td>도소매, 제조 / 기계장비, 운반하역기계, 윈치, 호이스트</td></tr>
+          <tr><th>본사 및 전시장</th><td>${esc(comp.addr)} (청계천 수표교 인근)</td></tr>
+          <tr><th>대표전화 / 팩스</th><td><b style="color:var(--ora-red)">대표 1600-5157</b> / 매장 02-2266-0989 / 팩스 02-2264-8272</td></tr>
+          <tr><th>공식 이메일</th><td>orawinch@naver.com / ${esc(comp.email)}</td></tr>
+          <tr><th>주요 취급품목</th><td>엔진윈치, 전동윈치, 미니/특수윈치, 수동/DC/유압윈치, 전동호이스트, 체인블럭, 레바블럭, 마그네틱리프트, 전동스태커, 고소작업리프트</td></tr>
+          <tr><th>핵심 취급브랜드</th><td>PORTABLE WINCH, COME-UP, POWER-UP, KIO, DUKE, DOCMA, YAMAGATA, FUJIYAMA, LK호이스트, 극동호이스트, V-TAL, MAX 등</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. 사업분야 섹션 (BUSINESS AREAS) -->
+<section class="sec soft" id="secBiz">
+  <div class="sec-in">
+    <div class="sec-hdr">
+      <div class="sec-eng">CORE BUSINESS</div>
+      <h2 class="sec-tit">오라테크 4대 핵심 사업분야</h2>
+      <p class="sec-desc">각 산업 현장의 특성과 요구 하중에 최적화된 전문 장비 라인업을 구축하고 있습니다. 카드를 클릭하면 해당 제품군 카탈로그로 이동합니다.</p>
+    </div>
+
+    <div class="biz-grid">
+      <div class="biz-card" onclick="curCat='엔진윈치';renderFilters();renderMainContent();navToSec('secProd')">
+        <span class="biz-num">BUSINESS 01</span>
+        <h3>⛽ 산림·임업·전력 포설용 엔진/배터리 윈치</h3>
+        <p>전기가 없는 산악 지형, 벌목 집재 작업, 송전탑 케이블 포설 현장을 위한 초경량 고출력 혼다 엔진윈치 및 리튬배터리 윈치를 공급합니다.</p>
+        <div class="biz-tags"><span class="biz-tag">PCW-5000</span><span class="biz-tag">PCW-3000LI</span><span class="biz-tag">PCH-2000</span><span class="biz-tag">DOCMA VF</span></div>
+      </div>
+      <div class="biz-card" onclick="curCat='전동윈치';renderFilters();renderMainContent();navToSec('secProd')">
+        <span class="biz-num">BUSINESS 02</span>
+        <h3>⚡ 산업·건설현장용 전동윈치 & 미니윈치</h3>
+        <p>단상 220V 경량 미니윈치(YT/FY/KIO/DU)부터 삼상 380V 중하중 산업용 전동윈치(PU/FU/CP/GX/CWG)까지 전 규격 라인업을 보유하고 있습니다.</p>
+        <div class="biz-tags"><span class="biz-tag">PU/FU 시리즈</span><span class="biz-tag">컴업 CP/GXR</span><span class="biz-tag">야마가타 YT</span><span class="biz-tag">KIO/DUKE</span></div>
+      </div>
+      <div class="biz-card" onclick="curCat='수동하역제품';renderFilters();renderMainContent();navToSec('secProd')">
+        <span class="biz-num">BUSINESS 03</span>
+        <h3>🏗️ 전동 호이스트 · 체인블럭 · 마그네틱</h3>
+        <p>공장 천장 크레인용 단상/삼상 호이스트, 수동 체인블럭·레바블럭, 와이어 루퍼(TIL), 영구자석 리프트(PML) 및 미니 크레인 구조물을 공급합니다.</p>
+        <div class="biz-tags"><span class="biz-tag">LK/극동 호이스트</span><span class="biz-tag">V-TAL 체인블럭</span><span class="biz-tag">MAX 레바블럭</span><span class="biz-tag">PML 자석</span></div>
+      </div>
+      <div class="biz-card" onclick="curCat='운반하역유압';renderFilters();renderMainContent();navToSec('secProd')">
+        <span class="biz-num">BUSINESS 04</span>
+        <h3>🚜 운반하역 유압스태커 · 리프트 · 주문제작</h3>
+        <p>물류창고 및 화물 상하차용 수동/전동 스태커, 전동 파레트트럭, 시저스 고소작업대 및 무대·현장 맞춤형 특수 윈치 주문제작을 수행합니다.</p>
+        <div class="biz-tags"><span class="biz-tag">SYC 유압스태커</span><span class="biz-tag">SEF/EDYC 전동</span><span class="biz-tag">JCPT 고소작업대</span><span class="biz-tag">특수윈치제작</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. 제품소개 / 전자 카탈로그 섹션 (PRODUCTS) -->
+<section class="sec" id="secProd">
+  <div class="sec-in">
+    <div class="sec-hdr">
+      <div class="sec-eng">PRODUCT E-CATALOG</div>
+      <h2 class="sec-tit">제품소개 및 시리즈별 상세 제원표</h2>
+      <p class="sec-desc">제품 카드를 클릭하시면 해당 시리즈(예: YT-180 ~ YT-500)의 용량별 비교 사양서를 한눈에 확인하실 수 있습니다.</p>
+    </div>
+
+    <!-- 🔑 관리자 모드 패널 -->
+    <div class="admin-box" id="adminPanel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <h3 style="color:#B45309;font-size:16px">🔑 오라테크 홈페이지 관리자 CMS (신제품 등록 / 수정 / 홈페이지 파일 저장)</h3>
-        <button class="btn btn-navy" onclick="adminDownloadUpdatedSite()">💾 현재 상태 그대로 홈페이지 파일(index.html) 다운로드</button>
+        <h3 style="color:#B45309;font-size:16px">🔑 오라테크 홈페이지 관리자 센터 (제품 등록 / 수정 / 홈페이지 파일 저장)</h3>
+        <button type="button" class="btn btn-navy" onclick="adminDownloadUpdatedSite()">💾 수정된 홈페이지 HTML 통째로 저장</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px">
-        <input id="admCat" placeholder="분류 (예: 미니/특수윈치)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
-        <input id="admCode" placeholder="모델코드 (예: YT-180)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
-        <input id="admName" placeholder="시리즈/제품명 (예: 야마가타 미니윈치)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
-        <input id="admCap" placeholder="사용용량 (예: 180Kg)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
-        <input id="admRope" placeholder="와이어/로프 (예: 5 x 30m)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
-        <input id="admPower" placeholder="상세제원 (속도/모터/전원/중량)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
-        <input id="admImg" placeholder="이미지 주소(URL)" style="padding:9px;border:1px solid #CBD5E1;border-radius:8px">
+        <input id="admCat" placeholder="분류 (예: 미니/특수윈치)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
+        <input id="admCode" placeholder="모델코드 (예: YT-180)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
+        <input id="admName" placeholder="시리즈명 (예: 야마가타 미니윈치)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
+        <input id="admCap" placeholder="사용용량 (예: 180Kg)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
+        <input id="admRope" placeholder="와이어/로프 (예: 5 x 30m)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
+        <input id="admPower" placeholder="상세제원 (속도/모터/전원/중량)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
+        <input id="admImg" placeholder="이미지 주소(URL)" style="padding:9px;border:1px solid #CBD5E1;border-radius:6px">
       </div>
       <div style="text-align:right">
-        <button class="btn btn-pri" onclick="adminSaveProduct()">➕ 제품 추가 / 업데이트 반영</button>
+        <button type="button" class="btn btn-blue" onclick="adminSaveProduct()">➕ 제품 추가 / 수정 반영</button>
       </div>
     </div>
 
-    <div class="search-row">
-      <div class="search-input-wrap">
-        <span class="search-ico">🔍</span>
-        <input id="qIn" placeholder="모델코드(예: YT-180, PCW-5000, PU-250B, VC-010) 또는 사양(220V, 1톤, 스태커) 검색..." oninput="renderMainContent()">
-      </div>
-      <div class="view-toggle">
-        <button class="vt-btn active" id="vtCardBtn" onclick="setViewMode('card')">🖼️ 갤러리 카드 뷰</button>
-        <button class="vt-btn" id="vtSeriesBtn" onclick="setViewMode('series')">📊 시리즈 제원표 뷰</button>
+    <!-- 카테고리 탭 & 검색 필터 박스 -->
+    <div class="cat-nav-box">
+      <div class="cat-tabs" id="catGrid"></div>
+      <div class="filter-bar">
+        <div class="cap-pills" id="capChipBar"></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="qIn" placeholder="🔍 모델코드(YT-180, PCW-5000, PU-250B) 또는 사양 검색..." style="width:280px;padding:9px 14px;border:1.5px solid var(--ora-navy);border-radius:8px;font-size:13.5px;font-weight:700" oninput="renderMainContent()">
+          <button type="button" class="btn btn-navy" id="vtCardBtn" onclick="setViewMode('card')" style="padding:9px 14px;font-size:12.5px">🖼️ 카탈로그 카드뷰</button>
+          <button type="button" class="btn btn-white" id="vtSeriesBtn" onclick="setViewMode('series')" style="padding:9px 14px;font-size:12.5px">📊 시리즈 통합제원표뷰</button>
+        </div>
       </div>
     </div>
 
-    <!-- 대분류 아이콘 그리드 -->
-    <div class="cat-grid" id="catGrid"></div>
+    <div style="margin-bottom:14px;font-weight:800;color:var(--txt-body);font-size:14px">
+      총 <span id="resultCntTxt" style="color:var(--ora-red);font-size:16px;font-weight:900">0</span>종의 세부 모델이 조회되었습니다.
+    </div>
 
-    <!-- 하중 필터 칩 -->
-    <div class="chip-bar" id="capChipBar"></div>
+    <div id="mainContentArea"></div>
   </div>
-</div>
+</section>
 
-<!-- 5. 메인 제품 리스트 영역 -->
-<div class="main-wrap">
-  <div class="sec-bar">
-    <div class="sec-title">📦 검색된 정품 라인업 <span id="resultCntTxt">0</span>종</div>
-    <div style="font-size:13px;color:var(--txt-sub);font-weight:600">💡 각 제품을 클릭하시면 <b>같은 시리즈의 용량별 비교 제원표</b>를 한눈에 보실 수 있습니다.</div>
-  </div>
-  <div id="mainContentArea"></div>
-</div>
-
-<!-- 6. 브랜드 신뢰 & A/S 기술센터 섹션 -->
-<section id="trustSec" style="background:#fff;border-top:1px solid var(--bdr);padding:64px 24px">
-  <div style="max-width:1400px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:40px">
-      <div style="color:var(--pri);font-weight:900;font-size:13px;letter-spacing:1px;margin-bottom:6px">WHY ORATECH</div>
-      <h2 style="font-size:30px;font-weight:900">전국 산림조합 · 관공서 · 산업현장이 오라테크를 선택하는 이유</h2>
+<!-- 7. 기술지원 · A/S 센터 섹션 (SUPPORT) -->
+<section class="sec soft" id="secAs">
+  <div class="sec-in">
+    <div class="sec-hdr">
+      <div class="sec-eng">TECHNICAL SUPPORT & A/S CENTER</div>
+      <h2 class="sec-tit">본사 직영 기술지원 및 A/S 서비스센터</h2>
+      <p class="sec-desc">오라테크는 단순 유통사가 아닌 CM모터 · LK모터 · 포터블윈치 · 미니윈치 전문 서비스센터를 직접 운영합니다.</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
-      <div style="background:#F8FAFC;padding:28px;border-radius:16px;border:1px solid var(--bdr)">
-        <div style="font-size:32px;margin-bottom:12px">🛠️</div>
-        <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">청계천 본사 직영 A/S 기술센터</h3>
-        <p style="font-size:14px;color:var(--txt-sub)">판매만 하고 끝나는 업체가 아닙니다. 모든 순정 부품(기어, 드럼, 스위치, 브레이크, 로프)을 상시 보유하여 신속하고 완벽한 수리를 보증합니다.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
+      <div style="background:#fff;padding:26px;border-radius:14px;border:1px solid var(--bdr);border-top:4px solid var(--ora-navy)">
+        <div style="font-weight:900;color:var(--ora-blue);font-size:13px;margin-bottom:6px">STEP 01</div>
+        <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">고장 진단 및 부품 수급</h3>
+        <p style="font-size:13.5px;color:var(--txt-body)">청계천 본사 매장 직접 방문 또는 화물/택배 입고 시 당일 고장 부위(모터, 브레이크, 기어, 스위치, 카본브러쉬)를 정밀 진단합니다.</p>
       </div>
-      <div style="background:#F8FAFC;padding:28px;border-radius:16px;border:1px solid var(--bdr)">
-        <div style="font-size:32px;margin-bottom:12px">🏛️</div>
-        <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">관공서·산림조합 공식 납품 서류 완비</h3>
-        <p style="font-size:14px;color:var(--txt-sub)">비교견적서, 납품확인서, 완료보고서, 대금청구서 등 산림조합 및 지자체·공기업 행정 절차에 필요한 모든 서류를 원스톱으로 즉시 발행해 드립니다.</p>
+      <div style="background:#fff;padding:26px;border-radius:14px;border:1px solid var(--bdr);border-top:4px solid var(--ora-green)">
+        <div style="font-weight:900;color:var(--ora-green);font-size:13px;margin-bottom:6px">STEP 02</div>
+        <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">순정 부품 수리 및 와이어 가공</h3>
+        <p style="font-size:13.5px;color:var(--txt-body)">상시 보유 중인 정품 부품을 사용하여 신속히 수리하며, 손상된 와이어로프·합성로프 교체 및 훅/심블 압착 가공을 즉시 진행합니다.</p>
       </div>
-      <div style="background:#F8FAFC;padding:28px;border-radius:16px;border:1px solid var(--bdr)">
-        <div style="font-size:32px;margin-bottom:12px">🪢</div>
-        <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">현장 맞춤 로프 절단 & 특수 제작</h3>
-        <p style="font-size:14px;color:var(--txt-sub)">원하시는 작업 길이(30m, 50m, 100m 등)에 맞춘 와이어·폴리에스터 로프 절단 및 아이가공/후크 체결, 무대·특수 윈치 주문제작을 지원합니다.</p>
+      <div style="background:#fff;padding:26px;border-radius:14px;border:1px solid var(--bdr);border-top:4px solid var(--ora-red)">
+        <div style="font-weight:900;color:var(--ora-red);font-size:13px;margin-bottom:6px">STEP 03</div>
+        <h3 style="font-size:18px;font-weight:900;margin-bottom:8px">하중 작동 테스트 및 출고</h3>
+        <p style="font-size:13.5px;color:var(--txt-body)">수리 완료 후 브레이크 제동력 및 작동 안전성 테스트를 거쳐 수리내역서와 함께 현장으로 안전하게 재발송해 드립니다.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 7. 푸터 -->
-<footer id="footerSec">
+<!-- 8. 오시는 길 & 온라인 견적문의 섹션 (CONTACT) -->
+<section class="sec" id="secContact">
+  <div class="sec-in">
+    <div class="sec-hdr">
+      <div class="sec-eng">CONTACT & LOCATION</div>
+      <h2 class="sec-tit">온라인 견적문의 및 찾아오시는 길</h2>
+      <p class="sec-desc">대량 구매, 대리점 개설, 산림조합·관공서 납품 서류 요청, 특수 사양 제작 문의를 남겨주시면 신속히 연락드립니다.</p>
+    </div>
+
+    <div class="comp-grid">
+      <div style="background:var(--bg-soft);border:1.5px solid var(--bdr);border-radius:16px;padding:28px">
+        <h3 style="font-size:20px;font-weight:900;color:var(--ora-navy);margin-bottom:16px">📍 본사 전시장 및 A/S 센터 안내</h3>
+        <div style="line-height:2;font-size:14.5px;color:var(--txt-body);margin-bottom:20px">
+          <div>• <b>도로명주소:</b> 서울특별시 중구 청계천로 110, 1층 (수표동)</div>
+          <div>• <b>지번주소:</b> 서울특별시 중구 수표동 11-9 (청계천 수표교 앞)</div>
+          <div>• <b>지하철 이용:</b> 2·3호선 <b>을지로3가역</b> 도보 4분 / 1·3·5호선 <b>종로3가역</b> 15번 출구 도보 5분</div>
+          <div>• <b>대표전화:</b> <b style="color:var(--ora-red);font-size:17px">1600-5157</b> / 매장 직통: <b>02-2266-0989</b></div>
+          <div>• <b>팩스번호:</b> 02-2264-8272 | <b>이메일:</b> orawinch@naver.com</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="https://map.naver.com/p/search/%EC%84%9C%EC%9A%B8%20%EC%A4%91%EA%B5%AC%20%EC%B2%AD%EA%B3%84%EC%B2%9C%EB%A1%9C%20110" target="_blank" class="btn btn-green" style="background:#03C75A;color:#fff">🗺️ 네이버 지도로 위치 보기</a>
+          <a href="tel:1600-5157" class="btn btn-navy">📞 1600-5157 전화걸기</a>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1.5px solid var(--bdr);border-radius:16px;padding:28px;box-shadow:var(--shadow-sm)">
+        <h3 style="font-size:20px;font-weight:900;color:var(--ora-navy);margin-bottom:14px">✉️ 빠른 온라인 견적 · 기술 문의</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <input id="inqComp" placeholder="업체명 / 기관명 *" style="padding:11px;border:1px solid #CBD5E1;border-radius:8px">
+          <input id="inqTel" placeholder="연락처 (휴대폰/전화) *" style="padding:11px;border:1px solid #CBD5E1;border-radius:8px">
+        </div>
+        <input id="inqModel" placeholder="문의 모델명 또는 필요 사양 (예: PCW-5000 2대, YT-300 1대)" style="width:100%;padding:11px;border:1px solid #CBD5E1;border-radius:8px;margin-bottom:10px">
+        <textarea id="inqMsg" rows="3" placeholder="납기 일정, 세금계산서/관공서 서류 요청, 로프 길이 변경 등 문의사항을 남겨주세요." style="width:100%;padding:11px;border:1px solid #CBD5E1;border-radius:8px;margin-bottom:12px"></textarea>
+        <button type="button" class="btn btn-blue" style="width:100%;padding:13px;font-size:15px" onclick="submitQuickInquiry()">📋 문의내용 복사 및 이메일/카톡 발송</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. 푸터 -->
+<footer>
   <div class="ft-in">
     <div>
-      <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:12px">ORATECH <span style="color:var(--pri)">오라테크</span></div>
-      <p style="margin-bottom:8px">대표자: ${esc(comp.ceo)} | 사업자등록번호: ${esc(comp.bizNo)} | 업태/종목: 도소매 / 기계장비·운반하역기계</p>
-      <p style="margin-bottom:8px">본사 및 전시장: ${esc(comp.addr)} (지하철 2·3호선 을지로3가역 인근)</p>
-      <p>Copyright © 2026 ORATECH. All Rights Reserved.</p>
+      <img src="${ORA_LOGO}" alt="오라테크" style="height:38px;background:#fff;padding:4px 10px;border-radius:6px;margin-bottom:14px;object-fit:contain">
+      <p style="margin-bottom:6px"><b style="color:#fff">${esc(comp.name)} (ORATECH)</b> | 대표자: ${esc(comp.ceo)} | 사업자등록번호: ${esc(comp.bizNo)}</p>
+      <p style="margin-bottom:6px">본사/전시장: ${esc(comp.addr)}</p>
+      <p style="color:#64748B">Copyright © 2026 ORATECH All Rights Reserved.</p>
     </div>
     <div>
-      <div style="color:#fff;font-weight:900;font-size:16px;margin-bottom:12px">고객기술상담 & 발주센터</div>
-      <div style="font-size:26px;font-weight:900;color:#FF7A33;margin-bottom:4px">1600-5157</div>
-      <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">매장 직통: ${esc(comp.tel)}</div>
+      <div style="color:#fff;font-weight:900;font-size:15px;margin-bottom:10px">고객센터 & 기술문의</div>
+      <div style="font-size:24px;font-weight:900;color:#FCD34D;margin-bottom:4px">1600-5157</div>
+      <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:6px">매장 직통: ${esc(comp.tel)}</div>
       <p>팩스: 02-2264-8272 | 이메일: orawinch@naver.com</p>
     </div>
     <div>
-      <div style="color:#fff;font-weight:900;font-size:16px;margin-bottom:12px">지정 입금계좌 안내</div>
-      <div style="background:rgba(255,255,255,0.06);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);color:#fff;font-weight:800;margin-bottom:10px">
+      <div style="color:#fff;font-weight:900;font-size:15px;margin-bottom:10px">지정 입금계좌</div>
+      <div style="background:rgba(255,255,255,0.08);padding:12px;border-radius:8px;color:#fff;font-weight:800;margin-bottom:8px">
         ${esc(comp.bank || '우리은행 011-058791-12-001 (예금주: 김향래)')}
       </div>
-      <p style="font-size:12px">• 평일 15시 이전 발주 건 당일 경동/대신화물 및 택배 출고</p>
+      <p style="font-size:12px">품질만족 · 가격만족 · A/S만족</p>
     </div>
   </div>
 </footer>
 
-<!-- 🔍 모달 1: 제품 상세 제원 & 같은 시리즈 전체 비교 모달 -->
+<!-- 🔍 모달 1: 제품 상세 사양서 & 같은 시리즈 전체 비교 -->
 <div class="m-bg" id="detailModal" onclick="if(event.target===this)this.style.display='none'">
   <div class="m-box">
     <div class="m-hdr">
-      <span id="dmTitle">제품 상세 사양서</span>
-      <button class="btn btn-outline" style="padding:6px 12px;font-size:12px" onclick="document.getElementById('detailModal').style.display='none'">✕ 닫기</button>
+      <span id="dmTitle">제품 상세 사양서 (SPECIFICATION)</span>
+      <button type="button" class="btn btn-white" style="padding:5px 12px;font-size:12px" onclick="document.getElementById('detailModal').style.display='none'">✕ 닫기</button>
     </div>
     <div class="m-body" id="dmBody"></div>
     <div class="m-ft" id="dmFoot"></div>
   </div>
 </div>
 
-<!-- 🛒 모달 2: 온라인 견적 바구니 모달 -->
+<!-- ✉️ 모달 2: 견적 문의함 -->
 <div class="m-bg" id="cartModal" onclick="if(event.target===this)this.style.display='none'">
-  <div class="m-box" style="width:720px">
+  <div class="m-box" style="width:700px">
     <div class="m-hdr">
-      <span>🛒 오라테크 빠른 견적 요청 바구니</span>
-      <button class="btn btn-outline" style="padding:6px 12px;font-size:12px" onclick="document.getElementById('cartModal').style.display='none'">✕ 닫기</button>
+      <span>✉️ 오라테크 기업 견적문의함</span>
+      <button type="button" class="btn btn-white" style="padding:5px 12px;font-size:12px" onclick="document.getElementById('cartModal').style.display='none'">✕ 닫기</button>
     </div>
     <div class="m-body" id="cartBody"></div>
     <div class="m-ft">
-      <button class="btn btn-outline" onclick="cart=[];updateCartBadge();openCartModal()">비우기</button>
-      <button class="btn btn-pri" onclick="copyCartInquiry()">📋 견적문의 텍스트 복사 (카톡/문자/메일 전송용)</button>
+      <button type="button" class="btn btn-white" onclick="cart=[];updateCartBadge();openCartModal()">목록 비우기</button>
+      <button type="button" class="btn btn-blue" onclick="copyCartInquiry()">📋 견적요청서 내용 복사 (메일/카톡 전송용)</button>
     </div>
   </div>
 </div>
@@ -9054,7 +9248,7 @@ var ITEMS = ${catalogJson};
 var curCat = "ALL", curCap = "ALL", viewMode = "card", isAdmin = false, cart = [];
 
 var CAT_META = [
-  { id:"ALL", name:"전체 장비", ico:"🌐" },
+  { id:"ALL", name:"전체 제품군", ico:"🌐" },
   { id:"엔진윈치", name:"엔진·배터리윈치", ico:"⛽" },
   { id:"전동윈치", name:"현장 전동윈치", ico:"⚡" },
   { id:"미니/특수윈치", name:"미니·특수윈치", ico:"🔌" },
@@ -9066,11 +9260,20 @@ var CAT_META = [
 
 var CAP_CHIPS = [
   { id:"ALL", label:"전체 용량" },
-  { id:"LIGHT", label:"~250kg 경량" },
+  { id:"LIGHT", label:"~250kg 소형" },
   { id:"MID", label:"300~500kg 중형" },
   { id:"HEAVY1", label:"700kg~1.5톤 주력" },
   { id:"HEAVY2", label:"2톤 이상 중량물" }
 ];
+
+// 안전한 섹션 스크롤 이동 (href="#..." 를 쓰지 않아 iframe 미리보기에서도 절대 ERP로 튕기지 않음!)
+function navToSec(secId){
+  document.querySelectorAll('.gnb-btn').forEach(function(b){
+    b.classList.toggle('active', b.id === 'nav_' + secId);
+  });
+  var el = document.getElementById(secId);
+  if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 function parseCapKg(capStr){
   var s = String(capStr||"").replace(/,/g,"");
@@ -9097,25 +9300,25 @@ function matchCapFilter(item, capMode){
 function makeFallbackSvg(code, cat){
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200">'
     + '<rect width="100%" height="100%" fill="#F8FAFC"/>'
-    + '<rect x="16" y="16" width="288" height="168" rx="12" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="2"/>'
-    + '<text x="50%" y="42%" dominant-baseline="middle" text-anchor="middle" fill="#1E3A8A" font-family="sans-serif" font-size="13" font-weight="bold">ORATECH ' + (cat||'EQUIPMENT') + '</text>'
-    + '<text x="50%" y="62%" dominant-baseline="middle" text-anchor="middle" fill="#FF5500" font-family="sans-serif" font-size="24" font-weight="900">' + code + '</text>'
+    + '<rect x="16" y="16" width="288" height="168" rx="10" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="2"/>'
+    + '<text x="50%" y="42%" dominant-baseline="middle" text-anchor="middle" fill="#001B5E" font-family="sans-serif" font-size="13" font-weight="bold">ORATECH · ' + (cat||'EQUIPMENT') + '</text>'
+    + '<text x="50%" y="62%" dominant-baseline="middle" text-anchor="middle" fill="#C81E1E" font-family="sans-serif" font-size="24" font-weight="900">' + code + '</text>'
     + '</svg>';
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 
 function renderFilters(){
-  document.getElementById("heroTotalCnt").innerHTML = ITEMS.length + "<span>+</span>";
+  document.getElementById("heroTotalCnt").innerText = ITEMS.length;
   document.getElementById("catGrid").innerHTML = CAT_META.map(function(c){
     var cnt = c.id === "ALL" ? ITEMS.length : ITEMS.filter(function(x){ return x.cat === c.id; }).length;
-    return '<div class="cat-card ' + (curCat===c.id?'active':'') + '" onclick="curCat=\\'' + c.id + '\\';renderFilters();renderMainContent()">'
-      + '<span class="c-ico">' + c.ico + '</span>'
-      + '<span class="c-tit">' + c.name + '</span>'
-      + '<span class="c-cnt">' + cnt + '종 모델</span></div>';
+    return '<div class="cat-tab ' + (curCat===c.id?'active':'') + '" onclick="curCat=\\'' + c.id + '\\';renderFilters();renderMainContent()">'
+      + '<span class="ico">' + c.ico + '</span>'
+      + '<span class="tit">' + c.name + '</span>'
+      + '<span class="cnt">' + cnt + '종</span></div>';
   }).join("");
 
-  document.getElementById("capChipBar").innerHTML = '<span class="chip-lbl">⚖️ 작업 하중별 필터:</span>' + CAP_CHIPS.map(function(ch){
-    return '<span class="chip ' + (curCap===ch.id?'active':'') + '" onclick="curCap=\\'' + ch.id + '\\';renderFilters();renderMainContent()">' + ch.label + '</span>';
+  document.getElementById("capChipBar").innerHTML = '<span style="font-size:12.5px;font-weight:800;color:var(--ora-navy);margin-right:4px">⚖️ 용량별:</span>' + CAP_CHIPS.map(function(ch){
+    return '<span class="cap-pill ' + (curCap===ch.id?'active':'') + '" onclick="curCap=\\'' + ch.id + '\\';renderFilters();renderMainContent()">' + ch.label + '</span>';
   }).join("");
 }
 
@@ -9131,8 +9334,8 @@ function getFilteredList(){
 
 function setViewMode(m){
   viewMode = m;
-  document.getElementById("vtCardBtn").classList.toggle("active", m === "card");
-  document.getElementById("vtSeriesBtn").classList.toggle("active", m === "series");
+  document.getElementById("vtCardBtn").className = m === "card" ? "btn btn-navy" : "btn btn-white";
+  document.getElementById("vtSeriesBtn").className = m === "series" ? "btn btn-navy" : "btn btn-white";
   renderMainContent();
 }
 
@@ -9142,12 +9345,11 @@ function renderMainContent(){
   var area = document.getElementById("mainContentArea");
 
   if(!list.length){
-    area.innerHTML = '<div style="background:#fff;padding:60px 20px;border-radius:16px;text-align:center;border:1px solid var(--bdr)"><div style="font-size:40px;margin-bottom:10px">🔍</div><h3 style="font-size:18px;margin-bottom:6px">검색 조건에 맞는 모델이 없습니다.</h3><p style="color:var(--txt-sub);margin-bottom:16px">검색어를 지우거나 [전체 장비] 탭을 선택해 보세요.</p><button class="btn btn-pri" onclick="resetAllFilters()">🔄 필터 전체 초기화</button></div>';
+    area.innerHTML = '<div style="background:#fff;padding:50px 20px;border-radius:14px;text-align:center;border:1px solid var(--bdr)"><h3 style="margin-bottom:8px;color:var(--ora-navy)">검색 조건에 해당하는 모델이 없습니다.</h3><button type="button" class="btn btn-blue" onclick="curCat=\\'ALL\\';curCap=\\'ALL\\';document.getElementById(\\'qIn\\').value=\\'\\';renderFilters();renderMainContent()">전체 모델 다시 보기</button></div>';
     return;
   }
 
   if(viewMode === "series"){
-    // 시리즈별로 묶어서 한눈에 비교하는 표 렌더링
     var groups = {};
     list.forEach(function(item){
       var gKey = item.name || item.cat;
@@ -9156,19 +9358,19 @@ function renderMainContent(){
     });
     area.innerHTML = Object.keys(groups).map(function(gName){
       var rows = groups[gName];
-      var fImg = rows[0].img || makeFallbackSvg(rows[0].code, rows[0].cat);
-      return '<div class="series-section">'
-        + '<div class="series-hdr"><div><span style="background:var(--pri);font-size:11px;padding:3px 8px;border-radius:4px;margin-right:8px;font-weight:800">' + rows[0].cat + '</span><b style="font-size:17px">' + gName + '</b> <span style="color:#94A3B8;font-size:13px;margin-left:6px">(총 ' + rows.length + '개 세부모델)</span></div></div>'
-        + '<div style="overflow-x:auto"><table class="series-tbl"><thead><tr><th style="width:70px">사진</th><th style="width:130px">모델코드</th><th style="width:130px">사용용량(하중)</th><th style="width:140px">와이어/로프/체인</th><th>상세 제원 (속도 · 모터 · 전원 · 자체중량)</th><th style="width:150px;text-align:center">견적/상세</th></tr></thead><tbody>'
+      return '<div class="series-box">'
+        + '<div class="series-bar"><div><span style="background:var(--ora-red);font-size:11px;padding:3px 8px;border-radius:4px;margin-right:8px;font-weight:800">' + rows[0].cat + '</span><b style="font-size:16.5px">' + gName + '</b> <span style="opacity:0.8;font-size:12.5px;margin-left:6px">(' + rows.length + '종 세부모델)</span></div></div>'
+        + '<div style="overflow-x:auto"><table class="spec-table"><thead><tr><th style="width:68px">사진</th><th style="width:125px">모델코드</th><th style="width:130px">사용용량(하중)</th><th style="width:140px">와이어/로프/체인</th><th>상세 제원 (속도 · 모터 · 전원 · 자체중량)</th><th style="width:155px;text-align:center">사양서/문의</th></tr></thead><tbody>'
         + rows.map(function(r){
             var idx = ITEMS.indexOf(r);
+            var fb = makeFallbackSvg(r.code, r.cat);
             return '<tr>'
-              + '<td><img src="' + r.img + '" style="width:48px;height:40px;object-fit:contain;border-radius:4px;border:1px solid #E2E8F0;background:#fff" onerror="this.src=\\'' + makeFallbackSvg(r.code,r.cat) + '\\'"></td>'
-              + '<td style="font-weight:900;color:#0F172A;font-size:15px;cursor:pointer" onclick="openDetailModal(' + idx + ')">' + r.code + '</td>'
-              + '<td style="font-weight:800;color:var(--pri)">' + r.cap + '</td>'
-              + '<td style="font-weight:700;color:var(--blu)">' + (r.rope||'-') + '</td>'
-              + '<td style="font-size:12.5px;color:var(--txt-sub)">' + (r.power||'-') + '</td>'
-              + '<td style="text-align:center"><button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="openDetailModal(' + idx + ')">상세</button> <button class="btn btn-pri" style="padding:6px 10px;font-size:12px" onclick="addToCart(\\'' + r.code + '\\')">+담기</button></td>'
+              + '<td><img src="' + (r.img||fb) + '" style="width:46px;height:38px;object-fit:contain;border:1px solid #E2E8F0;border-radius:4px;background:#fff" onerror="this.onerror=null;this.src=\\'' + fb + '\\'"></td>'
+              + '<td style="font-weight:900;color:var(--ora-navy);font-size:14.5px;cursor:pointer" onclick="openDetailModal(' + idx + ')">' + r.code + '</td>'
+              + '<td style="font-weight:800;color:var(--ora-red)">' + r.cap + '</td>'
+              + '<td style="font-weight:700;color:var(--ora-blue)">' + (r.rope||'-') + '</td>'
+              + '<td style="font-size:12.5px;color:var(--txt-body)">' + (r.power||'-') + '</td>'
+              + '<td style="text-align:center"><button type="button" class="btn btn-white" style="padding:5px 10px;font-size:12px" onclick="openDetailModal(' + idx + ')">제원표</button> <button type="button" class="btn btn-blue" style="padding:5px 10px;font-size:12px" onclick="addToCart(\\'' + r.code + '\\')">+문의담기</button></td>'
               + '</tr>';
           }).join("")
         + '</tbody></table></div></div>';
@@ -9176,35 +9378,32 @@ function renderMainContent(){
     return;
   }
 
-  // 기본: 프리미엄 갤러리 카드 뷰
+  // 기본: 기업용 전자 카탈로그 카드 뷰 (쇼핑몰 느낌 없이 깔끔한 제원 중심)
   area.innerHTML = '<div class="prod-grid">' + list.map(function(x){
     var idx = ITEMS.indexOf(x);
-    var fallback = makeFallbackSvg(x.code, x.cat);
+    var fb = makeFallbackSvg(x.code, x.cat);
     var siblingsCnt = ITEMS.filter(function(s){ return s.name === x.name; }).length;
     return '<div class="p-card">'
       + '<div>'
-      + '  <div class="p-img-box" onclick="openDetailModal(' + idx + ')">'
-      + '    <span class="p-badge-cat">' + x.cat + '</span>'
-      + '    <span class="p-badge-cap">' + x.cap + '</span>'
-      + '    <img src="' + (x.img || fallback) + '" alt="' + x.code + '" onerror="this.onerror=null;this.src=\\'' + fallback + '\\'">'
+      + '  <div class="p-img" onclick="openDetailModal(' + idx + ')">'
+      + '    <span class="p-cat-tag">' + x.cat + '</span>'
+      + '    <span class="p-cap-tag">' + x.cap + '</span>'
+      + '    <img src="' + (x.img || fb) + '" alt="' + x.code + '" onerror="this.onerror=null;this.src=\\'' + fb + '\\'">'
       + '  </div>'
-      + '  <div class="p-body" onclick="openDetailModal(' + idx + ')">'
-      + '    <div class="p-series">' + x.name + (siblingsCnt > 1 ? ' (' + siblingsCnt + '종 시리즈)' : '') + '</div>'
-      + '    <div class="p-code"><span>' + x.code + '</span><span style="font-size:12px;color:var(--blu);font-weight:700">상세제원 ›</span></div>'
-      + '    <div class="p-specs">'
-      + '      <div class="p-spec-row"><span class="p-spec-k">사용용량</span><span class="p-spec-v" style="color:var(--pri)">' + x.cap + '</span></div>'
-      + '      <div class="p-spec-row"><span class="p-spec-k">와이어/로프</span><span class="p-spec-v">' + (x.rope||'-') + '</span></div>'
-      + '      <div class="p-spec-row"><span class="p-spec-k">핵심사양</span><span class="p-spec-v">' + (x.power||'오라테크 정품') + '</span></div>'
-      + '    </div>'
+      + '  <div class="p-info" onclick="openDetailModal(' + idx + ')">'
+      + '    <div class="p-series-name">' + x.name + (siblingsCnt > 1 ? ' (시리즈 ' + siblingsCnt + '종)' : '') + '</div>'
+      + '    <div class="p-model-code"><span>' + x.code + '</span><span style="font-size:12px;color:var(--ora-blue);font-weight:800">SPEC 보기 ›</span></div>'
+      + '    <table class="p-spec-tbl">'
+      + '      <tr><td class="k">사용용량</td><td class="v" style="color:var(--ora-red)">' + x.cap + '</td></tr>'
+      + '      <tr><td class="k">와이어/로프</td><td class="v">' + (x.rope||'-') + '</td></tr>'
+      + '      <tr><td class="k">세부사양</td><td class="v" style="font-weight:600;font-size:11.5px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (x.power||'오라테크 정품') + '</td></tr>'
+      + '    </table>'
       + '  </div>'
       + '</div>'
-      + '<div class="p-foot">'
-      + '  <div class="p-price">' + (x.price > 0 ? '₩' + Number(x.price).toLocaleString() : '📞 전화/카톡 단가문의') + '</div>'
-      + '  <div style="display:flex;gap:6px">'
-      + '    <button class="btn btn-outline" style="padding:7px 11px;font-size:12px" onclick="openDetailModal(' + idx + ')">🔍 제원비교</button>'
-      + '    <button class="btn btn-pri" style="padding:7px 12px;font-size:12px" onclick="addToCart(\\'' + x.code + '\\')">🛒 담기</button>'
-      + (isAdmin ? '<button class="btn btn-outline" style="padding:7px 8px;font-size:12px;color:#DC2626" onclick="ITEMS.splice(' + idx + ',1);renderFilters();renderMainContent()">삭제</button>' : '')
-      + '  </div>'
+      + '<div class="p-actions">'
+      + '  <button type="button" class="btn btn-white" style="flex:1;padding:8px;font-size:12.5px" onclick="openDetailModal(' + idx + ')">📄 상세 제원표</button>'
+      + '  <button type="button" class="btn btn-navy" style="flex:1;padding:8px;font-size:12.5px" onclick="addToCart(\\'' + x.code + '\\')">✉️ 견적문의 담기</button>'
+      + (isAdmin ? '<button type="button" class="btn btn-red" style="padding:8px;font-size:12px" onclick="ITEMS.splice(' + idx + ',1);renderFilters();renderMainContent()">삭제</button>' : '')
       + '</div></div>';
   }).join("") + '</div>';
 }
@@ -9212,40 +9411,40 @@ function renderMainContent(){
 function openDetailModal(idx){
   var item = ITEMS[idx];
   if(!item) return;
-  var fallback = makeFallbackSvg(item.code, item.cat);
+  var fb = makeFallbackSvg(item.code, item.cat);
   var siblings = ITEMS.filter(function(s){ return s.name === item.name; });
 
-  document.getElementById("dmTitle").innerText = "[" + item.code + "] " + item.name + " 상세 제원 및 시리즈 비교";
+  document.getElementById("dmTitle").innerText = "SPECIFICATION | [" + item.code + "] " + item.name;
   document.getElementById("dmBody").innerHTML =
-    '<div style="display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:center;margin-bottom:24px">'
-    + '<div style="background:#F8FAFC;border:1px solid var(--bdr);border-radius:14px;padding:18px;text-align:center"><img src="' + (item.img||fallback) + '" style="max-width:100%;max-height:210px;object-fit:contain" onerror="this.src=\\'' + fallback + '\\'"></div>'
+    '<div style="display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:center;margin-bottom:24px">'
+    + '<div style="background:#fff;border:1.5px solid var(--bdr);border-radius:12px;padding:16px;text-align:center"><img src="' + (item.img||fb) + '" style="max-width:100%;max-height:200px;object-fit:contain" onerror="this.onerror=null;this.src=\\'' + fb + '\\'"></div>'
     + '<div>'
-    + '  <span style="background:var(--bg-navy);color:#fff;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:6px">' + item.cat + '</span>'
-    + '  <h2 style="font-size:28px;font-weight:900;margin:8px 0 4px 0">' + item.code + '</h2>'
-    + '  <div style="font-size:14.5px;color:var(--txt-sub);font-weight:700;margin-bottom:14px">' + item.name + '</div>'
-    + '  <div style="background:#F8FAFC;border:1px solid var(--bdr);border-radius:12px;padding:14px;line-height:1.8;font-size:13.5px">'
-    + '    <div>• <b>정격 사용용량:</b> <span style="color:var(--pri);font-weight:900;font-size:15px">' + item.cap + '</span></div>'
-    + '    <div>• <b>와이어 / 로프 / 체인 규격:</b> <b style="color:var(--blu)">' + (item.rope||'-') + '</b></div>'
-    + '    <div>• <b>상세 사양 (속도·모터·전원·중량):</b> ' + (item.power||'-') + '</div>'
-    + '    <div>• <b>기준 공급가:</b> <b>' + (item.price > 0 ? Number(item.price).toLocaleString() + '원 (VAT별도 / 대리점·수량 할인 문의)' : '전화 또는 견적바구니 문의 (1600-5157)') + '</b></div>'
+    + '  <span style="background:var(--ora-navy);color:#fff;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:5px">' + item.cat + '</span>'
+    + '  <h2 style="font-size:28px;font-weight:900;color:var(--ora-navy);margin:8px 0 4px 0">' + item.code + '</h2>'
+    + '  <div style="font-size:15px;color:var(--ora-blue);font-weight:800;margin-bottom:12px">' + item.name + '</div>'
+    + '  <div style="background:var(--bg-soft);border:1px solid var(--bdr);border-radius:10px;padding:14px;line-height:1.85;font-size:13.5px">'
+    + '    <div>• <b>정격 사용용량(하중):</b> <span style="color:var(--ora-red);font-weight:900;font-size:15px">' + item.cap + '</span></div>'
+    + '    <div>• <b>와이어 / 로프 / 체인 규격:</b> <b style="color:var(--ora-navy)">' + (item.rope||'-') + '</b></div>'
+    + '    <div>• <b>세부 기술 사양:</b> ' + (item.power||'-') + '</div>'
+    + '    <div>• <b>기술지원 및 납품문의:</b> <b>대표전화 1600-5157 / 매장 02-2266-0989</b></div>'
     + '  </div>'
     + '</div></div>'
-    + '<div style="font-weight:900;font-size:15px;margin-bottom:8px;color:var(--bg-navy)">📊 [' + item.name + '] 시리즈 용량별 한눈에 비교하기 (' + siblings.length + '종)</div>'
-    + '<div style="overflow-x:auto;border:1px solid var(--bdr);border-radius:12px"><table class="series-tbl"><thead><tr><th>모델코드</th><th>사용용량</th><th>와이어/로프</th><th>상세 제원 비교</th><th>선택</th></tr></thead><tbody>'
+    + '<div style="font-weight:900;font-size:15px;margin-bottom:8px;color:var(--ora-navy)">📊 >> SPECIFICATION | [' + item.name + '] 시리즈 전체 모델 비교표 (' + siblings.length + '종)</div>'
+    + '<div style="overflow-x:auto;border:1.5px solid var(--bdr);border-radius:10px"><table class="spec-table"><thead><tr><th>모델코드</th><th>사용용량(Kg/Ton)</th><th>와이어/로프/체인</th><th>세부 사양 (속도 · 모터 · 전원 · 자체중량)</th><th>견적문의</th></tr></thead><tbody>'
     + siblings.map(function(s){
         var isCur = s.code === item.code;
-        return '<tr style="' + (isCur?'background:#FFF0E6;font-weight:800':'') + '">'
-          + '<td style="font-weight:900;color:' + (isCur?'var(--pri)':'#0F172A') + '">' + s.code + (isCur?' (현재모델)':'') + '</td>'
-          + '<td style="color:var(--pri);font-weight:800">' + s.cap + '</td>'
+        return '<tr style="' + (isCur?'background:#EFF6FF;font-weight:800':'') + '">'
+          + '<td style="font-weight:900;color:' + (isCur?'var(--ora-blue)':'var(--ora-navy)') + '">' + s.code + (isCur?' ★':'') + '</td>'
+          + '<td style="color:var(--ora-red);font-weight:800">' + s.cap + '</td>'
           + '<td>' + (s.rope||'-') + '</td>'
           + '<td style="font-size:12.5px">' + (s.power||'-') + '</td>'
-          + '<td><button class="btn btn-pri" style="padding:5px 10px;font-size:11.5px" onclick="addToCart(\\'' + s.code + '\\')">+견적담기</button></td></tr>';
+          + '<td><button type="button" class="btn btn-navy" style="padding:5px 10px;font-size:11.5px" onclick="addToCart(\\'' + s.code + '\\')">+문의담기</button></td></tr>';
       }).join("")
     + '</tbody></table></div>';
 
   document.getElementById("dmFoot").innerHTML =
-    '<a href="tel:1600-5157" class="btn btn-navy">📞 즉시 전화상담 (1600-5157)</a>'
-    + '<button class="btn btn-pri" onclick="addToCart(\\'' + item.code + '\\');document.getElementById(\\'detailModal\\').style.display=\\'none\\'">🛒 견적바구니에 담기</button>';
+    '<a href="tel:1600-5157" class="btn btn-white">📞 전화상담 (1600-5157)</a>'
+    + '<button type="button" class="btn btn-blue" onclick="addToCart(\\'' + item.code + '\\');document.getElementById(\\'detailModal\\').style.display=\\'none\\'">✉️ 견적문의함에 담기</button>';
 
   document.getElementById("detailModal").style.display = "flex";
 }
@@ -9253,13 +9452,6 @@ function openDetailModal(idx){
 function applyQuickFinder(){
   curCat = document.getElementById("qfCat").value;
   curCap = document.getElementById("qfCap").value;
-  renderFilters();
-  renderMainContent();
-}
-
-function resetAllFilters(){
-  curCat = "ALL"; curCap = "ALL";
-  document.getElementById("qIn").value = "";
   renderFilters();
   renderMainContent();
 }
@@ -9273,41 +9465,49 @@ function addToCart(code){
   if(ex) ex.qty++;
   else cart.push({ code: code, qty: 1 });
   updateCartBadge();
-  alert("🛒 [" + code + "] 모델이 견적바구니에 담겼습니다! (우측 상단 '견적바구니' 클릭)");
+  alert("✉️ [" + code + "] 모델이 견적문의함에 추가되었습니다.");
 }
 
 function openCartModal(){
   var body = document.getElementById("cartBody");
   if(!cart.length){
-    body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt-sub)">장바구니에 담긴 모델이 없습니다. 관심 있는 제품의 <b>[🛒 담기]</b> 버튼을 눌러주세요.</div>';
+    body.innerHTML = '<div style="padding:36px;text-align:center;color:var(--txt-muted)">견적문의함에 담긴 모델이 없습니다. 제품 카탈로그에서 <b>[✉️ 견적문의 담기]</b>를 눌러주세요.</div>';
   } else {
-    body.innerHTML = '<div style="margin-bottom:14px;font-size:13.5px;color:var(--txt-sub)">아래 수량을 확인하신 후 <b>[📋 견적문의 텍스트 복사]</b>를 눌러 카카오톡이나 문자·이메일(orawinch@naver.com)로 보내주시면 가장 빠른 할인가로 회신해 드립니다.</div>'
-      + '<table class="series-tbl" style="border:1px solid var(--bdr);margin-bottom:16px"><thead><tr><th>모델코드</th><th>분류/시리즈</th><th>사용용량</th><th style="width:90px">수량</th><th style="width:60px">삭제</th></tr></thead><tbody>'
+    body.innerHTML = '<table class="spec-table" style="border:1px solid var(--bdr);margin-bottom:14px"><thead><tr><th>모델코드</th><th>시리즈명</th><th>사용용량</th><th style="width:90px">수량</th><th style="width:60px">삭제</th></tr></thead><tbody>'
       + cart.map(function(c, i){
           var info = ITEMS.find(function(x){ return x.code === c.code; }) || { name:'-', cap:'-' };
-          return '<tr><td style="font-weight:900">' + c.code + '</td><td>' + info.name + '</td><td style="color:var(--pri);font-weight:800">' + info.cap + '</td>'
-            + '<td><input type="number" value="' + c.qty + '" min="1" style="width:65px;padding:5px;border:1px solid #ccc;border-radius:6px;text-align:center;font-weight:800" oninput="cart[' + i + '].qty=Number(this.value)||1"></td>'
-            + '<td><button class="btn btn-outline" style="padding:4px 8px;font-size:11px" onclick="cart.splice(' + i + ',1);updateCartBadge();openCartModal()">✕</button></td></tr>';
+          return '<tr><td style="font-weight:900;color:var(--ora-navy)">' + c.code + '</td><td>' + info.name + '</td><td style="color:var(--ora-red);font-weight:800">' + info.cap + '</td>'
+            + '<td><input type="number" value="' + c.qty + '" min="1" style="width:65px;padding:5px;border:1px solid #CBD5E1;border-radius:6px;text-align:center;font-weight:800" oninput="cart[' + i + '].qty=Number(this.value)||1"></td>'
+            + '<td><button type="button" class="btn btn-white" style="padding:4px 8px;font-size:11px" onclick="cart.splice(' + i + ',1);updateCartBadge();openCartModal()">✕</button></td></tr>';
         }).join("")
       + '</tbody></table>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-      + '  <input id="reqClientName" placeholder="귀사 상호명 / 성함 (예: 강릉산림조합 홍길동)" style="padding:10px;border:1.5px solid var(--bdr);border-radius:8px">'
-      + '  <input id="reqClientTel" placeholder="회신받으실 연락처 (예: 010-0000-0000)" style="padding:10px;border:1.5px solid var(--bdr);border-radius:8px">'
+      + '  <input id="reqClientName" placeholder="업체명 / 기관명 (예: 강릉산림조합)" style="padding:10px;border:1px solid var(--bdr);border-radius:8px">'
+      + '  <input id="reqClientTel" placeholder="회신받으실 연락처 (예: 010-0000-0000)" style="padding:10px;border:1px solid var(--bdr);border-radius:8px">'
       + '</div>';
   }
   document.getElementById("cartModal").style.display = "flex";
 }
 
 function copyCartInquiry(){
-  if(!cart.length){ alert("담긴 제품이 없습니다."); return; }
-  var cName = (document.getElementById("reqClientName") ? document.getElementById("reqClientName").value : "") || "고객";
+  if(!cart.length){ alert("담긴 모델이 없습니다."); return; }
+  var cName = (document.getElementById("reqClientName") ? document.getElementById("reqClientName").value : "") || "문의고객";
   var cTel = (document.getElementById("reqClientTel") ? document.getElementById("reqClientTel").value : "") || "연락처미기재";
   var lines = cart.map(function(c){ return "- " + c.code + " : " + c.qty + "대(개)"; }).join("\\n");
-  var msg = "[오라테크 홈페이지 견적요청]\\n• 요청처: " + cName + " (" + cTel + ")\\n• 문의품목:\\n" + lines + "\\n\\n위 품목에 대한 견적 및 납기 확인 부탁드립니다.";
+  var msg = "[오라테크 공식 홈페이지 견적요청]\\n• 업체/기관명: " + cName + "\\n• 연락처: " + cTel + "\\n• 문의모델:\\n" + lines + "\\n\\n위 모델에 대한 견적서 및 납기 안내를 요청합니다.";
   navigator.clipboard.writeText(msg).then(function(){
-    alert("📋 견적요청 내용이 복사되었습니다!\\n카카오톡이나 문자, 이메일에 붙여넣기(Ctrl+V) 하여 전송해 주세요.");
-  }).catch(function(){
-    prompt("아래 내용을 복사해 주세요:", msg);
+    alert("📋 견적요청 내용이 클립보드에 복사되었습니다!\\n이메일(orawinch@naver.com)이나 카카오톡, 문자로 붙여넣기(Ctrl+V) 해주세요.");
+  });
+}
+
+function submitQuickInquiry(){
+  var compName = document.getElementById("inqComp").value.trim() || "문의업체";
+  var tel = document.getElementById("inqTel").value.trim() || "연락처미기재";
+  var model = document.getElementById("inqModel").value.trim() || "일반문의";
+  var memo = document.getElementById("inqMsg").value.trim() || "-";
+  var msg = "[오라테크 홈페이지 온라인 문의]\\n• 업체명: " + compName + "\\n• 연락처: " + tel + "\\n• 문의모델: " + model + "\\n• 상세내용: " + memo;
+  navigator.clipboard.writeText(msg).then(function(){
+    alert("📋 문의 내용이 클립보드에 복사되었습니다!\\n카카오톡이나 문자, 이메일(orawinch@naver.com)에 붙여넣기(Ctrl+V)로 바로 보내실 수 있습니다.");
   });
 }
 
@@ -9315,6 +9515,7 @@ function toggleAdminMode(){
   if(!isAdmin && prompt("관리자 비밀번호를 입력하세요 (초기: 0000):") !== "0000") return;
   isAdmin = !isAdmin;
   document.getElementById("adminPanel").style.display = isAdmin ? "block" : "none";
+  if(isAdmin) navToSec("secProd");
   renderMainContent();
 }
 
@@ -9335,7 +9536,7 @@ function adminSaveProduct(){
   if(exIdx > -1) ITEMS[exIdx] = obj;
   else ITEMS.unshift(obj);
   renderFilters(); renderMainContent();
-  alert("✅ [" + code + "] 제품이 홈페이지 카탈로그에 반영되었습니다!");
+  alert("✅ [" + code + "] 모델이 홈페이지 전자카탈로그에 반영되었습니다!");
 }
 
 function adminDownloadUpdatedSite(){
@@ -9367,7 +9568,7 @@ renderMainContent();
     var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'orawinch_flagship_website.html';
+    a.download = 'orawinch_corporate_website.html';
     a.click();
   };
 
