@@ -7691,5 +7691,888 @@ window.clearDoneFamilyMemos = function(){
   renderFamilyMemos(fmFilterMode);
 };
 </script>
+  <!-- ==================== 🌐 오라테크 홈페이지(orawinch.co.kr) 시리즈표 개별품목 자동분해 & 전 사이트 전수 크롤러 v46.2 ==================== -->
+<div class="modal-bg" id="webSyncModal" style="z-index:1295">
+  <div class="modal" style="width:980px;max-height:94vh">
+    <div class="mh" style="background:linear-gradient(90deg,#0f2027,#203a43,#2c5364)">
+      <span>🌐 오라테크 홈페이지(orawinch.co.kr) 시리즈 제원표 개별품목 자동분해 & 전수 크롤링 센터</span>
+      <button class="btn-r" onclick="closeModal('webSyncModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px;line-height:1.5">
+      <!-- 상단 자동 크롤러 & 원클릭 동기화 패널 -->
+      <div style="background:linear-gradient(90deg,#eef6ff,#e0f2fe);border:2px solid #0984e3;padding:10px 12px;border-radius:6px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+          <div>
+            <div style="font-weight:900;color:#142d4c;font-size:14px">
+              🎯 현재 분해된 개별 모델 수: <span id="wsTotalCountBadge" style="color:#d63031;font-size:16px">0</span>종 (YT-180~500 등 시리즈 표 낱개 분리 적용됨!)
+            </div>
+            <div style="font-size:11.5px;color:#333">
+              한 페이지에 묶여있는 시리즈 제원표(셀 병합 <code>colspan/rowspan</code> 포함)를 모델 하나하나마다 <b>용량·와이어·속도·모터·전원·자중</b>을 개별 품목으로 완벽히 쪼개서 ERP에 넣습니다!
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-p" style="background:#0984e3;padding:8px 14px;font-size:13px" onclick="syncWebsiteItemsToErp()">📥 체크된 전체 품목을 ERP(품목+제원+사진)에 일괄 등록</button>
+            <button class="btn-a" style="background:#d35400;padding:8px 14px;font-size:13px" onclick="generateModernHomepageFile()">✨ 이 데이터로 [신형 홈페이지+관리자] 다운로드</button>
+          </div>
+        </div>
+
+        <!-- 3가지 자동 수집 도구 바 -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:8px;border-top:1px dashed #90cdf4;align-items:center">
+          <button class="btn-g" style="background:#006266;padding:6px 12px" onclick="startInErpLiveCrawler()">🕷️ 1. 여기서 홈페이지 하위페이지 실시간 자동스캔</button>
+          <button class="btn-pur" style="padding:6px 12px" onclick="openConsoleSpiderGuide()">⚡ 2. [5초 전수수집] 옆 탭(orawinch.co.kr)에서 전 품목 100% 싹쓸이 코드 복사</button>
+          <input type="file" id="wsJsonIn" accept=".json" style="display:none" onchange="importCrawledWebJson(event)">
+          <button class="btn-s" style="padding:6px 12px" onclick="$('wsJsonIn').click()">📂 3. 수집된 홈페이지 JSON 파일 불러오기</button>
+          <span id="wsCrawlProgress" style="font-weight:900;color:#d35400;font-size:12px"></span>
+        </div>
+      </div>
+
+      <!-- ⚡ 옆 탭(orawinch.co.kr) 5초 전수수집 안내 박스 -->
+      <div id="consoleSpiderBox" style="display:none;background:#1e293b;color:#f8fafc;padding:12px;border-radius:6px;margin-bottom:10px;font-size:12px;line-height:1.6">
+        <div style="font-weight:900;color:#ffd32a;font-size:13.5px;margin-bottom:4px">⚡ 옆에 켜두신 http://www.orawinch.co.kr/ 탭에서 10초 만에 전 페이지(수백 개 세부 모델) 100% 싹쓸이하는 법!</div>
+        <div>
+          ① 지금 아래 <b>[📋 전수수집 로봇 코드 복사하기]</b> 버튼은 이미 클릭되어 클립보드에 복사되었습니다!<br>
+          ② 크롬 옆 탭에 켜두신 <b>오라테크 홈페이지(<code>http://www.orawinch.co.kr/</code> 아무 페이지나)</b>로 이동해서 키보드의 <b><code>F12</code></b> 키를 누르고 상단 <b><code>Console(콘솔)</code></b> 탭을 클릭하세요.<br>
+          ③ 콘솔 입력칸에 <b><code>Ctrl + V</code> (붙여넣기)</b> 후 <b><code>Enter</code></b>를 치면, 로봇이 홈페이지의 모든 대분류·소분류·상세탭을 초고속으로 돌면서 <code>YT-180~500</code> 같은 모든 표를 낱개로 분해해 <b><code>orawinch_all_models.json</code> 파일로 자동 다운로드</b>합니다!<br>
+          ④ 다운로드된 파일을 위 <b>[📂 3. 수집된 홈페이지 JSON 파일 불러오기]</b> 버튼으로 선택하시면 1초 만에 끝납니다!
+        </div>
+        <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn-kakao" onclick="copySpiderScriptToClipboard()">📋 전수수집 로봇 코드 다시 복사하기</button>
+          <button class="btn-w" onclick="$('consoleSpiderBox').style.display='none'">닫기</button>
+        </div>
+      </div>
+
+      <!-- 카테고리 필터 및 검색 -->
+      <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
+        <select id="wsCatFilter" style="padding:6px;font-weight:bold;border:2px solid #142d4c" onchange="renderWebSyncTable()">
+          <option value="ALL">📂 전체 홈페이지 카테고리 보기</option>
+          <option value="엔진윈치">⛽ 윈치 > 현장작업용 엔진윈치 (PCW/PCH/DOCMA)</option>
+          <option value="전동윈치">⚡ 윈치 > 현장작업용 전동윈치 (PU/FU/CP/GX/GXR/CWG/KT)</option>
+          <option value="미니/특수윈치">🔌 윈치 > 미니윈치 & 특수윈치 (YT/FY/KW/AT/RT/NS/SK/MW/KIO/DU)</option>
+          <option value="수동/DC/유압윈치">🚗 윈치 > 수동윈치 & DC윈치/호이스트 (DL/DLB/BHW/RBW/HW/RKEP)</option>
+          <option value="호이스트">🏗️ 호이스트 > 전동/단상호이스트 & 부품 (LK/극동/LGM/쌍용/단상)</option>
+          <option value="수동하역제품">⛓️ 수동제품 > 체인/레바/와이어윈치/트롤리/자석 (VC/MX/C-21/SHB/LX/TIL/PT/GT/HC/PML)</option>
+          <option value="크레인/구조물">🏗️ 윈치구조물 & 크레인 (CRT/CRH/TC/SB/겐트리)</option>
+          <option value="운반하역유압">🚜 운반·하역 유압장비 > 파레트/스태커/리프트 (JH/EPTK/SYC/SEF/EDYC/JCPT/GTWY)</option>
+        </select>
+        <input id="wsSearchKw" placeholder="🔍 모델코드 검색 (예: YT-180, YT-500, PU-250B, GX-200, VC-030)..." style="flex:1;padding:6px" oninput="renderWebSyncTable()">
+      </div>
+
+      <!-- 추출된 홈페이지 개별 모델 리스트 테이블 -->
+      <div class="tw" style="max-height:390px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:32px"><input type="checkbox" id="wsChkAll" checked onclick="toggleAllWebSyncChk(this.checked)"></th>
+              <th style="width:52px">사진</th>
+              <th style="width:115px">홈페이지 분류</th>
+              <th style="width:115px">개별 모델코드</th>
+              <th style="width:155px">시리즈 / 제품명</th>
+              <th style="width:95px">사용용량</th>
+              <th style="width:105px">와이어/로프/체인</th>
+              <th>상세 제원 (속도 · 모터 · 전원 · 자체중량 등)</th>
+              <th style="width:90px">기준단가</th>
+            </tr>
+          </thead>
+          <tbody id="webSyncTb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-g" style="padding:8px 14px" onclick="previewModernHomepageModal()">👁️ 신형 홈페이지 화면 미리보기</button>
+      <button class="btn-p" style="padding:8px 16px" onclick="syncWebsiteItemsToErp()">📥 체크한 전체 품목 ERP에 일괄 등록</button>
+      <button class="btn-w" onclick="closeModal('webSyncModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 👁️ 신형 홈페이지 실시간 미리보기 모달 -->
+<div class="modal-bg" id="webPreviewModal" style="z-index:1300">
+  <div class="modal" style="width:96vw;max-width:1400px;height:94vh;max-height:94vh">
+    <div class="mh" style="background:#142d4c">
+      <span>✨ 오라테크 2026년형 신형 반응형 홈페이지 + 관리자(CMS) 실시간 미리보기</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn-a" onclick="generateModernHomepageFile()">💾 이 홈페이지 파일(orawinch_new_site.html) 다운로드</button>
+        <button class="btn-r" onclick="closeModal('webPreviewModal')">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="mb" style="padding:0;overflow:hidden">
+      <iframe id="webPreviewFrame" style="width:100%;height:100%;border:none"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 중복 모달 자동 제거
+  ['webSyncModal','webPreviewModal'].forEach(function(id){
+    var els = document.querySelectorAll('[id="' + id + '"]');
+    if(els.length > 1){
+      for(var i = 0; i < els.length - 1; i++) els[i].parentNode.removeChild(els[i]);
+    }
+  });
+
+  // =========================================================================
+  // 📦 1. 시리즈 제원표를 개별 품목 단위로 완전 분해한 마스터 DB (YT-180~500 등 낱개 분해 완료!)
+  // =========================================================================
+  var SPLIT_SERIES_GROUPS = [
+    // [미니윈치] 야마가타(YAMAGATA) YT 시리즈 (대표님 스크린샷과 100% 동일하게 5종 개별 분해!)
+    { cat:'미니/특수윈치', series:'YAMAGATA(야마가타) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['YT-180', '180Kg', '5 x 30m', '속도: 23m/min / 모터: 1,200kw / 전원: 단상 220V / 자체중량: 16Kg', 310000],
+      ['YT-250', '250Kg', '5 x 30m', '속도: 23m/min / 모터: 1,300kw / 전원: 단상 220V / 자체중량: 17Kg', 340000],
+      ['YT-300', '300Kg', '5 x 30m', '속도: 16m/min / 모터: 1,300kw / 전원: 단상 220V / 자체중량: 21Kg', 390000],
+      ['YT-360', '360Kg', '6 x 30m', '속도: 15m/min / 모터: 1,300kw / 전원: 단상 220V / 자체중량: 27Kg', 450000],
+      ['YT-500', '500Kg', '7 x 30m', '속도: 12m/min / 모터: 1,300kw / 전원: 단상 220V / 자체중량: 28Kg', 520000]
+    ]},
+    // [미니윈치] 후지야마(FUJIYAMA) FY 시리즈
+    { cat:'미니/특수윈치', series:'FUJIYAMA(후지야마) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['FY-230', '230Kg', '5 x 30m', '속도: 18m/min / 모터: 1,200W / 전원: 단상 220V / 자중: 16Kg', 310000],
+      ['FY-250', '250Kg', '5 x 30m', '속도: 18m/min / 모터: 1,300W / 전원: 단상 220V / 자중: 17Kg', 330000]
+    ]},
+    // [미니윈치] 쿠마모토(KUMAMOTO) KW 시리즈
+    { cat:'미니/특수윈치', series:'KUMAMOTO(쿠마모토) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['KW-250', '250Kg', '5 x 30m', '속도: 16m/min / 모터: 1,300W / 전원: 단상 220V / 자중: 16Kg', 330000],
+      ['KW-250-2', '250Kg', '5 x 30m', '2홀 분리형 / 속도: 16m/min / 모터: 1,300W / 전원: 단상 220V', 350000]
+    ]},
+    // [미니윈치] 아키타(AKITA) AT 시리즈
+    { cat:'미니/특수윈치', series:'AKITA(아키타) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['AT-80', '80Kg', '4 x 25m', '초경량 미니윈치 / 전원: 단상 220V / 자중: 10Kg', 260000],
+      ['AT-200', '200Kg', '5 x 30m', '속도: 18m/min / 전원: 단상 220V / 자중: 15Kg', 320000],
+      ['AT-280', '280Kg', '5 x 30m', '속도: 15m/min / 전원: 단상 220V / 자중: 17Kg', 360000]
+    ]},
+    // [미니윈치] 료우타(RYOUTA) RT 시리즈
+    { cat:'미니/특수윈치', series:'RYOUTA(료우타) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/ryouta/IMG_01.jpg', models:[
+      ['RT-250', '250Kg', '4.8 x 31m', '속도: 15m/min / 소비전력: 1,300W / 전원: 단상 220V / 자중: 15Kg', 350000],
+      ['RT-300', '300Kg', '4.8 x 30m', '속도: 15m/min / 소비전력: 1,500W / 전원: 단상 220V / 자중: 16Kg', 390000]
+    ]},
+    // [미니윈치] 나가사키(Nagasaki) NS-W / NS-M 시리즈
+    { cat:'미니/특수윈치', series:'나가사키(Nagasaki) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/nagasaki/ns-w/IMG_01.jpg', models:[
+      ['NS-250W', '250Kg', '5 x 30m', '2홀 분리형 / 속도: 19m/min / 모터: 1,300W / 전원: 단상 220V', 380000],
+      ['NS-300W', '300Kg', '5 x 30m', '2홀 분리형 / 속도: 12m/min / 모터: 1,300W / 전원: 단상 220V', 420000],
+      ['NS-250M', '250Kg', '5 x 30m', '마그네틱 브레이크형 / 유무선 겸용 / 단상 220V', 440000],
+      ['NS-300M', '300Kg', '5 x 30m', '마그네틱 브레이크형 / 유무선 겸용 / 단상 220V', 480000]
+    ]},
+    // [미니윈치] 스카이(SKY) 컴업 SK 시리즈
+    { cat:'미니/특수윈치', series:'COME-UP 스카이(SKY) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['SK-180', '180Kg', '4.8 x 31m', '속도: 23m/min / 모터: 1,200W / 전원: 단상 220V / 자중: 15Kg', 360000],
+      ['SK-250', '250Kg', '4.8 x 31m', '속도: 14m/min / 모터: 1,300W / 전원: 단상 220V / 자중: 16Kg', 390000]
+    ]},
+    // [미니윈치] 야마모토 MW / 토요야스 TY / 가이아 GA
+    { cat:'미니/특수윈치', series:'야마모토/토요야스/가이아 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['MW-230', '230Kg', '5 x 30m', 'YAMAMOTO 미니윈치 / 전원: 단상 220V / 자중: 16Kg', 320000],
+      ['MW-500', '500Kg', '6 x 30m', 'YAMAMOTO 미니윈치 / 전원: 단상 220V / 자중: 26Kg', 490000],
+      ['MW-500L', '500Kg', '6 x 50m', 'YAMAMOTO 롱드럼 미니윈치 / 전원: 단상 220V', 550000],
+      ['TY-160', '160Kg', '4.8 x 30m', 'TOYOYAS 미니윈치 / 전원: 단상 220V', 290000],
+      ['TY-250', '250Kg', '5 x 30m', 'TOYOYAS 미니윈치 / 전원: 단상 220V', 330000],
+      ['GA-250', '250Kg', '5 x 30m', 'GAIA 미니윈치 / 전원: 단상 220V', 330000]
+    ]},
+    // [미니/특수윈치] KIO(키오) & DUKE(듀크) 시리즈
+    { cat:'미니/특수윈치', series:'KIO(키오) / DUKE(듀크) 미니윈치', img:'http://www.orawinch.co.kr/products/winch/mini/thumb_img/fujiyama.jpg', models:[
+      ['KIO-80', '80Kg', '4 x 30m', '대만 KIO 정품 고속 미니윈치 / 단상 220V', 480000],
+      ['KIO-160', '160Kg', '4.8 x 30m', '대만 KIO 정품 미니윈치 / 단상 220V', 550000],
+      ['KIO-200', '200Kg', '5 x 30m', '대만 KIO 정품 미니윈치 / 단상 220V', 620000],
+      ['KIO-230', '230Kg', '5 x 30m', '대만 KIO 정품 미니윈치 / 단상 220V', 660000],
+      ['KIO-300', '300Kg', '6 x 30m', '대만 KIO 정품 미니윈치 / 단상 220V', 750000],
+      ['KIO-490', '490Kg', '6.3 x 30m', '대만 KIO 고용량 미니윈치 / 단상 220V', 880000],
+      ['KIO-500', '500Kg', '7 x 30m', '대만 KIO 중량형 윈치 / 단상 220V', 950000],
+      ['DU-160', '160Kg', '4.8 x 30m', 'DUKE 전동 미니윈치 / 단상 220V', 420000],
+      ['DU-200', '200Kg', '5 x 30m', 'DUKE 전동 미니윈치 / 단상 220V / 16Kg', 450000],
+      ['DU-250', '250Kg', '5 x 30m', 'DUKE 전동 미니윈치 / 단상 220V / 17.5Kg', 520000],
+      ['DU-300', '300Kg', '6 x 30m', 'DUKE 전동 미니윈치 / 단상 220V / 22Kg', 680000],
+      ['DU-300A', '300Kg', '5 x 60m', 'DUKE 고층용 60m 장거리 윈치 / 단상 220V', 740000],
+      ['DU-500', '500Kg', '7 x 30m', 'DUKE 중량형 윈치 / 단상 220V / 38Kg', 1150000],
+      ['DU-500SH', '500Kg', '특수사양', 'TOMY 저속형 정밀 미니윈치 / 단상 220V', 780000],
+      ['CWL-200LG', '200Kg', '5 x 30m', '컴업 풍력발전/가정용 경량 윈치 / 단상 220V', 490000]
+    ]},
+    // [전동윈치] 파워업(Power-UP) 표준형 PU 시리즈 (6종 개별 분해)
+    { cat:'전동윈치', series:'파워업(Power-UP) 표준형 PU 시리즈', img:'http://www.orawinch.co.kr/products/winch/electric/PU/PU200.jpg', models:[
+      ['PU-200B', '200Kg', '6 x 30m', '속도: 12~18m/min / 전압: 단상220V / 모터: 0.8HPx4P / 자중: 28Kg / 치수: 210x265x474', 480000],
+      ['PU-250B', '250Kg', '6 x 30m', '속도: 12~18m/min / 전압: 단상220V / 모터: 1.1HPx4P / 자중: 32Kg / 치수: 210x265x527', 530000],
+      ['PU-300B', '300Kg', '6 x 30m', '속도: 12~18m/min / 전압: 단상220V / 모터: 1.5HPx4P / 자중: 33Kg / 치수: 210x265x527', 620000],
+      ['PU-500B', '500Kg', '8 x 30m', '속도: 14~20m/min / 전압: 단상220V / 모터: 2.5HPx4P / 자중: 47Kg / 치수: 220x288x625', 950000],
+      ['PU-3003B', '300Kg', '6 x 30m', '속도: 12~18m/min / 전압: 삼상220/380V / 모터: 1.5HPx4P / 자중: 33Kg / 치수: 210x265x527', 650000],
+      ['PU-5003B', '500Kg', '8 x 30m', '속도: 14~20m/min / 전압: 삼상220/380V / 모터: 2.5HPx4P / 자중: 47Kg / 치수: 220x288x625', 980000]
+    ]},
+    // [전동윈치] 파워업(Power-UP) 고급형 FU 시리즈 (8종 개별 분해)
+    { cat:'전동윈치', series:'파워업(Power-UP) 고급형 FU 시리즈', img:'http://www.orawinch.co.kr/products/winch/electric/FU/IMG_3p_01.jpg', models:[
+      ['FU-300B', '300Kg', '7 x 40m', '속도: 14~20m/min / 전압: 단상220V·삼상겸용 / 모터: 2.0HPx4P / 자중: 40Kg', 780000],
+      ['FU-500B', '500Kg', '8 x 50m', '속도: 18~24m/min / 전압: 단상220V·삼상겸용 / 모터: 2.5HPx4P / 자중: 57Kg', 1150000],
+      ['FU-1060', '1,000Kg (1톤)', '10 x 60m', '속도: 18~24m/min / 전압: 삼상220/380V / 모터: 5.0HPx6P / 자중: 220Kg', 2600000],
+      ['FU-1100', '1,100Kg', '12 x 100m', '속도: 13~20m/min / 전압: 삼상220/380V / 모터: 7.5HPx4P / 자중: 290Kg', 3100000],
+      ['FU-2000', '2,000Kg (2톤)', '16 x 100m', '속도: 11~18m/min / 전압: 삼상220/380V / 모터: 7.5HPx4P / 자중: 450Kg', 4800000],
+      ['FU-3000', '3,000Kg (3톤)', '18 x 150m', '속도: 11~18m/min / 전압: 삼상220/380V / 모터: 15.0HPx4P / 자중: 850Kg', 7200000],
+      ['FU-5000', '5,000Kg (5톤)', '22 x 200m', '속도: 11~18m/min / 전압: 삼상220/380V / 모터: 20.0HPx4P / 자중: 1,500Kg', 11500000],
+      ['FU-10000', '10,000Kg (10톤)', '32 x 200m', '속도: 9~13m/min / 전압: 삼상220/380V / 모터: 30.0HPx6P / 자중: 2,800Kg', 21000000]
+    ]},
+    // [전동윈치] 컴업(Come-UP) 가벼운 윈치 GX & GXR 시리즈 (13종 개별 분해)
+    { cat:'전동윈치', series:'컴업(Come-UP) 가벼운 윈치 GX/GXR 시리즈', img:'http://www.orawinch.co.kr/products/winch/electric/GXR/IMG_01.PNG', models:[
+      ['GX-100', '100Kg', '4 x 24m', '속도: 25m/min / 모터: 300W / 전원: 단상 220V / 자중: 10Kg (초소형)', 420000],
+      ['GX-200', '200Kg', '5 x 45m', '속도: 16m/min / 모터: 1,200W / 전원: 단상 220V / 자중: 16Kg', 520000],
+      ['GX-201', '200Kg', '5 x 70m', '속도: 16m/min / 모터: 1,200W / 전원: 단상 220V / 자중: 19Kg (롱드럼)', 560000],
+      ['GX-202', '200Kg', '5 x 75m', '속도: 37m/min (초고속) / 모터: 2,300W / 전원: 단상 220V / 자중: 21Kg', 640000],
+      ['GX-252', '250Kg', '5 x 75m', '속도: 30m/min (고속) / 모터: 2,300W / 전원: 단상 220V / 자중: 21Kg', 670000],
+      ['GX-300', '300Kg', '6 x 30m', '속도: 25m/min / 모터: 2,300W / 전원: 단상 220V / 자중: 18Kg', 690000],
+      ['GX-301', '300Kg', '7 x 40m', '속도: 25m/min / 모터: 2,300W / 전원: 단상 220V / 자중: 22Kg', 730000],
+      ['GXR-200', '200Kg', '5 x 45m', '마그네트 브레이크형 / 속도: 16m/min / 모터: 1,200W / 단상 220V / 자중: 16Kg', 580000],
+      ['GXR-201', '200Kg', '5 x 70m', '마그네트 브레이크형 / 속도: 16m/min / 모터: 1,200W / 단상 220V / 자중: 19Kg', 620000],
+      ['GXR-202', '200Kg', '5 x 75m', '마그네트 브레이크형 / 속도: 37m/min / 모터: 2,300W / 단상 220V / 자중: 21Kg', 680000],
+      ['GXR-252', '250Kg', '5 x 75m', '마그네트 브레이크형 / 속도: 30m/min / 모터: 2,300W / 단상 220V / 자중: 21Kg', 710000],
+      ['GXR-300', '300Kg', '6 x 30m', '마그네트 브레이크형 / 속도: 25m/min / 모터: 2,300W / 단상 220V / 자중: 18Kg', 740000],
+      ['GXR-301', '300Kg', '7 x 40m', '마그네트 브레이크형 / 속도: 25m/min / 모터: 2,300W / 단상 220V / 자중: 22Kg', 780000]
+    ]},
+    // [전동윈치] 컴업(Come-UP) CP & CWG 시리즈
+    { cat:'전동윈치', series:'컴업(Come-UP) CP / CWG 시리즈', img:'http://www.orawinch.co.kr/products/winch/electric/CP/IMG_h_001.jpg', models:[
+      ['CP-200', '200Kg', '6 x 30m', '보급형 테이블 윈치 / 전원: 단상 220V', 620000],
+      ['CP-250', '250Kg', '6 x 30m', '보급형 테이블 윈치 / 전원: 단상 220V', 680000],
+      ['CP-300', '300Kg', '6 x 30m', '보급형 테이블 윈치 / 전원: 단상 220V', 750000],
+      ['CP-500', '500Kg', '7 x 60m', '속도: 14~18m/min / 모터: 1.8kWx4P / 전원: 단상 220V / 자중: 55Kg', 1250000],
+      ['CP-500T', '500Kg', '7 x 60m', '속도: 14~18m/min / 모터: 1.8kWx4P / 전원: 삼상 220/380V / 자중: 54Kg', 1280000],
+      ['CP-900T', '900Kg', '10 x 30m', '속도: 12~16m/min / 모터: 3.0kWx4P / 전원: 삼상 220/380V / 자중: 100Kg', 2150000],
+      ['CWG-300', '300Kg', '6 x 30m', '컴업 중하중 윈치 / 단상·삼상 선택', 950000],
+      ['CWG-500', '500Kg', '7 x 50m', '컴업 중하중 윈치 / 단상·삼상 선택', 1350000],
+      ['CWG-1000', '1,000Kg (1톤)', '10 x 60m', '컴업 산업용 중량 윈치 / 삼상 220/380V', 2800000],
+      ['CWG-2000', '2,000Kg (2톤)', '14 x 100m', '컴업 산업용 중량 윈치 / 삼상 220/380V', 5200000],
+      ['CWG-3000', '3,000Kg (3톤)', '16 x 100m', '컴업 산업용 중량 윈치 / 삼상 220/380V', 7600000]
+    ]},
+    // [전동윈치] KT 플러그타입 & 고용량 시리즈 (8종 개별 분해)
+    { cat:'전동윈치', series:'KT 전동윈치 시리즈', img:'http://www.orawinch.co.kr/products/winch/electric/images/kt_plug.jpg', models:[
+      ['KT-200', '200Kg', '6 x 30m', '플러그 타입 기본형 / 전원: 단상 220V', 420000],
+      ['KT-300', '300Kg', '6 x 30m', '플러그 타입 기본형 / 전원: 단상 220V', 460000],
+      ['KT-450M', '450Kg', '7 x 30m', '고용량 마그네트형 / 전원: 단상 220V', 680000],
+      ['KT-500', '500Kg', '8 x 30m', '고용량 표준형 / 전원: 단상 220V', 750000],
+      ['KT-500T', '500Kg', '8 x 30m', '고용량 삼상형 / 전원: 삼상 220/380V', 780000],
+      ['KT-500M', '500Kg', '8 x 30m', '고용량 마그네트형 / 전원: 단상 220V', 820000],
+      ['KT-1000', '1,000Kg (1톤)', '10 x 50m', '대용량 단상 윈치 / 전원: 단상 220V', 1650000],
+      ['KT-1000T', '1,000Kg (1톤)', '10 x 50m', '대용량 삼상 윈치 / 전원: 삼상 220/380V', 1680000]
+    ]},
+    // [엔진윈치] PORTABLE WINCH & DOCMA 시리즈
+    { cat:'엔진윈치', series:'포터블 엔진윈치 (PCW/PCH/DOCMA)', img:'http://www.orawinch.co.kr/products/winch/engine/portable/PCW5000/images/PCW5000-Collection.jpg', models:[
+      ['PCW-3000', '직선 700Kg (도르래 3.5톤)', '10~12mm 로프', '혼다 GX-35 4행정 엔진 / 속도: 10m/min / 자중: 9.5Kg', 1850000],
+      ['PCW-3000LI', '직선 700Kg (도르래 3.5톤)', '10~12mm 로프', '80/82V 리튬이온 배터리 / 3단 속도(8~11.6m/min) / 자중: 9.5Kg', 2100000],
+      ['PCW-4000', '직선 1,000Kg (도르래 4톤)', '10~12mm 로프', '혼다 GX-50 360도 경사엔진 / 원심클러치+역회전방지 / 자중: 12Kg', 2350000],
+      ['PCW-4500', '직선 1,200Kg', '10~12mm 로프', '2행정 MARUYAMA CER500W 엔진 구동 / 산림·견인용', 2450000],
+      ['PCW-5000', '직선 1,000Kg (도르래 5톤)', '12~13mm 로프', '혼다 GXH-50 4행정 엔진 / 속도: 12~18m/min / 자중: 16Kg', 2600000],
+      ['PCW-5000HS', '직선 700Kg (고속형)', '12~13mm 로프', '혼다 GXH-50 엔진 / 속도: 18~28m/min / 자중: 16Kg', 2650000],
+      ['PCH-1000', '인양 250Kg / 견인 775Kg', '12mm 로프', '혼다 GXH-50 엔진 / 자동 로프그립 브레이크 / 자중: 19Kg', 3100000],
+      ['PCH-2000', '인양 450Kg / 견인 1,050Kg', '12~13mm 로프', '혼다 GXH-50 엔진 / 고하중 인양·견인 겸용 / 자중: 19.6Kg', 3600000],
+      ['APW-6000', '최대 1,500Kg (3300LB)', '합성로프', 'STIHL AP 배터리 구동 산림윈치', 2700000],
+      ['VF-150', '최대 1,420Kg', '와이어/섬유로프', 'DOCMA 2행정 54.2cc 산림용 엔진윈치 / 자중: 25Kg', 3200000],
+      ['VF-155', '최대 1,260Kg', '자동권취로프', 'DOCMA AUTO-4 혼다 GX-50 엔진윈치', 3300000],
+      ['VF-80', '최대 815Kg', '섬유로프', 'DOCMA VF-80 Bolt 전동드릴 구동식 초경량 윈치', 1450000]
+    ]},
+    // [수동/DC/유압윈치] 듀튼 DL/DLB, 쌍용 BHW/RBW, 후지야마 스텐 HW, 런바 DC
+    { cat:'수동/DC/유압윈치', series:'수동 핸드윈치 & 차량용 DC윈치', img:'http://www.orawinch.co.kr/products/winch/manual/thumb_img/jh.jpg', models:[
+      ['DL-600', '600LB (270Kg)', '와이어 별도', 'Dutton 라체트 수동윈치', 55000],
+      ['DL-1100', '1,100LB (500Kg)', '와이어 별도', 'Dutton 라체트 수동윈치', 65000],
+      ['DL-1600', '1,600LB (720Kg)', '와이어 별도', 'Dutton 라체트 수동윈치', 75000],
+      ['DL-2500', '2,500LB (1,130Kg)', '와이어 별도', 'Dutton 라체트 수동윈치', 95000],
+      ['DL-3500B', '3,500LB (1,580Kg)', '와이어 별도', 'Dutton 핸드브레이크 타입 수동윈치', 135000],
+      ['DLB-800', '800LB (360Kg)', '와이어 별도', 'Dutton 오토브레이크 수동윈치', 80000],
+      ['DLB-1200', '1,200LB (540Kg)', '와이어 별도', 'Dutton 오토브레이크 수동윈치', 95000],
+      ['DLB-1500', '1,500LB (680Kg)', '와이어 별도', 'Dutton 오토브레이크 수동윈치', 115000],
+      ['DLB-2000', '2,000LB (900Kg)', '와이어 별도', 'Dutton 오토브레이크 수동윈치', 145000],
+      ['BHW-1200', '1,200LB (540Kg)', '와이어 별도', '쌍용타이거 디스크 브레이크형 수동윈치', 75000],
+      ['BHW-1800', '1,800LB (810Kg)', '와이어 별도', '쌍용타이거 디스크 브레이크형 수동윈치', 95000],
+      ['BHW-2600', '2,600LB (1,180Kg)', '와이어 별도', '쌍용타이거 디스크 브레이크형 수동윈치', 120000],
+      ['RBW-1200', '1,200LB (540Kg)', '와이어 별도', '쌍용 경제형 오토브레이크 수동윈치', 85000],
+      ['RBW-1800', '1,800LB (810Kg)', '와이어 별도', '쌍용 경제형 오토브레이크 수동윈치', 105000],
+      ['RBW-2500', '2,500LB (1,130Kg)', '와이어 별도', '쌍용 경제형 오토브레이크 수동윈치', 135000],
+      ['RBW-3500', '3,500LB (1,580Kg)', '와이어 별도', '쌍용 경제형 오토브레이크 수동윈치', 175000],
+      ['HW-1200SR', '1,200LB', '올스텐(SUS304)', '후지야마 스테인리스 브레이크 수동윈치', 190000],
+      ['HW-1800SR', '1,800LB', '올스텐(SUS304)', '후지야마 스테인리스 브레이크 수동윈치', 240000],
+      ['HW-2600SR', '2,600LB', '올스텐(SUS304)', '후지야마 스테인리스 브레이크 수동윈치', 290000],
+      ['RKEP-3500U', '3,500LB (1,580Kg)', '와이어 장착', '런바(Runva) DC 12V/24V 차량·산업용 윈치/호이스트', 480000],
+      ['DHC-1600', '726Kg (1,600LB)', '6 x 19.8m', '컴업 DC 12V/24V 인양용 호이스트 윈치 / 900W', 680000]
+    ]},
+    // [수동하역제품] 체인블럭 V-TAL VC 시리즈 & 쌍용 MAX MX 시리즈 & 레바블럭 LX 시리즈 (톤수별 완전 분해!)
+    { cat:'수동하역제품', series:'V-TAL 체인블럭 / MAX 체인·레바블럭', img:'http://www.orawinch.co.kr/products/manual/block_chain/v-tal/images/IMG_01.jpg', models:[
+      ['VC-005', '0.5톤 (500Kg)', '로드체인 5x15mm', 'V-TAL 수동 체인블럭 / 표준양정 2.5m / 자중: 9.5Kg', 85000],
+      ['VC-010', '1톤 (1,000Kg)', '로드체인 6x18mm', 'V-TAL 수동 체인블럭 / 표준양정 2.5m / 자중: 11.5Kg', 105000],
+      ['VC-015', '1.5톤 (1,500Kg)', '로드체인 8x24mm', 'V-TAL 수동 체인블럭 / 표준양정 2.5m / 자중: 17Kg', 135000],
+      ['VC-020', '2톤 (2,000Kg)', '로드체인 6x18mm (2줄)', 'V-TAL 수동 체인블럭 / 표준양정 3m / 자중: 18.5Kg', 155000],
+      ['VC-030', '3톤 (3,000Kg)', '로드체인 8x24mm (2줄)', 'V-TAL 수동 체인블럭 / 표준양정 3m / 자중: 29Kg', 210000],
+      ['VC-050', '5톤 (5,000Kg)', '로드체인 9x27mm (2줄)', 'V-TAL 수동 체인블럭 / 표준양정 3m / 자중: 41Kg', 320000],
+      ['VC-100', '10톤 (10,000Kg)', '로드체인 9x27mm (4줄)', 'V-TAL 수동 체인블럭 / 표준양정 3.5m / 자중: 78.5Kg', 650000],
+      ['LX-025', '0.25톤 (250Kg)', '로드체인 4x12mm (1.0m)', '쌍용 MAX 초소형 레바블럭 / 테스트하중 0.37톤 / 장력 28.2Kg', 75000],
+      ['LX-075', '0.75톤 (750Kg)', '로드체인 6x18mm (1.5m)', '쌍용 MAX 레바블럭 / 테스트하중 1.12톤 / 장력 26.5Kg', 98000],
+      ['LX-150', '1.5톤 (1,500Kg)', '로드체인 7x21mm (1.5m)', '쌍용 MAX 레바블럭 / 테스트하중 2.25톤 / 장력 29.5Kg', 135000],
+      ['LX-300', '3.0톤 (3,000Kg)', '로드체인 10x30mm (1.5m)', '쌍용 MAX 레바블럭 / 테스트하중 4.5톤 / 장력 33.5Kg', 210000],
+      ['TIL-S08', '800Kg (0.8톤)', '전용 와이어로프 8.3mm', 'SUPER TIL 와이어로프 루퍼(윈치) / 무제한 양정 견인', 210000],
+      ['TIL-S15', '1,500Kg (1.5톤)', '전용 와이어로프 11mm', 'SUPER TIL 와이어로프 루퍼(윈치) / 자중: 17Kg', 280000],
+      ['TIL-S30', '3,000Kg (3.0톤)', '전용 와이어로프 16mm', 'SUPER TIL 와이어로프 루퍼(윈치) / 중량물 견인', 420000],
+      ['PML-100', '100Kg', '영구자석 리프트', '무전원 네오디뮴 마그네틱 리프트 (철판·환봉 인양)', 140000],
+      ['PML-300', '300Kg', '영구자석 리프트', '무전원 네오디뮴 마그네틱 리프트', 210000],
+      ['PML-600', '600Kg', '영구자석 리프트', '무전원 네오디뮴 마그네틱 리프트', 290000],
+      ['PML-1000', '1,000Kg (1톤)', '영구자석 리프트', '무전원 네오디뮴 마그네틱 리프트', 450000],
+      ['PML-2000', '2,000Kg (2톤)', '영구자석 리프트', '무전원 네오디뮴 마그네틱 리프트', 820000],
+      ['PML-3000', '3,000Kg (3톤)', '영구자석 리프트', '무전원 네오디뮴 마그네틱 리프트', 1350000]
+    ]},
+    // [호이스트] 단상/삼상 체인 및 와이어 호이스트 (톤수별 분해)
+    { cat:'호이스트', series:'단상/삼상 전동호이스트 (LK/극동/쌍용)', img:'http://www.orawinch.co.kr/products/hoist/sphase/du-1000k/IMG_01.jpg', models:[
+      ['DU-500K', '500Kg (0.5톤)', '로드체인 6.3mm', '단상 220V 전동 체인호이스트', 780000],
+      ['DU-1000K', '1,000Kg (1톤)', '로드체인 7.1mm', '단상 220V 전동 체인호이스트', 950000],
+      ['LK-DA005', '0.5톤 (500Kg)', '로드체인 6.3mm', 'LK 삼상 220/380V 체인호이스트 (정치식/트로리형)', 1150000],
+      ['LK-DA010', '1톤 (1,000Kg)', '로드체인 7.1mm', 'LK 삼상 220/380V 체인호이스트 (정치식/트로리형)', 1350000],
+      ['LK-DA020', '2톤 (2,000Kg)', '로드체인 7.1mm (2줄)', 'LK 삼상 220/380V 체인호이스트', 1750000],
+      ['LK-DA030', '3톤 (3,000Kg)', '로드체인 10mm', 'LK 삼상 220/380V 체인호이스트', 2350000],
+      ['LK-DA050', '5톤 (5,000Kg)', '로드체인 11.2mm (2줄)', 'LK 삼상 220/380V 체인호이스트', 3400000],
+      ['SHOCK-STAR', '전용량 호환', 'R·S·T 결선형', '호이스트·크레인 출발 충격방지 소프트스타트(쇼크레스타)', 180000]
+    ]},
+    // [운반하역유압] 핸드파레트, 스태커, 고소작업리프트 (모델별 완전 분해)
+    { cat:'운반하역유압', series:'스태커 / 파레트 / 고소작업리프트', img:'http://www.orawinch.co.kr/products/lift/sy_stacker/thumb_img/01.jpg', models:[
+      ['JH-2500', '2,500Kg (2.5톤)', '포크 550/685 x 1150mm', '경제형 수동 핸드파레트 트럭 (우레탄 바퀴)', 320000],
+      ['EPTK-25RA-M', '2,500Kg (2.5톤)', '포크 550 x 1150mm', '입승식 전동 핸드파렛트 트럭 (주행+상승 전동 / 24V 210Ah)', 3800000],
+      ['EPTK-25RA-L', '2,500Kg (2.5톤)', '포크 685 x 1220mm', '입승식 전동 핸드파렛트 트럭 광폭형 (24V 210Ah)', 3900000],
+      ['SYC-516', '500Kg', '양정 1,600mm (1.6m)', '수동 유압 스태커 (족답/핸들 겸용)', 720000],
+      ['SYC-1016', '1,000Kg (1톤)', '양정 1,600mm (1.6m)', '수동 유압 스태커 표준형', 850000],
+      ['SYC-1025', '1,000Kg (1톤)', '양정 2,500mm (2.5m)', '수동 유압 스태커 2단 마스트형', 1150000],
+      ['SYC-2016', '2,000Kg (2톤)', '양정 1,600mm (1.6m)', '수동 유압 스태커 중량형', 1250000],
+      ['SEF-4120', '400Kg', '양정 1,200mm (1.2m)', '전동 미니 스태커 (DC 12V 배터리 / 경량 크롬바디)', 1350000],
+      ['SEF-4150', '400Kg', '양정 1,500mm (1.5m)', '전동 미니 스태커 (DC 12V 배터리 / 트럭 상하차용)', 1450000],
+      ['EDYC-1025', '1,000Kg (1톤)', '양정 2,500mm (2.5m)', '전동 주행+전동 상승 스태커', 3900000],
+      ['EDYC-1030', '1,000Kg (1톤)', '양정 3,000mm (3.0m)', '전동 주행+전동 상승 스태커', 4200000],
+      ['EDYC-1530', '1,500Kg (1.5톤)', '양정 3,000mm (3.0m)', '전동 주행+전동 상승 스태커', 4600000],
+      ['JCPT-0607', '240Kg', '작업높이 5.9m', '전동 자주식 시저스 고소작업대(렌탈카)', 6800000],
+      ['JCPT-0807', '230Kg', '작업높이 7.8m', '전동 자주식 시저스 고소작업대', 7600000],
+      ['JCPT-1008HD', '450Kg', '작업높이 10.0m', '전동 자주식 시저스 고소작업대', 8500000],
+      ['GTWY8-100', '125Kg', '작업높이 8.0m', '1인용 알루미늄 마스트 수직 고소작업리프트', 3900000],
+      ['GTWY10-100', '125Kg', '작업높이 10.0m', '1인용 알루미늄 마스트 수직 고소작업리프트', 4400000],
+      ['GTWY12-200', '200Kg (2인용)', '작업높이 12.0m', '2인용 알루미늄 듀얼마스트 수직 고소작업리프트', 5800000]
+    ]}
+  ];
+
+  // 그룹 데이터를 개별 품목 리스트(ORAWINCH_WEB_CATALOG)로 전개
+  window.ORAWINCH_WEB_CATALOG = [];
+  SPLIT_SERIES_GROUPS.forEach(function(g){
+    g.models.forEach(function(m){
+      window.ORAWINCH_WEB_CATALOG.push({
+        cat: g.cat,
+        code: m[0],
+        name: g.series,
+        cap: m[1],
+        rope: m[2],
+        power: m[3],
+        price: m[4],
+        img: g.img
+      });
+    });
+  });
+
+  // 이전에 크롤링해 로컬스토리지에 저장해둔 추가 품목이 있으면 자동 병합
+  try{
+    var savedCrawled = sGet('ora_crawled_web_items');
+    if(savedCrawled){
+      var parsed = JSON.parse(savedCrawled);
+      if(Array.isArray(parsed)){
+        parsed.forEach(function(p){
+          if(p && p.code && !window.ORAWINCH_WEB_CATALOG.some(function(x){ return x.code === p.code; })){
+            window.ORAWINCH_WEB_CATALOG.push(p);
+          }
+        });
+      }
+    }
+  }catch(e){}
+
+  // =========================================================================
+  // 🧮 2. HTML 테이블 셀병합(colspan / rowspan) 2차원 행렬 분해 엔진 (YT-180~500 완벽 분해!)
+  // =========================================================================
+  window.unrollHtmlTableToMatrix = function(tableEl){
+    var rows = Array.from(tableEl.querySelectorAll('tr'));
+    var grid = [];
+    for(var r = 0; r < rows.length; r++){
+      if(!grid[r]) grid[r] = [];
+      var cells = Array.from(rows[r].querySelectorAll('th, td'));
+      var cIdx = 0;
+      for(var c = 0; c < cells.length; c++){
+        while(grid[r][cIdx] !== undefined) cIdx++;
+        var cell = cells[c];
+        var txt = (cell.innerText || cell.textContent || '').replace(/\r?\n|\r/g, ' ').replace(/\s+/g, ' ').trim();
+        var colspan = Math.max(1, parseInt(cell.getAttribute('colspan') || '1', 10));
+        var rowspan = Math.max(1, parseInt(cell.getAttribute('rowspan') || '1', 10));
+        for(var dr = 0; dr < rowspan; dr++){
+          for(var dc = 0; dc < colspan; dc++){
+            if(!grid[r + dr]) grid[r + dr] = [];
+            grid[r + dr][cIdx + dc] = txt;
+          }
+        }
+        cIdx += colspan;
+      }
+    }
+    return grid;
+  };
+
+  // 분해된 2D 행렬에서 개별 모델들과 상세제원을 분리 추출하는 핵심 함수
+  window.extractModelsFromHtmlDoc = function(doc, pageUrl, defaultCat){
+    var extracted = [];
+    var pageTitle = '';
+    var titleEl = doc.querySelector('h3, h4, .sub_title, .tit, strong');
+    if(titleEl) pageTitle = (titleEl.innerText || '').trim();
+    if(!pageTitle) pageTitle = defaultCat || '오라테크 장비';
+
+    // 페이지 내 대표 제품 이미지 추출 (네비게이션/로고 제외)
+    var bestImg = 'http://www.orawinch.co.kr/main/images/mvi/mvi02.png';
+    var imgs = Array.from(doc.querySelectorAll('img'));
+    for(var i = 0; i < imgs.length; i++){
+      var src = imgs[i].getAttribute('src') || '';
+      if(/\/products\//i.test(src) && !/(btn|icon|tit|menu|top|foot|logo|dot|arrow)/i.test(src)){
+        try{ bestImg = new URL(src, pageUrl).href; break; }catch(e){ bestImg = src; break; }
+      }
+    }
+
+    var specRx = /(용량|하중|견인|속도|와이어|로프|체인|전원|전압|모터|출력|마력|중량|자중|무게|양정|높이|포크|배터리|Capacity|Speed|Motor|Voltage|Weight|Wire|Rope)/i;
+    var tables = Array.from(doc.querySelectorAll('table'));
+
+    tables.forEach(function(tbl){
+      var grid = window.unrollHtmlTableToMatrix(tbl);
+      if(grid.length < 2 || !grid[0] || grid[0].length < 2) return;
+
+      // 1) '모델' / '모델명' / '형식' / 'Model' 행 찾기
+      var modelRowIdx = -1;
+      for(var r = 0; r < Math.min(grid.length, 3); r++){
+        var firstCell = String(grid[r][0] || '').replace(/\s+/g, '');
+        if(/^(모델|모델명|형식|규격|Model|MODEL|형번)/i.test(firstCell)){
+          modelRowIdx = r; break;
+        }
+      }
+      if(modelRowIdx === -1) return;
+
+      // 가로형(열=모델) vs 세로형(행=모델) 판별
+      var colSpecCnt = 0, rowSpecCnt = 0;
+      for(var r2 = modelRowIdx + 1; r2 < grid.length; r2++){
+        if(specRx.test(grid[r2][0] || '')) colSpecCnt++;
+      }
+      for(var c2 = 1; c2 < grid[modelRowIdx].length; c2++){
+        if(specRx.test(grid[modelRowIdx][c2] || '')) rowSpecCnt++;
+      }
+
+      // [Case A] 가로형 제원표 (YT-180, YT-250, YT-300, YT-360, YT-500처럼 열마다 모델이 나열된 구조!)
+      if(colSpecCnt >= rowSpecCnt && colSpecCnt >= 2){
+        var hdrRow = grid[modelRowIdx];
+        for(var col = 1; col < hdrRow.length; col++){
+          var rawModel = String(hdrRow[col] || '').trim();
+          // 단위 열이나 빈 열 건너뛰기
+          if(!rawModel || rawModel === hdrRow[0] || /^(단위|구분|사양|비고|Unit)$/i.test(rawModel)) continue;
+          if(!/[A-Za-z0-9]/.test(rawModel)) continue;
+
+          var capVal = '', ropeVal = '', otherSpecs = [];
+          for(var row = modelRowIdx + 1; row < grid.length; row++){
+            var key = String(grid[row][0] || '').trim();
+            // 만약 1번 열이 단위 열(예: kg, m/min)이면 키에 결합
+            if(hdrRow[1] === hdrRow[0] && col > 1 && grid[row][1] && grid[row][1] !== key){
+              key = key + '(' + grid[row][1] + ')';
+            }
+            var val = String(grid[row][col] || '').trim();
+            if(!key || !val || key === val) continue;
+            if(/^[A-Z]$/.test(key)) continue; // 단순 치수(A, B, C...) 제외
+
+            if(/(용량|하중|견인|Capacity)/i.test(key) && !capVal){
+              capVal = val + (/kg|ton|t|lb/i.test(val + key) ? '' : 'Kg');
+            } else if(/(와이어|로프|체인|포크|양정|Wire|Rope|Chain)/i.test(key) && !ropeVal){
+              ropeVal = val;
+            } else {
+              otherSpecs.push(key + ': ' + val);
+            }
+          }
+
+          if(capVal || otherSpecs.length >= 1){
+            extracted.push({
+              cat: defaultCat || '전동윈치',
+              code: rawModel.toUpperCase(),
+              name: pageTitle,
+              cap: capVal || '표준사양',
+              rope: ropeVal || '-',
+              power: otherSpecs.join(' / ') || '오라테크 정품',
+              price: 0,
+              img: bestImg
+            });
+          }
+        }
+      }
+      // [Case B] 세로형 제원표 (각 행이 개별 모델인 구조!)
+      else if(rowSpecCnt > colSpecCnt && rowSpecCnt >= 2){
+        var specHeaders = grid[modelRowIdx];
+        for(var r3 = modelRowIdx + 1; r3 < grid.length; r3++){
+          var rawM = String(grid[r3][0] || '').trim();
+          if(!rawM || rawM === specHeaders[0] || !/[A-Za-z0-9]/.test(rawM)) continue;
+          var capV = '', ropeV = '', others = [];
+          for(var c3 = 1; c3 < specHeaders.length; c3++){
+            var k = String(specHeaders[c3] || '').trim();
+            var v = String(grid[r3][c3] || '').trim();
+            if(!k || !v) continue;
+            if(/(용량|하중|견인)/i.test(k) && !capV) capV = v;
+            else if(/(와이어|로프|체인|양정|포크)/i.test(k) && !ropeV) ropeV = v;
+            else others.push(k + ': ' + v);
+          }
+          if(capV || others.length >= 1){
+            extracted.push({
+              cat: defaultCat || '운반하역장비',
+              code: rawM.toUpperCase(),
+              name: pageTitle,
+              cap: capV || '표준사양',
+              rope: ropeV || '-',
+              power: others.join(' / '),
+              price: 0,
+              img: bestImg
+            });
+          }
+        }
+      }
+    });
+
+    return extracted;
+  };
+
+  // =========================================================================
+  // 🕷️ 3. ERP 내부 실시간 자동 크롤러 (CORS 프록시 경유)
+  // =========================================================================
+  async function fetchOratechHtmlViaProxy(targetUrl){
+    var proxies = [
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl),
+      'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl)
+    ];
+    for(var i = 0; i < proxies.length; i++){
+      try{
+        var res = await fetch(proxies[i]);
+        if(!res.ok) continue;
+        var buf = await res.arrayBuffer();
+        var txt = new TextDecoder('utf-8').decode(buf);
+        if(txt.indexOf('\uFFFD') !== -1 || /charset=["']?euc-kr/i.test(txt)){
+          txt = new TextDecoder('euc-kr').decode(buf);
+        }
+        if(txt && txt.length > 200) return txt;
+      }catch(e){}
+    }
+    return null;
+  }
+
+  window.startInErpLiveCrawler = async function(){
+    var prog = $('wsCrawlProgress');
+    if(prog) prog.innerText = '🕷️ orawinch.co.kr 메인 카테고리 스캔 중...';
+
+    var seedPages = [
+      { url:'http://www.orawinch.co.kr/products/winch/mini/yamagata/r01.htm', cat:'미니/특수윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/mini/fujiyama/r01.htm', cat:'미니/특수윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/mini/kumamoto/r01.htm', cat:'미니/특수윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/mini/akita/r01.htm', cat:'미니/특수윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/mini/ryouta/r01.htm', cat:'미니/특수윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/mini/nagasaki/r01.htm', cat:'미니/특수윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/electric/PU/r01.htm', cat:'전동윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/electric/FU/r01.htm', cat:'전동윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/electric/CP/r01.htm', cat:'전동윈치' },
+      { url:'http://www.orawinch.co.kr/products/winch/electric/GXR/r01.htm', cat:'전동윈치' },
+      { url:'http://www.orawinch.co.kr/products/r01.htm', cat:'전동윈치' },
+      { url:'http://www.orawinch.co.kr/products/r02.htm', cat:'호이스트' },
+      { url:'http://www.orawinch.co.kr/products/r03.htm', cat:'수동하역제품' },
+      { url:'http://www.orawinch.co.kr/products/r05.htm', cat:'운반하역유압' }
+    ];
+
+    var foundLinks = [];
+    var newModelsCnt = 0;
+
+    for(var i = 0; i < seedPages.length; i++){
+      var sp = seedPages[i];
+      if(prog) prog.innerText = '🕷️ 스캔 중 (' + (i+1) + '/' + seedPages.length + '): ' + sp.url.replace('http://www.orawinch.co.kr','');
+      var html = await fetchOratechHtmlViaProxy(sp.url);
+      if(!html) continue;
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+
+      // 현재 페이지에서 제원표가 있으면 즉시 모델 분해
+      var models = window.extractModelsFromHtmlDoc(doc, sp.url, sp.cat);
+      models.forEach(function(m){
+        var ex = window.ORAWINCH_WEB_CATALOG.find(function(x){ return normSearch(x.code) === normSearch(m.code); });
+        if(!ex){
+          window.ORAWINCH_WEB_CATALOG.unshift(m);
+          newModelsCnt++;
+        } else {
+          if(m.power && m.power.length > ex.power.length) ex.power = m.power;
+          if(m.img && m.img.indexOf('/products/') !== -1) ex.img = m.img;
+        }
+      });
+
+      // 하위 상세페이지 링크 수집
+      Array.from(doc.querySelectorAll('a[href*="/products/"]')).forEach(function(a){
+        try{
+          var full = new URL(a.getAttribute('href'), sp.url).href;
+          if(full.indexOf('orawinch.co.kr/products/') !== -1 && /\.htm/i.test(full) && !foundLinks.some(function(x){ return x.url === full; })){
+            foundLinks.push({ url: full, cat: sp.cat });
+          }
+        }catch(e){}
+      });
+    }
+
+    // 수집된 하위 상세페이지 추가 순회 (최대 35개 하위 페이지 연속 스캔)
+    var subLimit = Math.min(foundLinks.length, 35);
+    for(var j = 0; j < subLimit; j++){
+      var sub = foundLinks[j];
+      if(prog) prog.innerText = '🕷️ 상세 제원표 분해 중 (' + (j+1) + '/' + subLimit + '): ' + sub.url.replace('http://www.orawinch.co.kr/products/','');
+      var subHtml = await fetchOratechHtmlViaProxy(sub.url);
+      if(!subHtml) continue;
+      var subDoc = new DOMParser().parseFromString(subHtml, 'text/html');
+      var subModels = window.extractModelsFromHtmlDoc(subDoc, sub.url, sub.cat);
+      subModels.forEach(function(m){
+        var ex = window.ORAWINCH_WEB_CATALOG.find(function(x){ return normSearch(x.code) === normSearch(m.code); });
+        if(!ex){
+          window.ORAWINCH_WEB_CATALOG.unshift(m);
+          newModelsCnt++;
+        }
+      });
+    }
+
+    sSet('ora_crawled_web_items', JSON.stringify(window.ORAWINCH_WEB_CATALOG));
+    renderWebSyncTable();
+    if(prog) prog.innerText = '✅ 실시간 스캔 완료! (총 ' + window.ORAWINCH_WEB_CATALOG.length + '종 대기중)';
+    alert('🎉 실시간 스캔 및 시리즈 제원표 분해 완료!\n새로 추가/업데이트된 개별 모델이 목록에 반영되었습니다.');
+  };
+
+  // =========================================================================
+  // ⚡ 4. 옆 탭(http://www.orawinch.co.kr) F12 콘솔용 5초 전수수집 스파이더 코드 생성기
+  // =========================================================================
+  window.openConsoleSpiderGuide = function(){
+    $('consoleSpiderBox').style.display = 'block';
+    copySpiderScriptToClipboard(true);
+  };
+
+  window.copySpiderScriptToClipboard = function(silent){
+    // orawinch.co.kr 탭에서 동일 출처(Same-Origin)로 100% 모든 페이지를 초고속 크롤링하는 원클릭 스크립트
+    var spiderCode = `(async function(){
+  console.log("🕷️ [오라테크 전 품목 자동 분해 로봇] 크롤링을 시작합니다...");
+  const visited = new Set(), queue = [location.href, "http://www.orawinch.co.kr/products/r01.htm", "http://www.orawinch.co.kr/products/r02.htm", "http://www.orawinch.co.kr/products/r03.htm", "http://www.orawinch.co.kr/products/r04.htm", "http://www.orawinch.co.kr/products/r05.htm", "http://www.orawinch.co.kr/products/r06.htm"];
+  const results = {};
+  const specRx = /(용량|하중|견인|속도|와이어|로프|체인|전원|전압|모터|출력|마력|중량|자중|무게|양정|높이|포크|배터리|Capacity|Speed|Motor|Voltage|Weight|Wire|Rope)/i;
+  function unroll(tbl){
+    const rows = Array.from(tbl.querySelectorAll("tr")), grid = [];
+    for(let r=0;r<rows.length;r++){
+      if(!grid[r]) grid[r]=[];
+      const cells = Array.from(rows[r].querySelectorAll("th,td"));
+      let cIdx=0;
+      for(let c=0;c<cells.length;c++){
+        while(grid[r][cIdx]!==undefined) cIdx++;
+        const txt = (cells[c].innerText||"").replace(/\\s+/g," ").trim();
+        const cs = Math.max(1,parseInt(cells[c].getAttribute("colspan")||"1",10));
+        const rs = Math.max(1,parseInt(cells[c].getAttribute("rowspan")||"1",10));
+        for(let dr=0;dr<rs;dr++) for(let dc=0;dc<cs;dc++){
+          if(!grid[r+dr]) grid[r+dr]=[];
+          grid[r+dr][cIdx+dc]=txt;
+        }
+        cIdx+=cs;
+      }
+    }
+    return grid;
+  }
+  function guessCat(u){
+    if(u.includes("/engine/")) return "엔진윈치";
+    if(u.includes("/electric/")) return "전동윈치";
+    if(u.includes("/mini/")||u.includes("/special/")) return "미니/특수윈치";
+    if(u.includes("/hoist/")) return "호이스트";
+    if(u.includes("/manual/")) return "수동하역제품";
+    if(u.includes("/lift/")) return "운반하역유압";
+    if(u.includes("/crane/")||u.includes("/structure/")) return "크레인/구조물";
+    return "수동/DC/유압윈치";
+  }
+  while(queue.length > 0 && visited.size < 250){
+    const url = queue.shift();
+    if(visited.has(url)) continue;
+    visited.add(url);
+    try{
+      const res = await fetch(url);
+      const buf = await res.arrayBuffer();
+      let html = new TextDecoder("euc-kr").decode(buf);
+      if(html.includes("UTF-8")||html.includes("utf-8")) html = new TextDecoder("utf-8").decode(buf);
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      doc.querySelectorAll("a[href]").forEach(a=>{
+        try{
+          const h = new URL(a.getAttribute("href"), url).href.split("#")[0];
+          if(h.includes("orawinch.co.kr/products/") && /\\.htm/i.test(h) && !visited.has(h)) queue.push(h);
+        }catch(e){}
+      });
+      let bestImg = "";
+      doc.querySelectorAll("img").forEach(im=>{
+        const s = im.getAttribute("src")||"";
+        if(!bestImg && s.includes("/products/") && !/(btn|icon|tit|menu|top|foot|logo|dot)/i.test(s)) bestImg = new URL(s, url).href;
+      });
+      const cat = guessCat(url);
+      const title = (doc.querySelector("h3,h4,.sub_title,strong")||{innerText:cat}).innerText.replace(/\\s+/g," ").trim();
+      doc.querySelectorAll("table").forEach(tbl=>{
+        const g = unroll(tbl);
+        if(g.length<2 || !g[0] || g[0].length<2) return;
+        let mRow = -1;
+        for(let r=0;r<Math.min(g.length,3);r++){
+          if(/^(모델|모델명|형식|규격|Model)/i.test((g[r][0]||"").replace(/\\s+/g,""))){ mRow=r; break; }
+        }
+        if(mRow===-1) return;
+        let colSpec=0, rowSpec=0;
+        for(let r=mRow+1;r<g.length;r++) if(specRx.test(g[r][0]||"")) colSpec++;
+        for(let c=1;c<g[mRow].length;c++) if(specRx.test(g[mRow][c]||"")) rowSpec++;
+        if(colSpec >= rowSpec && colSpec >= 1){
+          const hdr = g[mRow];
+          for(let c=1;c<hdr.length;c++){
+            const code = (hdr[c]||"").trim().toUpperCase();
+            if(!code || code===hdr[0] || /^(단위|구분|사양|비고)$/i.test(code) || !/[A-Z0-9]/.test(code)) continue;
+            let cap="", rope="", others=[];
+            for(let r=mRow+1;r<g.length;r++){
+              let k=(g[r][0]||"").trim(), v=(g[r][c]||"").trim();
+              if(!k||!v||k===v||/^[A-Z]$/.test(k)) continue;
+              if(/(용량|하중|견인)/i.test(k)&&!cap) cap=v;
+              else if(/(와이어|로프|체인|양정|포크)/i.test(k)&&!rope) rope=v;
+              else others.push(k+": "+v);
+            }
+            if(cap||others.length) results[code] = {cat, code, name:title, cap:cap||"표준", rope:rope||"-", power:others.join(" / "), price:0, img:bestImg};
+          }
+        } else if(rowSpec > colSpec){
+          const hdr = g[mRow];
+          for(let r=mRow+1;r<g.length;r++){
+            const code = (g[r][0]||"").trim().toUpperCase();
+            if(!code || code===hdr[0] || !/[A-Z0-9]/.test(code)) continue;
+            let cap="", rope="", others=[];
+            for(let c=1;c<hdr.length;c++){
+              let k=(hdr[c]||"").trim(), v=(g[r][c]||"").trim();
+              if(!k||!v) continue;
+              if(/(용량|하중|견인)/i.test(k)&&!cap) cap=v;
+              else if(/(와이어|로프|체인|양정|포크)/i.test(k)&&!rope) rope=v;
+              else others.push(k+": "+v);
+            }
+            if(cap||others.length) results[code] = {cat, code, name:title, cap:cap||"표준", rope:rope||"-", power:others.join(" / "), price:0, img:bestImg};
+          }
+        }
+      });
+      console.log("스캔완료 ("+visited.size+"페이지 / 추출모델: "+Object.keys(results).length+"종):", url);
+    }catch(e){}
+  }
+  const arr = Object.values(results);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(arr,null,2)],{type:"application/json"}));
+  a.download = "orawinch_all_models.json";
+  a.click();
+  alert("🎉 오라테크 홈페이지 총 "+visited.size+"개 페이지에서 "+arr.length+"종의 개별 품목과 상세제원 분해가 완료되어 [orawinch_all_models.json] 파일로 다운로드되었습니다! 이제 ERP에서 이 파일을 불러오세요!");
+})();`;
+
+    navigator.clipboard.writeText(spiderCode).then(function(){
+      if(!silent) alert('📋 [전수수집 로봇 코드]가 복사되었습니다!\n옆에 켜두신 orawinch.co.kr 탭에서 F12 -> Console 창에 붙여넣기(Ctrl+V) 후 엔터를 치세요!');
+    });
+  };
+
+  window.importCrawledWebJson = function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    var r = new FileReader();
+    r.onload = function(ev){
+      try{
+        var arr = JSON.parse(ev.target.result);
+        if(!Array.isArray(arr)) throw new Error('배열 형식이 아닙니다.');
+        var addCnt = 0;
+        arr.forEach(function(item){
+          if(!item || !item.code) return;
+          var ex = window.ORAWINCH_WEB_CATALOG.find(function(x){ return normSearch(x.code) === normSearch(item.code); });
+          if(!ex){
+            window.ORAWINCH_WEB_CATALOG.push(item);
+            addCnt++;
+          } else {
+            if(item.power) ex.power = item.power;
+            if(item.cap) ex.cap = item.cap;
+            if(item.rope && item.rope !== '-') ex.rope = item.rope;
+            if(item.img) ex.img = item.img;
+          }
+        });
+        sSet('ora_crawled_web_items', JSON.stringify(window.ORAWINCH_WEB_CATALOG));
+        renderWebSyncTable();
+        alert('🎉 수집된 JSON 파일에서 총 ' + arr.length + '종의 품목(신규 ' + addCnt + '종)을 불러왔습니다!\n이제 우측 상단 [📥 체크된 전체 품목을 ERP에 일괄 등록] 버튼을 누르세요!');
+      }catch(err){
+        alert('파일 읽기 오류: ' + err.message);
+      }
+    };
+    r.readAsText(f);
+    e.target.value = '';
+  };
+
+  // =========================================================================
+  // 🖥️ 5. UI 렌더링 및 ERP 품목장(db.items) + 모델제원표(db.customSpecs) 일괄 동기화
+  // =========================================================================
+  window.renderWebSyncTable = function(){
+    var cat = $('wsCatFilter') ? $('wsCatFilter').value : 'ALL';
+    var kw = ($('wsSearchKw') ? $('wsSearchKw').value : '').trim();
+    if($('wsTotalCountBadge')) $('wsTotalCountBadge').innerText = window.ORAWINCH_WEB_CATALOG.length;
+
+    var rows = window.ORAWINCH_WEB_CATALOG.filter(function(item){
+      if(cat !== 'ALL' && item.cat !== cat) return false;
+      if(!kw) return true;
+      return matchKw(item.code + ' ' + item.name + ' ' + item.cap + ' ' + item.rope + ' ' + item.power, kw);
+    });
+
+    $('webSyncTb').innerHTML = rows.map(function(item){
+      var origIdx = window.ORAWINCH_WEB_CATALOG.indexOf(item);
+      var alreadyInErp = (db.items||[]).some(function(i){ return normSearch(i.name) === normSearch(item.code); });
+      return '<tr>'
+        + '<td class="c"><input type="checkbox" class="wsChk" value="' + origIdx + '" checked></td>'
+        + '<td class="c"><img src="' + esc(item.img) + '" style="width:42px;height:34px;object-fit:contain;border:1px solid #cbd5e1;border-radius:3px;background:#fff" onerror="this.style.display=\'none\'"></td>'
+        + '<td class="c"><span class="bg bg-b">' + esc(item.cat) + '</span></td>'
+        + '<td class="b" style="color:#142d4c;font-size:13px">' + esc(item.code) + (alreadyInErp ? ' <span class="bg bg-g" style="font-size:9px">ERP등록됨</span>' : '') + '</td>'
+        + '<td class="b">' + esc(item.name) + '</td>'
+        + '<td class="b t-red">' + esc(item.cap) + '</td>'
+        + '<td class="c b" style="color:#0984e3">' + esc(item.rope) + '</td>'
+        + '<td style="white-space:normal;font-size:11.5px;color:#222">' + esc(item.power) + '</td>'
+        + '<td class="r b">' + (item.price > 0 ? fmt(item.price) + '원' : '<span style="color:#888">단가미정</span>') + '</td>'
+        + '</tr>';
+    }).join('') || '<tr><td colspan="9" class="c" style="padding:20px;color:#888">검색 조건에 맞는 품목이 없습니다.</td></tr>';
+  };
+
+  window.syncWebsiteItemsToErp = function(){
+    var idxs = Array.from(document.querySelectorAll('.wsChk:checked')).map(function(el){ return Number(el.value); });
+    if(!idxs.length){ alert('ERP에 등록할 품목을 선택해 주세요.'); return; }
+
+    if(!Array.isArray(db.items)) db.items = [];
+    if(!Array.isArray(db.customSpecs)) db.customSpecs = [];
+
+    var newCnt = 0, updCnt = 0;
+    idxs.forEach(function(i){
+      var w = window.ORAWINCH_WEB_CATALOG[i];
+      if(!w) return;
+      var specNoteStr = '[' + w.name + '] 용량:' + w.cap + ' | 로프/체인:' + w.rope + ' | ' + w.power;
+
+      var exItm = db.items.find(function(it){ return normSearch(it.name) === normSearch(w.code); });
+      if(exItm){
+        exItm.cat = w.cat || exItm.cat;
+        if(!exItm.spec || exItm.spec === exItm.name) exItm.spec = w.cap;
+        if(!exItm.sellPrice && w.price > 0) exItm.sellPrice = w.price;
+        if(!exItm.buyPrice && w.price > 0) exItm.buyPrice = Math.round(w.price * 0.72);
+        exItm.specNote = specNoteStr;
+        if(!exItm.photo && w.img) exItm.photo = w.img;
+        updCnt++;
+      } else {
+        db.items.push({
+          id: Date.now() + Math.floor(Math.random()*1000000),
+          code: 'WEB-' + w.code,
+          name: w.code,
+          spec: w.cap,
+          cat: w.cat,
+          buyPrice: w.price > 0 ? Math.round(w.price * 0.72) : 0,
+          sellPrice: w.price || 0,
+          initQty: 5,
+          safeQty: 2,
+          specNote: specNoteStr,
+          photo: w.img || ''
+        });
+        newCnt++;
+      }
+
+      var exSp = db.customSpecs.find(function(sp){ return normSearch(sp.code) === normSearch(w.code); });
+      var spObj = {
+        code: w.code,
+        cat: w.cat + ' (' + w.name + ')',
+        pull: w.cap,
+        rope: w.rope,
+        weight: w.power,
+        engine: w.power,
+        compat: w.name
+      };
+      if(exSp) Object.assign(exSp, spObj);
+      else db.customSpecs.push(spObj);
+    });
+
+    saveDB('홈페이지개별모델동기화');
+    renderAll();
+    renderWebSyncTable();
+    alert('✅ [홈페이지 개별 모델 ➔ ERP 일괄 등록 완료!]\n\n• 신규 등록된 모델: ' + newCnt + '종\n• 상세제원·사진 업데이트: ' + updCnt + '종\n\n이제 매출전표나 견적서에서 [YT-180], [YT-500], [PU-250B] 등을 치시면 방금 넣은 상세제원과 사진이 즉시 따라붙습니다!');
+  };
+})();
+</script>
 </body>
 </html>
