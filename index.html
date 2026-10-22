@@ -7038,5 +7038,1276 @@ window.convertPoToPurchaseSlip = function(){
   alert('🚢 영문 발주서(PO) 내역이 [수입·매입전표] 입력창으로 그대로 복사되었습니다!\n관세·운임 입력 후 저장하시면 입고 처리됩니다.');
 };
 </script>
+  <!-- ==================== 🚀 오라테크 v46 올인원 확장팩 (기존 #3,#6 + 신규 #2,#3,#4,#5 완벽 통합) ==================== -->
+
+<!-- 👨‍👦 [신규 5번] 화면 우측하단 플로팅 부자(父子) 인수인계 포스트잇 버튼 -->
+<div id="floatingMemoBtn" class="no-print" onclick="openFamilyMemoModal()" style="position:fixed;right:18px;bottom:18px;z-index:990;background:linear-gradient(135deg,#f39c12,#d35400);color:#fff;padding:11px 16px;border-radius:30px;font-weight:900;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,0.35);cursor:pointer;border:2px solid #fff;display:flex;align-items:center;gap:6px;transition:transform .15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+  <span>👨‍👦 부자(父子) 공유메모판</span>
+  <span id="floatMemoCnt" style="background:#d63031;color:#fff;padding:2px 7px;border-radius:12px;font-size:11.5px">0건</span>
+</div>
+
+<!-- 🧙‍♂️ [기존 3번] AI 윈치·호이스트 현장 맞춤 사양 역추적 & 모델 추천 마법사 모달 -->
+<div class="modal-bg" id="winchWizardModal" style="z-index:1280">
+  <div class="modal" style="width:840px;max-height:92vh">
+    <div class="mh no-print" style="background:linear-gradient(90deg,#d35400,#e67e22)">
+      <span>🧙‍♂️ AI 윈치·호이스트 현장 사양 역추적 마법사 ("몇 톤 당길 건데 어떤 모델 써야 돼요?")</span>
+      <button class="btn-r" onclick="closeModal('winchWizardModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px;line-height:1.5">
+      <div style="background:#fff8e6;border:1px solid #f39c12;padding:9px 12px;border-radius:5px;margin-bottom:10px;color:#856404">
+        💡 <b>전화 상담 3초 해결:</b> 손님이 <i>"산에서 1.5톤짜리 나무 당길 건데 전기 없어요, 뭐 써야 돼요?"</i>라고 물으실 때! 아래 조건만 선택하면 <b>마찰계수·경사하중·활차(도르래) 배율</b>을 자동 계산하여 딱 맞는 오라테크 모델을 추천하고 <b>1클릭으로 전표/견적서에 꽂아줍니다!</b>
+      </div>
+      <div class="fg" style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #cbd5e1">
+        <div class="c3">
+          <label>① 작업 종류</label>
+          <select id="wzWorkType" style="width:100%" onchange="onWzWorkTypeChange()">
+            <option value="pull_slope">⛰️ 경사면/산림 견인 (통나무·장비)</option>
+            <option value="pull_flat">🚜 평지 수평 견인 (바닥 끌기)</option>
+            <option value="lift">🏗️ 수직 인양 (공중 들어올리기)</option>
+          </select>
+        </div>
+        <div class="c3">
+          <label>② 물체 실제 무게 (kg)</label>
+          <input type="number" id="wzWeightKg" value="1500" step="100" style="width:100%;font-size:14px;color:#d63031;font-weight:900" oninput="runWinchWizard()">
+        </div>
+        <div class="c3">
+          <label>③ 현장 전원 / 동력 환경</label>
+          <select id="wzPower" style="width:100%" onchange="runWinchWizard()">
+            <option value="ALL">⚡ 전체 동력 (모두 비교)</option>
+            <option value="ENGINE">⛽ 무전원 야외/산림 (혼다 엔진)</option>
+            <option value="BATTERY">🔋 무전원 저소음 (리튬 배터리)</option>
+            <option value="AC220">🔌 일반 전기 (단상 220V)</option>
+            <option value="AC380">🏭 공장/산업 동력 (삼상 380V)</option>
+            <option value="DC">🚗 차량/배터리 (DC 12V/24V)</option>
+            <option value="MANUAL">💪 수동 작업 (체인/레버/핸드)</option>
+          </select>
+        </div>
+        <div class="c3">
+          <label>④ 바닥 마찰 / 경사도 조건</label>
+          <select id="wzFactor" style="width:100%" onchange="runWinchWizard()">
+            <option value="0.65">산림/흙바닥 + 완만한 경사 20° (계수 0.65)</option>
+            <option value="0.85">험로/자갈 + 급경사 35° (계수 0.85)</option>
+            <option value="0.45">평지 마찰 끌기 (계수 0.45)</option>
+            <option value="0.25">바퀴 달린 대차/차량 견인 (계수 0.25)</option>
+            <option value="1.25">수직 인양 (하중 100% + 안전율 1.25배)</option>
+          </select>
+        </div>
+      </div>
+      <div id="wzCalcSummary" style="margin:10px 0;padding:10px 12px;background:#eef6ff;border-left:5px solid #0984e3;border-radius:4px;font-size:13px"></div>
+      <div class="tw" style="max-height:260px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:85px">적합도</th>
+              <th style="width:110px">추천 모델코드</th>
+              <th style="width:115px">분류 / 동력</th>
+              <th style="width:130px">직선 정격하중</th>
+              <th>현장 구성 해법 (직선 vs 활차/도르래 배율)</th>
+              <th style="width:95px">표준단가</th>
+              <th style="width:175px">전표 / 견적 즉시적용</th>
+            </tr>
+          </thead>
+          <tbody id="wzResultTb"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:8px;background:#fffdf5;border:1px solid #f39c12;padding:8px;border-radius:4px;display:flex;gap:8px;align-items:center">
+        <textarea id="wzConsultText" rows="2" style="flex:1;font-size:11.5px;padding:6px;border:1px solid #ccc;border-radius:3px"></textarea>
+        <button class="btn-kakao" style="padding:8px 12px;height:48px" onclick="copyTextById('wzConsultText','고객 상담용 추천안내')">🟡 상담내용 카톡복사</button>
+      </div>
+    </div>
+    <div class="mf"><button class="btn-w" onclick="closeModal('winchWizardModal')">닫기</button></div>
+  </div>
+</div>
+
+<!-- 🚢 [기존 6번] 해외 수입 발주서 (영문 Purchase Order) & 재고소진 예측 자동발주 모달 -->
+<div class="modal-bg" id="intlPoModal" style="z-index:1280">
+  <div class="modal" style="width:880px;max-height:94vh">
+    <div class="mh no-print" style="background:#2c3e50">
+      <span>🚢 해외 제조사 영문 수입 발주서 (PURCHASE ORDER) & 재고소진 분석기</span>
+      <button class="btn-r" onclick="closeModal('intlPoModal')">✕ 닫기</button>
+    </div>
+    <div class="mb">
+      <div class="fg no-print" style="background:#f1f5f9;padding:8px;border-radius:4px;margin-bottom:8px;border:1px solid #cbd5e1">
+        <div class="c3"><label>Messers (해외 공급사/제조사)</label><input id="poSupplier" value="PORTABLE WINCH CO." style="width:100%" oninput="renderIntlPoDoc()"></div>
+        <div class="c2"><label>통화 (Currency)</label>
+          <select id="poCur" style="width:100%" onchange="onPoCurChange()">
+            <option value="USD">USD ($)</option><option value="CNY">CNY (¥)</option><option value="EUR">EUR (€)</option><option value="JPY">JPY (¥)</option>
+          </select>
+        </div>
+        <div class="c2"><label>적용환율(기준)</label><input type="number" id="poRate" value="1380" style="width:100%" oninput="renderIntlPoDoc()"></div>
+        <div class="c2"><label>무역조건 (Incoterms)</label>
+          <select id="poTerms" style="width:100%" onchange="renderIntlPoDoc()">
+            <option value="FOB Port of Loading">FOB</option>
+            <option value="CIF Incheon, Korea">CIF Incheon</option>
+            <option value="CIF Busan, Korea">CIF Busan</option>
+            <option value="EXW Factory">EXW</option>
+          </select>
+        </div>
+        <div class="c3"><label>결제조건 (Payment)</label><input id="poPayTerms" value="T/T 100% Before Shipment" style="width:100%" oninput="renderIntlPoDoc()"></div>
+      </div>
+      <div class="no-print" style="display:flex;gap:5px;margin-bottom:8px;align-items:center;flex-wrap:wrap;background:#fff8e6;padding:6px 8px;border-radius:4px;border:1px solid #f39c12">
+        <b style="color:#d35400;font-size:11.5px">➕ 발주품목 추가:</b>
+        <input id="poAddModel" placeholder="모델코드 (예: PCW-5000)" style="width:140px">
+        <input id="poAddDesc" placeholder="영문품명 (예: Portable Gas Winch)" style="width:190px">
+        <input type="number" id="poAddQty" value="10" placeholder="수량" style="width:70px">
+        <input type="number" id="poAddFob" value="1000" step="any" placeholder="외화단가" style="width:95px">
+        <button class="btn-a" onclick="addPoLineItem()">＋ 품목추가</button>
+        <button class="btn-s" onclick="autoFillLowStockToPo()">⚡ 발주필요/소진임박 품목 자동채우기</button>
+        <button class="btn-w" onclick="poLines=[];renderIntlPoDoc()">비우기</button>
+      </div>
+      <div id="poPrintWrap"><div id="poDocArea"></div></div>
+    </div>
+    <div class="mf no-print">
+      <button class="btn-g" onclick="convertPoToPurchaseSlip()">🚢 이 발주내역을 [수입·매입전표] 입력창으로 넘기기</button>
+      <button class="btn-s" onclick="currentDocMeta={client:$('poSupplier').value,docName:'Purchase_Order',areaId:'poDocArea'};downloadDocPdf('poDocArea','ORATECH_PO')">📄 영문 PO PDF 저장</button>
+      <button class="btn-p" onclick="printArea('poPrintWrap')">🖨️ 영문 발주서 A4 인쇄</button>
+      <button class="btn-w" onclick="closeModal('intlPoModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 💰 [신규 2번] 개인사업자 전용 5월 종합소득세 누진세율 구간 경보 & 절세 시뮬레이터 모달 -->
+<div class="modal-bg" id="incomeTaxModal" style="z-index:1280">
+  <div class="modal" style="width:820px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#1e3c72,#2a5298)">
+      <span>💰 개인사업자(오라테크) 5월 종합소득세 누진세율 구간 경보 & 절세 시뮬레이터</span>
+      <button class="btn-r" onclick="closeModal('incomeTaxModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px;line-height:1.55">
+      <div style="background:#eef6ff;border:1px solid #90cdf4;padding:9px 12px;border-radius:5px;margin-bottom:10px;color:#1e3a8a">
+        💡 <b>개인회사 대표님 필수 점검:</b> 개인사업자는 순이익이 과세표준 구간(1,400만 / 5,000만 / 8,800만 / 1.5억)을 넘는 순간 세율이 <b>6% ➔ 15% ➔ 24% ➔ 35%</b>로 급격히 뜁니다! 연말 전에 재고 매입이나 필요경비를 추가 반영했을 때 <b>실제 줄어드는 세금(국세+지방소득세)</b>을 실시간 시뮬레이션하세요.
+      </div>
+      <div class="fg" style="background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #cbd5e1">
+        <div class="c3">
+          <label>① 분석 기준연도</label>
+          <select id="itxYear" style="width:100%" onchange="runIncomeTaxSim()"></select>
+        </div>
+        <div class="c3">
+          <label>② 인적·노란우산·기타 소득공제(원)</label>
+          <input type="number" id="itxDeduction" value="6500000" step="500000" style="width:100%" oninput="runIncomeTaxSim()" title="본인 기본공제 150만 + 노란우산공제 최대 500만 등 합산액">
+        </div>
+        <div class="c6">
+          <label style="color:#d35400">③ 🧪 절세 시뮬레이션: 연말 전 추가 매입/경비 지출 예정액 (원)</label>
+          <div style="display:flex;gap:4px">
+            <input type="number" id="itxExtraExp" value="0" step="1000000" style="flex:1;border:2px solid #e67e22;font-size:13.5px;color:#d35400" oninput="runIncomeTaxSim()">
+            <button class="btn-w" onclick="$('itxExtraExp').value=num($('itxExtraExp').value)+5000000;runIncomeTaxSim()">+500만</button>
+            <button class="btn-w" onclick="$('itxExtraExp').value=num($('itxExtraExp').value)+10000000;runIncomeTaxSim()">+1,000만</button>
+            <button class="btn-w" onclick="$('itxExtraExp').value=0;runIncomeTaxSim()">초기화</button>
+          </div>
+        </div>
+      </div>
+      <div id="itxResultBox" style="margin-top:10px"></div>
+    </div>
+    <div class="mf"><button class="btn-w" onclick="closeModal('incomeTaxModal')">닫기</button></div>
+  </div>
+</div>
+
+<!-- 🪢 [신규 3번] 와이어로프 · 합성로프 미터(m) 절단 판매 계산기 & 드럼(롤) 잔량 추적기 모달 -->
+<div class="modal-bg" id="ropeCutModal" style="z-index:1280">
+  <div class="modal" style="width:820px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#0f9b0f,#11998e)">
+      <span>🪢 와이어·섬유로프 미터(m) 절단 판매 계산기 & 드럼(롤) 자투리 잔량 추적기</span>
+      <button class="btn-r" onclick="closeModal('ropeCutModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px">
+      <!-- 상단: 절단 판매 계산 & 전표 투입 -->
+      <div style="background:#f0fdf4;border:1.5px solid #27ae60;padding:10px;border-radius:6px;margin-bottom:12px">
+        <div style="font-weight:900;color:#155724;font-size:13.5px;margin-bottom:6px">✂️ 1. 고객 맞춤 미터(m) 절단 단가 & 후크/심블 가공비 자동 계산기</div>
+        <div class="fg">
+          <div class="c4">
+            <label>차감할 창고 로프 드럼(롤) 선택</label>
+            <select id="rcRollSel" style="width:100%" onchange="onRopeRollSelect()"></select>
+          </div>
+          <div class="c2">
+            <label>1m당 판매단가(원)</label>
+            <input type="number" id="rcPricePerM" value="6500" step="100" style="width:100%" oninput="calcRopeCutPreview()">
+          </div>
+          <div class="c2">
+            <label>요청 절단길이(m)</label>
+            <input type="number" id="rcCutMeter" value="50" step="5" style="width:100%;font-size:14px;color:#d63031" oninput="calcRopeCutPreview()">
+          </div>
+          <div class="c2">
+            <label>주문 줄(개) 수</label>
+            <input type="number" id="rcRollCnt" value="1" min="1" style="width:100%" oninput="calcRopeCutPreview()">
+          </div>
+          <div class="c2">
+            <label>단말 가공/후크 공임</label>
+            <input type="number" id="rcSpliceFee" value="15000" step="5000" style="width:100%" oninput="calcRopeCutPreview()" title="아이스플라이스, 심블, 안전후크 체결 가공비">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed #86efac;flex-wrap:wrap;gap:6px">
+          <div id="rcCalcSummary" style="font-size:13px;font-weight:bold;color:#0f5132"></div>
+          <div style="display:flex;gap:5px">
+            <button class="btn-p" style="background:#16a085" onclick="applyRopeCutToSlip('s')">📈 매출전표에 투입 (+드럼잔량 차감)</button>
+            <button class="btn-s" onclick="applyRopeCutToSlip('es')">📋 견적서에 투입</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단: 창고 로프 드럼(롤) 잔량 관리 -->
+      <div style="background:#f8fafc;border:1px solid #cbd5e1;padding:10px;border-radius:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px">
+          <span style="font-weight:900;color:#142d4c;font-size:13px">🛞 2. 매장/창고 보유 로프 드럼(롤) 잔량 현황 (자투리 부족 사고 방지)</span>
+          <div style="display:flex;gap:4px">
+            <input id="newRollName" placeholder="품명/규격 (예: PCA-1260 12mm로프 #2호롤)" style="width:210px">
+            <input type="number" id="newRollTotalM" placeholder="총길이(m)" value="200" style="width:80px">
+            <input type="number" id="newRollUnitP" placeholder="m당단가" value="6500" style="width:85px">
+            <button class="btn-a" onclick="addNewRopeRoll()">➕ 새 드럼(롤) 등록</button>
+          </div>
+        </div>
+        <div class="tw" style="max-height:220px">
+          <table>
+            <thead>
+              <tr>
+                <th>드럼(롤) 식별명 / 규격</th>
+                <th style="width:85px">1m당 단가</th>
+                <th style="width:85px">최초 총길이</th>
+                <th style="width:95px">절단 누적출고</th>
+                <th style="width:110px">현재 남은길이(잔량)</th>
+                <th style="width:140px">잔량 게이지</th>
+                <th style="width:95px">잔량수정/삭제</th>
+              </tr>
+            </thead>
+            <tbody id="ropeRollTb"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn-w" onclick="closeModal('ropeCutModal')">닫기</button></div>
+  </div>
+</div>
+
+<!-- 💱 [신규 4번] 실시간 환율 전광판 & 외화 송금 타이밍 스나이퍼 모달 -->
+<div class="modal-bg" id="fxSniperModal" style="z-index:1280">
+  <div class="modal" style="width:760px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#0f2027,#203a43,#2c5364)">
+      <span>💱 실시간 글로벌 환율 전광판 & 해외 수입대금 송금 타이밍 스나이퍼</span>
+      <button class="btn-r" onclick="closeModal('fxSniperModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+        <span id="fxUpdateStatus" style="font-weight:bold;color:#0984e3">🌐 실시간 환율 데이터를 불러오는 중...</span>
+        <button class="btn-s" onclick="fetchLiveExchangeRates(true)">🔄 실시간 환율 새로고침</button>
+      </div>
+      <div id="fxBoardCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px"></div>
+
+      <div style="background:#fff8e6;border:1.5px solid #f39c12;padding:10px;border-radius:6px;margin-bottom:10px">
+        <div style="font-weight:900;color:#d35400;font-size:13.5px;margin-bottom:6px">🎯 외화 송금(T/T) 타이밍 스나이퍼 (입고/계약 당시 환율 vs 오늘 실시간 환율 환차익 판독)</div>
+        <div class="fg">
+          <div class="c3">
+            <label>결제 통화</label>
+            <select id="fxSimCur" style="width:100%" onchange="onFxSimCurChange()">
+              <option value="USD">USD (미국 달러 $)</option>
+              <option value="CNY">CNY (중국 위안 ¥)</option>
+              <option value="EUR">EUR (유로 €)</option>
+              <option value="JPY">JPY (일본 100엔 ¥)</option>
+            </select>
+          </div>
+          <div class="c3">
+            <label>송금할 외화 금액</label>
+            <input type="number" id="fxSimAmt" value="10000" step="500" style="width:100%;font-size:14px;color:#142d4c" oninput="runFxSniperSim()">
+          </div>
+          <div class="c3">
+            <label>계약/입고 당시 기준환율(원)</label>
+            <input type="number" id="fxSimBookRate" value="1400" step="1" style="width:100%" oninput="runFxSniperSim()">
+          </div>
+          <div class="c3">
+            <label>오늘 송금 적용환율(원)</label>
+            <input type="number" id="fxSimTodayRate" value="1380" step="1" style="width:100%;background:#e8f8f5" oninput="runFxSniperSim()">
+          </div>
+        </div>
+        <div id="fxSimResult" style="margin-top:8px;padding:10px;background:#fff;border-radius:4px;border:1px solid #cbd5e1"></div>
+      </div>
+
+      <div style="font-weight:900;color:#142d4c;margin-bottom:4px">🚢 우리 장부 내 외화 매입전표 미지급 현황 (실시간 환차손익 자동진단)</div>
+      <div class="tw" style="max-height:190px">
+        <table>
+          <thead>
+            <tr><th>입고일자</th><th>해외매입처</th><th>통화</th><th>장부환율</th><th>오늘환율</th><th>미지급(원화기준)</th><th>오늘 송금 시 환차익/손</th></tr>
+          </thead>
+          <tbody id="fxUnpaidPurTb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf"><button class="btn-w" onclick="closeModal('fxSniperModal')">닫기</button></div>
+  </div>
+</div>
+
+<!-- 👨‍👦 [신규 5번] 아버님 ↔ 아드님 실시간 인수인계 포스트잇 & 체크보드 모달 -->
+<div class="modal-bg" id="familyMemoModal" style="z-index:1290">
+  <div class="modal" style="width:760px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#d35400,#f39c12)">
+      <span>👨‍👦 아버님 ↔ 아드님 실시간 인수인계 포스트잇 & 미결 업무 체크보드 (클라우드 자동연동)</span>
+      <button class="btn-r" onclick="closeModal('familyMemoModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px">
+      <div style="background:#fffdf5;border:1px solid #f39c12;padding:8px 10px;border-radius:4px;margin-bottom:10px;color:#856404">
+        💡 <b>전화 메모 분실 제로!</b> 자리 비우셨을 때 받은 전화 주문, A/S 독촉, 화물 발송 부탁을 여기에 한 줄 적어두시면 <b>클라우드를 통해 아버님과 아드님 화면에 동시 공유</b>되며, <b>[⚡전표변환]</b>을 누르면 즉시 매출전표로 바뀝니다!
+      </div>
+      <div class="fg" style="background:#f8fafc;padding:8px;border-radius:6px;border:1px solid #cbd5e1">
+        <div class="c2">
+          <label>작성자</label>
+          <select id="fmWriter" style="width:100%;font-weight:bold">
+            <option value="👨‍🦳 아버님(대표)">👨‍🦳 아버님(대표)</option>
+            <option value="👦 아드님(실장)">👦 아드님(실장)</option>
+          </select>
+        </div>
+        <div class="c2">
+          <label>분류 태그</label>
+          <select id="fmCat" style="width:100%">
+            <option value="📞 전화주문/견적">📞 전화주문/견적</option>
+            <option value="🚚 화물/택배출고">🚚 화물/택배출고</option>
+            <option value="🛠️ A/S수리전달">🛠️ A/S수리전달</option>
+            <option value="💰 입금/미수확인">💰 입금/미수확인</option>
+            <option value="📌 기타인수인계">📌 기타인수인계</option>
+          </select>
+        </div>
+        <div class="c6">
+          <label>전달할 내용 (예: 강릉산림조합 내일 오전 PCW-5000 1대, 로프 50m 경동화물 발송요망)</label>
+          <input id="fmText" placeholder="메모 내용을 입력하거나 우측 🎙️음성버튼으로 말씀하세요..." style="width:100%;border:2px solid #e67e22" onkeydown="if(event.key==='Enter')addFamilyMemo()">
+        </div>
+        <div class="c2">
+          <label>&nbsp;</label>
+          <div style="display:flex;gap:3px">
+            <button class="btn-r" style="background:#e84393;padding:6px 8px" onclick="voiceToFamilyMemo()" title="마이크에 대고 말하면 메모가 자동 입력됩니다">🎙️</button>
+            <button class="btn-a" style="flex:1;padding:6px" onclick="addFamilyMemo()">➕ 등록</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px 0">
+        <div style="display:flex;gap:4px">
+          <button class="btn-w" id="fmTabPend" style="font-weight:900;border-color:#d35400;color:#d35400" onclick="renderFamilyMemos('PEND')">🔥 미결(진행중) 메모만 보기</button>
+          <button class="btn-w" id="fmTabAll" onclick="renderFamilyMemos('ALL')">📂 완료 포함 전체보기</button>
+        </div>
+        <button class="btn-w" style="font-size:11px;color:#c0392b" onclick="clearDoneFamilyMemos()">🧹 완료된 메모 일괄정리</button>
+      </div>
+
+      <div class="tw" style="max-height:330px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px">상태</th>
+              <th style="width:105px">등록일시/작성자</th>
+              <th style="width:110px">분류</th>
+              <th>인수인계 상세 내용</th>
+              <th style="width:185px">확인완료 / 전표변환 / 삭제</th>
+            </tr>
+          </thead>
+          <tbody id="familyMemoTb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf"><button class="btn-w" onclick="closeModal('familyMemoModal')">닫기</button></div>
+  </div>
+</div>
+
+<script>
+// ==================== 🚀 6대 무기 통합 엔진 스크립트 ====================
+let poLines = [];
+let liveFxRates = { USD: 1385, CNY: 192.5, EUR: 1495, JPY: 9.15, updated: '기본환율' };
+let fmFilterMode = 'PEND';
+
+(function initPluginV46AllInOne(){
+  // 1) 클라우드 압축/복원 시 로프드럼(ropeRolls) 및 부자메모(familyMemos)가 100% 함께 백업되도록 후킹
+  const origBuildSlim = window.buildSlimDB;
+  if(typeof origBuildSlim === 'function'){
+    window.buildSlimDB = function(src){
+      const slim = origBuildSlim(src);
+      slim.rr = src.ropeRolls || [];
+      slim.fm = src.familyMemos || [];
+      return slim;
+    };
+  }
+  const origRestoreSlim = window.restoreSlimDB;
+  if(typeof origRestoreSlim === 'function'){
+    window.restoreSlimDB = function(slim){
+      const out = origRestoreSlim(slim);
+      if(slim && Array.isArray(slim.rr)) out.ropeRolls = slim.rr;
+      if(slim && Array.isArray(slim.fm)) out.familyMemos = slim.fm;
+      return out;
+    };
+  }
+  const origNormDB = window.normDB;
+  if(typeof origNormDB === 'function'){
+    window.normDB = function(){
+      origNormDB();
+      if(!Array.isArray(db.ropeRolls) || !db.ropeRolls.length){
+        db.ropeRolls = [
+          { id: 1, name: 'PCA-1260 (12mm 폴리에스터 로프 #1호 드럼)', code: 'PCA-1260', spec: '12mm', totalM: 200, usedM: 50, pricePerM: 6500 },
+          { id: 2, name: 'PCA-1205M (10mm 폴리에스터 로프 #1호 드럼)', code: 'PCA-1205M', spec: '10mm', totalM: 200, usedM: 30, pricePerM: 5500 },
+          { id: 3, name: 'WIRE-6MM (6mm 전동윈치 와이어로프 드럼)', code: 'WIRE-6MM', spec: '6mm', totalM: 300, usedM: 60, pricePerM: 3000 }
+        ];
+      }
+      if(!Array.isArray(db.familyMemos)){
+        db.familyMemos = [
+          { id: 1, date: todayStr() + ' 09:30', writer: '👨‍🦳 아버님(대표)', cat: '📞 전화주문/견적', text: '(예시) 강릉산림조합 PCW-5000 1대, PCA-1260 1개 단가 문의함 - 오후 재통화 예정', done: false }
+        ];
+      }
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    normDB();
+    injectAllShortcutButtons();
+    fetchLiveExchangeRates(false);
+    updateFamilyMemoBadge();
+    setTimeout(() => { enhanceItemsTableWithDepletion(); }, 350);
+  });
+
+  const origRenderItems = window.renderItems;
+  if(typeof origRenderItems === 'function'){
+    window.renderItems = function(){
+      origRenderItems();
+      enhanceItemsTableWithDepletion();
+    };
+  }
+  const origRenderAll = window.renderAll;
+  if(typeof origRenderAll === 'function'){
+    window.renderAll = function(){
+      origRenderAll();
+      updateFamilyMemoBadge();
+    };
+  }
+})();
+
+function injectAllShortcutButtons(){
+  // 상단바: 실시간 환율 전광판 배지 + 윈치마법사 + 부자메모판
+  const brandDiv = document.querySelector('.topbar .brand');
+  if(brandDiv && !document.getElementById('fxTopBadge')){
+    const fxBadge = document.createElement('span');
+    fxBadge.id = 'fxTopBadge';
+    fxBadge.style.cssText = 'background:#006266;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #81ecec;color:#fff';
+    fxBadge.title = '클릭 시 실시간 환율 전광판 및 외화 송금 타이밍 스나이퍼 열기';
+    fxBadge.onclick = () => openFxSniperModal();
+    fxBadge.innerHTML = '💱 환율조회중...';
+    brandDiv.appendChild(fxBadge);
+  }
+
+  const topRight = document.querySelector('.topbar > div:last-child');
+  if(topRight && !document.getElementById('btnTopWizard')){
+    const wBtn = document.createElement('button');
+    wBtn.id = 'btnTopWizard';
+    wBtn.className = 'btn-a';
+    wBtn.style.cssText = 'background:#d35400;border:1px solid #fff;font-weight:900';
+    wBtn.innerHTML = '🧙‍♂️ 윈치추천마법사';
+    wBtn.onclick = () => openWinchWizard();
+
+    const rBtn = document.createElement('button');
+    rBtn.id = 'btnTopRope';
+    rBtn.className = 'btn-g';
+    rBtn.style.cssText = 'background:#0f9b0f;border:1px solid #fff;font-weight:900';
+    rBtn.innerHTML = '🪢 로프절단/잔량';
+    rBtn.onclick = () => openRopeCutModal();
+
+    const tBtn = document.createElement('button');
+    tBtn.id = 'btnTopTax';
+    tBtn.className = 'btn-p';
+    tBtn.style.cssText = 'background:#1e3c72;border:1px solid #fff;font-weight:900';
+    tBtn.innerHTML = '💰 종소세절세';
+    tBtn.onclick = () => openIncomeTaxModal();
+
+    const refBtn = document.getElementById('voiceTopBtn');
+    if(refBtn && refBtn.nextSibling){
+      topRight.insertBefore(tBtn, refBtn.nextSibling);
+      topRight.insertBefore(rBtn, refBtn.nextSibling);
+      topRight.insertBefore(wBtn, refBtn.nextSibling);
+    } else {
+      topRight.insertBefore(wBtn, topRight.firstChild);
+      topRight.insertBefore(rBtn, topRight.firstChild);
+      topRight.insertBefore(tBtn, topRight.firstChild);
+    }
+  }
+
+  // 매출전표 & 견적서 품목줄에 [🪢 로프m절단] 및 [🧙‍♂️ 사양마법사] 버튼 장착
+  const saleHdr = document.querySelector('#t-sale .panel .ph div');
+  if(saleHdr && !document.getElementById('btnSaleWizard')){
+    const sb = document.createElement('button');
+    sb.id = 'btnSaleWizard';
+    sb.className = 'btn-a';
+    sb.style.cssText = 'padding:2px 6px;font-size:11px;background:#d35400';
+    sb.innerHTML = '🧙‍♂️ 사양마법사';
+    sb.onclick = () => openWinchWizard();
+    saleHdr.insertBefore(sb, saleHdr.firstChild);
+
+    const rb = document.createElement('button');
+    rb.className = 'btn-g';
+    rb.style.cssText = 'padding:2px 6px;font-size:11px;background:#0f9b0f';
+    rb.innerHTML = '🪢 로프m절단';
+    rb.onclick = () => openRopeCutModal();
+    saleHdr.insertBefore(rb, saleHdr.firstChild);
+  }
+
+  // 수입/매입 탭 & 품목 탭에 [🚢 영문발주서(PO)] & [💱 송금스나이퍼] 버튼 장착
+  const purHdr = document.querySelector('#t-pur .panel .ph div');
+  if(purHdr && !document.getElementById('btnOpenPoPur')){
+    const fxB = document.createElement('button');
+    fxB.className = 'btn-g';
+    fxB.style.background = '#006266';
+    fxB.innerHTML = '💱 환율·송금스나이퍼';
+    fxB.onclick = () => openFxSniperModal();
+    purHdr.insertBefore(fxB, purHdr.firstChild);
+
+    const poB = document.createElement('button');
+    poB.id = 'btnOpenPoPur';
+    poB.className = 'btn-p';
+    poB.style.background = '#2c3e50';
+    poB.innerHTML = '🚢 영문발주서(PO)';
+    poB.onclick = () => openIntlPoModal();
+    purHdr.insertBefore(poB, purHdr.firstChild);
+  }
+
+  const itmHdr = document.querySelector('#t-itm .panel:nth-child(2) .ph div');
+  if(itmHdr && !document.getElementById('btnOpenPoItm')){
+    const poB2 = document.createElement('button');
+    poB2.id = 'btnOpenPoItm';
+    poB2.className = 'btn-p';
+    poB2.style.background = '#2c3e50';
+    poB2.innerHTML = '🚢 영문발주서(PO)';
+    poB2.onclick = () => openIntlPoModal();
+    itmHdr.insertBefore(poB2, itmHdr.firstChild);
+
+    const rpB2 = document.createElement('button');
+    rpB2.className = 'btn-g';
+    rpB2.style.background = '#0f9b0f';
+    rpB2.innerHTML = '🪢 로프드럼잔량';
+    rpB2.onclick = () => openRopeCutModal();
+    itmHdr.insertBefore(rpB2, itmHdr.firstChild);
+  }
+
+  // 부가세 탭에 [💰 개인사업자 종합소득세 시뮬레이터] 버튼 장착
+  const vatHdr = document.querySelector('#t-vat .panel:nth-child(2) .ph');
+  if(vatHdr && !document.getElementById('btnOpenItxVat')){
+    const itxB = document.createElement('button');
+    itxB.id = 'btnOpenItxVat';
+    itxB.className = 'btn-a';
+    itxB.style.padding = '3px 10px';
+    itxB.innerHTML = '💰 5월 종합소득세 구간경보 & 절세 시뮬레이터 열기';
+    itxB.onclick = () => openIncomeTaxModal();
+    vatHdr.appendChild(itxB);
+  }
+}
+
+// ==================== 1. 🧙‍♂️ [기존 3번] AI 윈치·호이스트 사양 역추적 마법사 ====================
+const WINCH_ENGINEERING_DB = [
+  { code:'PCW-5000', cat:'포터블 엔진윈치', power:'ENGINE', powerTxt:'⛽ 혼다 GXH-50 가솔린', work:['pull_slope','pull_flat'], directKg:1000, maxPulleyKg:5000, pulleyCode:'PCA-1274', ropeCode:'PCA-1260', defPrice:2600000, note:'산림조합·벌목·케이블 포설 베스트셀러 1위 (16kg)' },
+  { code:'PCW-5000HS', cat:'포터블 고속 엔진윈치', power:'ENGINE', powerTxt:'⛽ 혼다 GXH-50 (고속형)', work:['pull_slope','pull_flat'], directKg:700, maxPulleyKg:3500, pulleyCode:'PCA-1274', ropeCode:'PCA-1260', defPrice:2650000, note:'분당 18m 고속 견인 작업용' },
+  { code:'PCW-4000', cat:'포터블 엔진윈치(클러치형)', power:'ENGINE', powerTxt:'⛽ 혼다 GX-50 (360°경사엔진)', work:['pull_slope','pull_flat'], directKg:1000, maxPulleyKg:4000, pulleyCode:'PCA-1275', ropeCode:'PCA-1205M', defPrice:2350000, note:'자동 원심클러치 & 역회전 방지 스토퍼 내장 (12kg)' },
+  { code:'PCW-3000', cat:'초경량 엔진윈치', power:'ENGINE', powerTxt:'⛽ 혼다 GX-35 (초경량)', work:['pull_slope','pull_flat'], directKg:700, maxPulleyKg:3500, pulleyCode:'PCA-1275', ropeCode:'PCA-1205M', defPrice:1850000, note:'9.5kg 초경량 산악 휴대용 윈치' },
+  { code:'PCW-3000LI', cat:'포터블 배터리윈치', power:'BATTERY', powerTxt:'🔋 80V/82V 리튬이온 배터리', work:['pull_slope','pull_flat'], directKg:700, maxPulleyKg:3500, pulleyCode:'PCA-1275', ropeCode:'PCA-1205M', defPrice:2100000, note:'매연·소음 제로! 실내·터널·산림 겸용' },
+  { code:'PCH-1000', cat:'인양·견인 겸용 엔진윈치', power:'ENGINE', powerTxt:'⛽ 혼다 GXH-50', work:['lift','pull_slope','pull_flat'], directKg:250, pullKg:775, maxPulleyKg:2000, pulleyCode:'PCA-1274', ropeCode:'PCA-1260', defPrice:3100000, note:'수직 인양(250kg) 자동 브레이크 탑재' },
+  { code:'PCH-2000', cat:'고하중 인양·견인 윈치', power:'ENGINE', powerTxt:'⛽ 혼다 GXH-50', work:['lift','pull_slope','pull_flat'], directKg:450, pullKg:1050, maxPulleyKg:3000, pulleyCode:'PCA-1274', ropeCode:'PCA-1260', defPrice:3600000, note:'철탑·송전·건설 수직 인양(450kg) 및 견인(1,050kg)' },
+  { code:'DU-200', cat:'전동윈치(DUKE)', power:'AC220', powerTxt:'🔌 단상 220V', work:['lift','pull_flat'], directKg:200, maxPulleyKg:400, pulleyCode:'', ropeCode:'', defPrice:450000, note:'정격 200kg 수직 인양 (와이어 5mm×30m 장착)' },
+  { code:'DU-250', cat:'전동윈치(DUKE)', power:'AC220', powerTxt:'🔌 단상 220V', work:['lift','pull_flat'], directKg:250, maxPulleyKg:500, pulleyCode:'', ropeCode:'', defPrice:520000, note:'정격 250kg 수직 인양 (유무선 리모컨 호환)' },
+  { code:'DU-300', cat:'전동윈치(DUKE)', power:'AC220', powerTxt:'🔌 단상 220V', work:['lift','pull_flat'], directKg:300, maxPulleyKg:600, pulleyCode:'', ropeCode:'', defPrice:680000, note:'정격 300kg 중량물 인양 (와이어 6mm×30m)' },
+  { code:'DU-500', cat:'전동윈치(DUKE)', power:'AC220', powerTxt:'🔌 단상 220V / 삼상 380V', work:['lift','pull_flat'], directKg:500, maxPulleyKg:1000, pulleyCode:'', ropeCode:'', defPrice:1150000, note:'정격 500kg 산업·건설현장 인양용' },
+  { code:'KD-100', cat:'소형 전동호이스트', power:'AC220', powerTxt:'🔌 단상 220V', work:['lift'], directKg:100, maxPulleyKg:200, pulleyCode:'', ropeCode:'', defPrice:220000, note:'단줄 100kg / 복줄(도르래) 200kg 가성비 호이스트' },
+  { code:'KDJ-300', cat:'다목적 전동윈치', power:'AC380', powerTxt:'🏭 단상220V / 삼상380V', work:['lift','pull_flat'], directKg:300, maxPulleyKg:600, pulleyCode:'', ropeCode:'', defPrice:750000, note:'고내구성 산업용 윈치' },
+  { code:'CB-2000', cat:'수동 체인블럭/레버블럭', power:'MANUAL', powerTxt:'💪 무전원 수동식', work:['lift','pull_flat'], directKg:2000, maxPulleyKg:2000, pulleyCode:'', ropeCode:'', defPrice:180000, note:'전원 불필요 수동 중량물 인양/고정' },
+  { code:'EWN-4500', cat:'차량용 DC 전동윈치', power:'DC', powerTxt:'🚗 DC 12V / 24V 배터리', work:['pull_flat','pull_slope'], directKg:2000, maxPulleyKg:4000, pulleyCode:'', ropeCode:'', defPrice:650000, note:'특장차·구난·트레일러 장착용 DC 윈치' }
+];
+
+window.openWinchWizard = function(){ runWinchWizard(); $('winchWizardModal').style.display = 'flex'; };
+window.onWzWorkTypeChange = function(){
+  const wt = $('wzWorkType').value;
+  $('wzFactor').value = wt === 'lift' ? '1.25' : (wt === 'pull_flat' ? '0.45' : '0.65');
+  runWinchWizard();
+};
+window.runWinchWizard = function(){
+  const wt = $('wzWorkType').value;
+  const weightKg = Math.max(10, num($('wzWeightKg').value));
+  const pwr = $('wzPower').value;
+  const factor = parseFloat($('wzFactor').value) || 0.65;
+  const reqForceKg = Math.round(weightKg * factor);
+  const workLabel = wt === 'lift' ? '수직 인양(Lifting)' : (wt === 'pull_flat' ? '평지 수평 견인' : '경사면/산림 견인');
+
+  $('wzCalcSummary').innerHTML = `🎯 <b>엔지니어링 역산 결과:</b> 물체 무게 <b>${fmt(weightKg)} kg (${(weightKg/1000).toFixed(2)}톤)</b> × 저항·안전계수(<b>${factor}</b>) = 최소 필요 장력: <b class="t-red" style="font-size:16px">${fmt(reqForceKg)} kgf</b>`;
+
+  const matched = [];
+  WINCH_ENGINEERING_DB.forEach(m => {
+    if(!m.work.includes(wt)) return;
+    if(pwr !== 'ALL' && m.power !== pwr) return;
+    const effDirectKg = (wt !== 'lift' && m.pullKg) ? m.pullKg : m.directKg;
+    if(reqForceKg > m.maxPulleyKg) return;
+    const dbItm = (db.items||[]).find(i => normSearch(i.name) === normSearch(m.code));
+    const price = (dbItm && dbItm.sellPrice > 0) ? Number(dbItm.sellPrice) : m.defPrice;
+
+    let badge = '', solution = '', pulleyNeed = 0, score = 0;
+    if(effDirectKg >= reqForceKg){
+      badge = `<span class="bg bg-g">👑 1줄 직선 가능</span>`;
+      solution = `<b>직선(1줄) 바로 작업 가능</b> — ${esc(m.note)}`;
+      pulleyNeed = 0; score = 100 - Math.abs(effDirectKg - reqForceKg) / 50;
+    } else if(effDirectKg * 2 >= reqForceKg && wt !== 'lift'){
+      badge = `<span class="bg bg-b">⚙️ 활차 1개(2배율)</span>`;
+      solution = `<b class="t-blu">도르래(${m.pulleyCode||'활차'}) 1개 구성 시 ${fmt(effDirectKg*2)}kg 견인 가능!</b> — ${esc(m.note)}`;
+      pulleyNeed = 1; score = 80;
+    } else if(effDirectKg * 3 >= reqForceKg && wt !== 'lift'){
+      badge = `<span class="bg bg-y">⚙️ 활차 2개(3~4배율)</span>`;
+      solution = `<b style="color:#d35400">도르래(${m.pulleyCode||'활차'}) 2개 복식 구성 시 ${fmt(effDirectKg*3)}~${fmt(effDirectKg*4)}kg 견인!</b>`;
+      pulleyNeed = 2; score = 65;
+    } else if(wt === 'lift' && effDirectKg * 2 >= reqForceKg && m.code === 'KD-100'){
+      badge = `<span class="bg bg-b">⚙️ 복줄(2줄) 인양</span>`;
+      solution = `<b>도르래 후크로 복줄(2줄) 세팅 시 200kg 인양 가능</b>`;
+      pulleyNeed = 0; score = 85;
+    } else return;
+    matched.push({ m, effDirectKg, price, badge, solution, pulleyNeed, score });
+  });
+
+  matched.sort((a,b) => b.score - a.score);
+  if(!matched.length){
+    $('wzResultTb').innerHTML = `<tr><td colspan="7" class="c t-red" style="padding:20px;font-weight:bold">해당 조건(${fmt(reqForceKg)}kgf)을 수행할 소형 모델이 없습니다. 전원 조건을 [전체 동력]으로 변경해 보세요.</td></tr>`;
+    $('wzConsultText').value = ''; return;
+  }
+  $('wzResultTb').innerHTML = matched.map(x => {
+    const m = x.m;
+    return `<tr>
+      <td class="c">${x.badge}</td>
+      <td class="b" style="font-size:13.5px;color:#142d4c">${esc(m.code)}</td>
+      <td class="c">${esc(m.cat)}<div style="font-size:10.5px;color:#555">${esc(m.powerTxt)}</div></td>
+      <td class="c b">직선 ${fmt(x.effDirectKg)} kg</td>
+      <td style="white-space:normal;line-height:1.4">${x.solution}</td>
+      <td class="r b t-blu">${fmt(x.price)}원</td>
+      <td class="c">
+        <button class="btn-p" style="padding:3px 7px;font-size:11px" onclick="applyWizardToSlip('s','${m.code}',${x.price},'${m.ropeCode}','${m.pulleyCode}',${x.pulleyNeed},false)">📈단품</button>
+        ${(m.ropeCode || x.pulleyNeed > 0) ? `<button class="btn-a" style="padding:3px 7px;font-size:11px" onclick="applyWizardToSlip('s','${m.code}',${x.price},'${m.ropeCode}','${m.pulleyCode}',${x.pulleyNeed},true)">🎁풀세트</button>` : ''}
+        <button class="btn-s" style="padding:3px 6px;font-size:11px" onclick="applyWizardToSlip('es','${m.code}',${x.price},'${m.ropeCode}','${m.pulleyCode}',${x.pulleyNeed},true)">📋견적</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const best = matched[0], comp = db.comp || {};
+  $('wzConsultText').value = `[${comp.name} 현장 맞춤 장비 추천]\n▶ 작업조건: ${workLabel} (중량 약 ${fmt(weightKg)}kg / 필요장력 약 ${fmt(reqForceKg)}kgf)\n▶ 추천모델: ${best.m.code} (${best.m.cat} / ${best.m.powerTxt}) — 공급가 ${fmt(best.price)}원(VAT별도)\n▶ 구성해법: ${best.solution.replace(/<[^>]+>/g,'')}\n☎ 문의: ${comp.name} (${comp.tel})`;
+};
+
+window.applyWizardToSlip = function(prefix, code, price, ropeCode, pulleyCode, pulleyQty, asFullSet){
+  closeModal('winchWizardModal');
+  goTab(prefix === 'es' ? 't-est' : 't-sale');
+  const addOne = (itmCode, qty, fbPrice) => {
+    if(!itmCode) return;
+    const dbItm = (db.items||[]).find(i => normSearch(i.name) === normSearch(itmCode));
+    const p = (dbItm && dbItm.sellPrice > 0) ? Number(dbItm.sellPrice) : (fbPrice || 0);
+    const sp = dbItm ? (dbItm.spec || itmCode) : itmCode;
+    const uCost = (dbItm && dbItm.buyPrice > 0) ? Number(dbItm.buyPrice) : Math.round(p * 0.75);
+    if(prefix === 'es') estDraft.push({ item: itmCode, spec: sp, qty, price: p, sup: Math.round(qty * p) });
+    else saleDraft.push({ item: itmCode, spec: sp, qty, price: p, sup: Math.round(qty * p), vat: Math.round(qty * p * 0.1), uCost });
+  };
+  addOne(code, 1, price);
+  if(asFullSet){
+    if(ropeCode) addOne(ropeCode, 1, 350000);
+    if(pulleyCode && pulleyQty > 0) addOne(pulleyCode, pulleyQty, 120000);
+  }
+  if(prefix === 'es') recalcEstDraft(); else recalcSaleDraft();
+};
+
+// ==================== 2. 🚢 [기존 6번] 재고 소진일(D-Day) 예측기 & 해외 영문 발주서(PO) ====================
+function getItemDepletionStats(){
+  const iStats = getItemStats();
+  const cutoffDate = new Date(); cutoffDate.setDate(cutoffDate.getDate() - 180);
+  const cutoffStr = formatLocalYMD(cutoffDate);
+  const sold180 = {};
+  (db.sales||[]).forEach(s => {
+    if(s.date >= cutoffStr){
+      (s.lines||[]).forEach(l => {
+        const k = normSearch(extractPureProductCode(l.item, l.spec) || l.item);
+        sold180[k] = (sold180[k] || 0) + (Number(l.qty)||0);
+      });
+    }
+  });
+  const out = {};
+  Object.keys(iStats).forEach(k => {
+    const st = iStats[k], qty180 = sold180[k] || 0, dailyRate = qty180 / 180;
+    const daysLeft = dailyRate > 0 ? Math.max(0, Math.round(st.curQty / dailyRate)) : 999;
+    out[k] = { qty180, monthlyAvg: Math.round((qty180 / 6) * 10) / 10, daysLeft };
+  });
+  return out;
+}
+
+function enhanceItemsTableWithDepletion(){
+  const tb = $('itmTb'); if(!tb) return;
+  const depMap = getItemDepletionStats();
+  tb.querySelectorAll('tr').forEach(tr => {
+    const tds = tr.querySelectorAll('td'); if(tds.length < 12) return;
+    const nameCell = tds[2], statusCell = tds[11];
+    if(statusCell.querySelector('.dep-badge')) return;
+    const rawName = (nameCell.childNodes[0] ? nameCell.childNodes[0].textContent : nameCell.innerText).trim();
+    const dep = depMap[normSearch(rawName)];
+    if(dep && dep.daysLeft < 60 && dep.qty180 > 0){
+      const badge = document.createElement('div');
+      badge.className = 'dep-badge';
+      badge.style.cssText = 'font-size:10px;color:#d63031;font-weight:bold;margin-top:2px';
+      badge.innerText = dep.daysLeft === 0 ? '🚨 즉시발주(품절)' : `⏳ 약 ${dep.daysLeft}일 뒤 소진`;
+      statusCell.appendChild(badge);
+    }
+  });
+}
+
+window.openIntlPoModal = function(){
+  if(!poLines.length) autoFillLowStockToPo(true);
+  renderIntlPoDoc(); $('intlPoModal').style.display = 'flex';
+};
+window.onPoCurChange = function(){
+  const cur = $('poCur').value;
+  $('poRate').value = liveFxRates[cur] || { USD:1380, CNY:192, EUR:1490, JPY:9.2 }[cur] || 1380;
+  const rate = num($('poRate').value) || 1380;
+  poLines.forEach(l => { if(l.krwBaseCost > 0) l.fob = Math.round((l.krwBaseCost / rate) * 100) / 100; });
+  renderIntlPoDoc();
+};
+window.autoFillLowStockToPo = function(silent){
+  const iStats = getItemStats(), depMap = getItemDepletionStats(), rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+  let candidates = Object.values(iStats).filter(st => {
+    const dep = depMap[normSearch(st.it.name)];
+    return st.low || (dep && dep.daysLeft <= 45 && dep.qty180 > 0);
+  });
+  if(!candidates.length) candidates = Object.values(iStats).slice(0, 5);
+  poLines = candidates.slice(0, 12).map(st => {
+    const it = st.it, sp = window.getModelSpec ? window.getModelSpec(it.name) : null;
+    const krwCost = Number(it.buyPrice) || Math.round((Number(it.sellPrice)||1000000) * 0.65);
+    const fob = Math.max(10, Math.round((krwCost / rate) * 100) / 100);
+    const dep = depMap[normSearch(it.name)] || { monthlyAvg: 5 };
+    return { model: it.name, desc: sp ? `${sp.cat} (${sp.pull})` : (it.cat || 'Winch & Hoist Equipment'), qty: Math.max(5, Math.ceil((dep.monthlyAvg || 5) * 2)), fob, krwBaseCost: krwCost };
+  });
+  renderIntlPoDoc();
+  if(!silent) alert(`⚡ 안전재고 부족 및 소진 임박 품목 ${poLines.length}종이 영문 발주서에 자동 입력되었습니다!`);
+};
+window.addPoLineItem = function(){
+  const model = ($('poAddModel').value||'').trim().toUpperCase();
+  if(!model){ alert('모델코드를 입력하세요.'); return; }
+  const desc = ($('poAddDesc').value||'').trim() || 'Industrial Winch / Hoist';
+  const qty = Math.max(1, num($('poAddQty').value)), fob = Number($('poAddFob').value) || 100, rate = num($('poRate').value) || 1380;
+  poLines.push({ model, desc, qty, fob, krwBaseCost: Math.round(fob * rate) });
+  $('poAddModel').value = ''; $('poAddDesc').value = ''; renderIntlPoDoc();
+};
+window.renderIntlPoDoc = function(){
+  const comp = db.comp || {}, supplier = ($('poSupplier') ? $('poSupplier').value : 'PORTABLE WINCH CO.').trim();
+  const cur = $('poCur') ? $('poCur').value : 'USD', rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+  const terms = $('poTerms') ? $('poTerms').value : 'FOB', payTerms = $('poPayTerms') ? $('poPayTerms').value : 'T/T';
+  const sym = { USD:'$', CNY:'¥', EUR:'€', JPY:'¥' }[cur] || '$', poNo = 'ORA-PO-' + todayStr().replace(/-/g,'');
+  let totalForeign = 0, totalQty = 0;
+  const rowsHtml = poLines.map((l, idx) => {
+    const amt = Math.round(l.qty * l.fob * 100) / 100; totalForeign += amt; totalQty += Number(l.qty)||0;
+    return `<tr>
+      <td class="c">${idx+1}</td><td class="b" style="color:#142d4c">${esc(l.model)}</td><td>${esc(l.desc)}</td>
+      <td class="r"><input type="number" class="no-print" value="${l.qty}" style="width:55px;text-align:right;margin-right:4px" oninput="poLines[${idx}].qty=num(this.value);renderIntlPoDoc()"><span class="only-print">${fmt(l.qty)}</span> EA</td>
+      <td class="r">${sym} <input type="number" class="no-print" value="${l.fob}" step="any" style="width:75px;text-align:right" oninput="poLines[${idx}].fob=Number(this.value)||0;renderIntlPoDoc()"><span class="only-print">${l.fob.toLocaleString()}</span></td>
+      <td class="r b">${sym} ${amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td class="c no-print"><button class="btn-r" style="padding:1px 5px" onclick="poLines.splice(${idx},1);renderIntlPoDoc()">✕</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" class="c" style="padding:20px;color:#888">위 [⚡ 발주필요 품목 자동채우기] 또는 [＋ 품목추가]를 눌러주세요.</td></tr>`;
+
+  $('poDocArea').innerHTML = `
+    <style>.only-print{display:none}@media print{.only-print{display:inline!important}}</style>
+    <div class="a4-page" style="min-height:245mm">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px double #142d4c;padding-bottom:10px;margin-bottom:12px">
+          <div><img src="${ORA_LOGO}" alt="ORATECH" style="height:36px;object-fit:contain"><div style="font-size:11px;color:#444;margin-top:2px"><b>ORATECH (오라테크)</b> | Seoul, Republic of Korea</div></div>
+          <div style="text-align:right"><div style="font-size:24px;font-weight:900;color:#142d4c;letter-spacing:2px">PURCHASE ORDER</div><div style="font-size:12px"><b>P/O No.:</b> ${poNo} | <b>Date:</b> ${todayStr()}</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;font-size:12px">
+          <div style="border:1px solid #142d4c;padding:10px;background:#f8fafc">
+            <div style="font-weight:900;color:#142d4c;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px">TO (SUPPLIER / VENDOR):</div>
+            <div style="font-size:15px;font-weight:900;color:#000">${esc(supplier)}</div>
+            <div style="margin-top:6px"><b>Incoterms:</b> ${esc(terms)}</div><div><b>Payment Terms:</b> ${esc(payTerms)}</div><div><b>Currency:</b> ${esc(cur)} (${sym})</div>
+          </div>
+          <div style="border:1px solid #142d4c;padding:10px;background:#fff">
+            <div style="font-weight:900;color:#142d4c;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px">BUYER / CONSIGNEE (IMPORTER):</div>
+            <div style="font-size:14px;font-weight:900">ORATECH (${esc(comp.name)})</div>
+            <div><b>CEO:</b> ${esc(comp.ceo)} | <b>Tel:</b> +82-2-2266-0989</div><div><b>Email:</b> ${esc(comp.email)}</div><div><b>Address:</b> 1F, 110 Cheonggyecheon-ro, Jung-gu, Seoul, Korea</div>
+          </div>
+        </div>
+        <table class="a4-tbl">
+          <thead><tr><th style="width:36px">No.</th><th style="width:130px">Model / Item Code</th><th>Description of Goods</th><th style="width:95px">Q'ty</th><th style="width:115px">Unit Price (${cur})</th><th style="width:125px">Amount (${cur})</th><th class="no-print" style="width:42px">Del</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot><tr style="background:#f1f5f9;font-weight:900;font-size:13px"><td colspan="3" class="c">TOTAL (${poLines.length} Models)</td><td class="r">${fmt(totalQty)} EA</td><td class="r">TOTAL (${cur}):</td><td class="r t-red">${sym} ${totalForeign.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="no-print"></td></tr></tfoot>
+        </table>
+      </div>
+      <div style="margin-top:12px;border-top:2px solid #142d4c;padding-top:10px;display:flex;justify-content:space-between;align-items:flex-end;font-size:12px">
+        <div><b>Remarks:</b> Please send Proforma Invoice (P/I) and Packing List upon confirmation.<br><span class="no-print" style="color:#0984e3;font-weight:bold">※ 원화 환산 예상 물대 (환율 ${fmt(rate)}원 기준): 약 ₩${fmt(Math.round(totalForeign * rate))} 원</span></div>
+        <div style="text-align:center;min-width:200px"><div style="margin-bottom:25px;font-weight:bold;color:#142d4c">Confirmed & Authorized by:</div><div style="border-top:1px solid #000;padding-top:4px;font-weight:900"><span class="stamp-wrap">ORATECH / CEO ${esc(comp.ceo)}<span class="stamp">${esc(comp.name)}<br>대표인</span></span></div></div>
+      </div>
+    </div>`;
+};
+window.convertPoToPurchaseSlip = function(){
+  if(!poLines.length){ alert('발주 품목이 없습니다.'); return; }
+  closeModal('intlPoModal'); goTab('t-pur'); resetPurForm();
+  $('pDate').value = todayStr(); $('pClient').value = ($('poSupplier').value||'').trim() || '해외공급처';
+  $('pCur').value = $('poCur').value; $('pRate').value = num($('poRate').value) || 1380;
+  purDraft = poLines.map(l => ({ item: l.model, spec: l.model, qty: Number(l.qty)||1, price: Number(l.fob)||0, krwAmt: 0, incAmt: 0, uCost: 0 }));
+  recalcPurDraft();
+  alert('🚢 영문 발주서(PO) 내역이 [수입·매입전표] 입력창으로 그대로 복사되었습니다!');
+};
+
+// ==================== 3. 💰 [신규 2번] 개인사업자 5월 종합소득세 누진세율 경보 & 절세 시뮬레이터 ====================
+const KR_TAX_BRACKETS = [
+  { max: 14000000, rate: 0.06, ded: 0, label: '1구간 (1,400만 이하 · 6%)' },
+  { max: 50000000, rate: 0.15, ded: 1260000, label: '2구간 (1,400만~5,000만 · 15%)' },
+  { max: 88000000, rate: 0.24, ded: 5760000, label: '3구간 (5,000만~8,800만 · 24%)' },
+  { max: 150000000, rate: 0.35, ded: 15440000, label: '4구간 (8,800만~1.5억 · 35% 🚨주의)' },
+  { max: 300000000, rate: 0.38, ded: 19940000, label: '5구간 (1.5억~3억 · 38% 🚨고세율)' },
+  { max: 500000000, rate: 0.40, ded: 25940000, label: '6구간 (3억~5억 · 40%)' },
+  { max: 1000000000, rate: 0.42, ded: 35940000, label: '7구간 (5억~10억 · 42%)' },
+  { max: Infinity, rate: 0.45, ded: 65940000, label: '8구간 (10억 초과 · 45%)' }
+];
+
+function calcKoreanIncomeTax(taxBase){
+  if(taxBase <= 0) return { national:0, local:0, total:0, bracket: KR_TAX_BRACKETS[0], nextJump: 14000000, prevDrop: 0 };
+  let idx = KR_TAX_BRACKETS.findIndex(b => taxBase <= b.max);
+  if(idx === -1) idx = KR_TAX_BRACKETS.length - 1;
+  const b = KR_TAX_BRACKETS[idx];
+  const prevMax = idx > 0 ? KR_TAX_BRACKETS[idx-1].max : 0;
+  const national = Math.max(0, Math.round(taxBase * b.rate - b.ded));
+  const local = Math.round(national * 0.1);
+  return { national, local, total: national + local, bracket: b, idx, nextJump: b.max - taxBase, prevDrop: taxBase - prevMax, prevMax };
+}
+
+window.openIncomeTaxModal = function(){
+  const yearSet = new Set([String(new Date().getFullYear())]);
+  (db.sales||[]).forEach(s => { if(s.date && s.date.length >= 4) yearSet.add(s.date.slice(0,4)); });
+  const years = Array.from(yearSet).sort().reverse();
+  const sel = $('itxYear');
+  if(sel && !sel.options.length){
+    sel.innerHTML = years.map(y => `<option value="${y}">${y}년 귀속 (다음해 5월 신고)</option>`).join('');
+  }
+  runIncomeTaxSim();
+  $('incomeTaxModal').style.display = 'flex';
+};
+
+window.runIncomeTaxSim = function(){
+  const yr = ($('itxYear') && $('itxYear').value) || String(new Date().getFullYear());
+  const ded = num($('itxDeduction').value);
+  const extraExp = num($('itxExtraExp').value);
+
+  let saleSup = 0, saleProf = 0, purSup = 0, expSup = 0;
+  (db.sales||[]).forEach(s => {
+    if(String(s.date||'').startsWith(yr)){
+      saleSup += (Number(s.supply)||0);
+      saleProf += (Number(s.profit)||0);
+    }
+  });
+  (db.purchases||[]).forEach(p => {
+    if(String(p.date||'').startsWith(yr)) purSup += (Number(p.totalCost)||0);
+  });
+  (db.expenses||[]).forEach(ex => {
+    if(String(ex.date||'').startsWith(yr)) expSup += (Number(ex.sup)||0);
+  });
+
+  // 추정 사업소득금액 = 매출총이익 - 판관비(경비)
+  const netBizIncome = Math.max(0, saleProf - expSup);
+  const curTaxBase = Math.max(0, netBizIncome - ded);
+  const simTaxBase = Math.max(0, curTaxBase - extraExp);
+
+  const curRes = calcKoreanIncomeTax(curTaxBase);
+  const simRes = calcKoreanIncomeTax(simTaxBase);
+  const savedTax = curRes.total - simRes.total;
+  const savedVat = Math.round(extraExp * 0.1); // 추가 매입/경비의 부가세 10% 공제 효과
+
+  $('itxResultBox').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="background:#f8fafc;border:1px solid #cbd5e1;padding:10px;border-radius:6px">
+        <div style="font-size:11.5px;color:#555;font-weight:bold">📊 ${yr}년 누적 매출공급가 / 매출이익</div>
+        <div style="font-size:16px;font-weight:900;color:#142d4c">${fmt(saleSup)}원</div>
+        <div style="font-size:11.5px;color:#27ae60;font-weight:bold">매출총이익: ${fmt(saleProf)}원 (경비: ${fmt(expSup)}원)</div>
+      </div>
+      <div style="background:#fffdf5;border:1.5px solid #f39c12;padding:10px;border-radius:6px">
+        <div style="font-size:11.5px;color:#856404;font-weight:bold">🎯 현재 예상 과세표준 (소득공제 차감후)</div>
+        <div style="font-size:18px;font-weight:900;color:#d35400">${fmt(curTaxBase)} 원</div>
+        <div style="font-size:11.5px;font-weight:bold;color:#142d4c">${curRes.bracket.label}</div>
+      </div>
+      <div style="background:#fff5f5;border:1.5px solid #d63031;padding:10px;border-radius:6px">
+        <div style="font-size:11.5px;color:#721c24;font-weight:bold">🏛️ 5월 예상 종합소득세 (지방세 10% 포함)</div>
+        <div style="font-size:19px;font-weight:900;color:#d63031">${fmt(curRes.total)} 원</div>
+        <div style="font-size:11px;color:#666">국세 ${fmt(curRes.national)} + 지방소득세 ${fmt(curRes.local)}</div>
+      </div>
+    </div>
+
+    <div style="background:#142d4c;color:#fff;padding:12px;border-radius:6px;margin-bottom:10px;line-height:1.6">
+      <div style="font-size:13.5px;font-weight:900;color:#ffd32a;margin-bottom:4px">🚨 개인사업자 세율 구간 네비게이션 진단</div>
+      ${curRes.idx > 0
+        ? `• 현재 과세표준이 <b>${fmt(curRes.prevMax)}원 기준선</b>을 <b>${fmt(curRes.prevDrop)}원</b> 초과하여 <b>${Math.round(curRes.bracket.rate*100)}% 세율 구간</b>에 진입해 있습니다!<br>
+           👉 연말(12월 31일) 전에 필요경비나 소모품/부품 매입을 <b style="color:#ffd32a">${fmt(curRes.prevDrop)}원</b> 이상 추가 확보하시면 바로 아래 세율 구간(<b>${Math.round(KR_TAX_BRACKETS[curRes.idx-1].rate*100)}%</b>)으로 내려갑니다!`
+        : `• 현재 가장 낮은 기본 세율 구간(6%) 내에 있어 세금 부담이 매우 안정적입니다.`}
+      ${curRes.nextJump < Infinity ? `<br>• 다음 상위 세율 구간(${Math.round(KR_TAX_BRACKETS[curRes.idx+1].rate*100)}%)까지 남은 여유 한도: <b>${fmt(curRes.nextJump)}원</b>` : ''}
+    </div>
+
+    ${extraExp > 0 ? `
+    <div style="background:#f0fdf4;border:2px solid #27ae60;padding:12px;border-radius:6px">
+      <div style="font-size:14px;font-weight:900;color:#155724;margin-bottom:4px">✨ [절세 시뮬레이션 결과] 연말 전 ${fmt(extraExp)}원 추가 경비/매입 집행 시:</div>
+      <div style="font-size:13px;color:#111">
+        1. <b>5월 종합소득세 절감액:</b> ${fmt(curRes.total)}원 ➔ <b>${fmt(simRes.total)}원</b> (<b class="t-grn">-${fmt(savedTax)}원 즉시 절세!</b>)<br>
+        2. <b>1월 부가가치세 매입세액 공제(10%):</b> <b class="t-blu">-${fmt(savedVat)}원 추가 절세!</b><br>
+        🎯 <b>총 세금 절감 합계 (종소세+부가세):</b> <span style="font-size:17px;font-weight:900;color:#d63031">총 ${fmt(savedTax + savedVat)} 원 세금 세이브!</span>
+        (실질 본인 부담률은 지출액의 ${Math.max(0, 100 - Math.round(((savedTax+savedVat)/extraExp)*100))}%에 불과합니다)
+      </div>
+    </div>` : ''}
+  `;
+};
+
+// ==================== 4. 🪢 [신규 3번] 로프 미터(m) 절단 판매 계산기 & 드럼(롤) 잔량 추적기 ====================
+window.openRopeCutModal = function(){
+  renderRopeRollUI();
+  onRopeRollSelect();
+  $('ropeCutModal').style.display = 'flex';
+};
+
+function renderRopeRollUI(){
+  const rolls = db.ropeRolls || [];
+  const sel = $('rcRollSel');
+  if(sel){
+    sel.innerHTML = rolls.map(r => {
+      const rem = Math.max(0, (Number(r.totalM)||200) - (Number(r.usedM)||0));
+      return `<option value="${r.id}">${esc(r.name)} (잔량: ${rem}m / 단가: ${fmt(r.pricePerM)}원/m)</option>`;
+    }).join('') + `<option value="0">직접 입력 (드럼 차감 안함)</option>`;
+  }
+
+  if($('ropeRollTb')){
+    $('ropeRollTb').innerHTML = rolls.map(r => {
+      const tot = Math.max(1, Number(r.totalM)||200);
+      const used = Number(r.usedM)||0;
+      const rem = Math.max(0, tot - used);
+      const pct = Math.min(100, Math.round((rem / tot) * 100));
+      const barColor = rem <= 40 ? '#d63031' : (rem <= 80 ? '#e67e22' : '#27ae60');
+      return `<tr>
+        <td class="b" style="color:#142d4c">${esc(r.name)}</td>
+        <td class="r">${fmt(r.pricePerM)}원/m</td>
+        <td class="r">${fmt(tot)} m</td>
+        <td class="r t-red">-${fmt(used)} m</td>
+        <td class="r b" style="font-size:13.5px;color:${barColor}">${fmt(rem)} m 남음</td>
+        <td>
+          <div style="width:100%;height:16px;background:#e2e8f0;border-radius:8px;overflow:hidden;border:1px solid #cbd5e1">
+            <div style="width:${pct}%;height:100%;background:${barColor};color:#fff;font-size:10px;font-weight:bold;text-align:center;line-height:16px">${pct}%</div>
+          </div>
+        </td>
+        <td class="c">
+          <button class="btn-w" style="padding:2px 6px;font-size:11px" onclick="adjustRopeRollRem(${r.id})">✏️잔량조정</button>
+          <button class="btn-r" style="padding:2px 5px;font-size:11px" onclick="deleteRopeRoll(${r.id})">✕</button>
+        </td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="7" class="c" style="padding:16px;color:#888">등록된 로프 드럼(롤)이 없습니다.</td></tr>`;
+  }
+}
+
+window.onRopeRollSelect = function(){
+  const id = Number($('rcRollSel').value);
+  const roll = (db.ropeRolls||[]).find(r => Number(r.id) === id);
+  if(roll && roll.pricePerM > 0){
+    $('rcPricePerM').value = roll.pricePerM;
+  }
+  calcRopeCutPreview();
+};
+
+window.calcRopeCutPreview = function(){
+  const id = Number($('rcRollSel').value);
+  const roll = (db.ropeRolls||[]).find(r => Number(r.id) === id);
+  const priceM = num($('rcPricePerM').value);
+  const cutM = num($('rcCutMeter').value);
+  const cnt = Math.max(1, num($('rcRollCnt').value));
+  const fee = num($('rcSpliceFee').value);
+
+  const unitLinePrice = (priceM * cutM) + fee;
+  const totalPrice = unitLinePrice * cnt;
+  const totalNeedM = cutM * cnt;
+  const remM = roll ? Math.max(0, (Number(roll.totalM)||200) - (Number(roll.usedM)||0)) : 9999;
+
+  let warnHtml = '';
+  if(roll && totalNeedM > remM){
+    warnHtml = `<span class="bg bg-r" style="margin-left:6px">🚨 경고! 선택 드럼 잔량(${remM}m)보다 요청 길이(${totalNeedM}m)가 더 깁니다! 새 드럼을 개봉하세요!</span>`;
+  } else if(roll){
+    warnHtml = `<span class="bg bg-g" style="margin-left:6px">✅ 절단 후 남은 드럼 잔량: ${remM - totalNeedM}m</span>`;
+  }
+
+  $('rcCalcSummary').innerHTML = `1줄당 단가: <b>${fmt(unitLinePrice)}원</b> [로프 ${cutM}m(${fmt(priceM*cutM)}원) + 가공/후크(${fmt(fee)}원)] × ${cnt}줄 = 총 공급가: <b class="t-red" style="font-size:15px">${fmt(totalPrice)}원</b> ${warnHtml}`;
+};
+
+window.applyRopeCutToSlip = function(prefix){
+  const id = Number($('rcRollSel').value);
+  const roll = (db.ropeRolls||[]).find(r => Number(r.id) === id);
+  const priceM = num($('rcPricePerM').value);
+  const cutM = num($('rcCutMeter').value);
+  const cnt = Math.max(1, num($('rcRollCnt').value));
+  const fee = num($('rcSpliceFee').value);
+  if(cutM <= 0){ alert('절단할 길이(m)를 입력하세요.'); return; }
+
+  const totalNeedM = cutM * cnt;
+  if(roll){
+    const remM = Math.max(0, (Number(roll.totalM)||200) - (Number(roll.usedM)||0));
+    if(totalNeedM > remM && !confirm(`⚠️ 현재 드럼 잔량(${remM}m)보다 긴 ${totalNeedM}m를 출고합니다. 계속 진행할까요?`)) return;
+    if(prefix === 's'){
+      roll.usedM = (Number(roll.usedM)||0) + totalNeedM;
+      saveDB('로프절단차감');
+    }
+  }
+
+  const unitLinePrice = (priceM * cutM) + fee;
+  const itemCode = roll ? (roll.code || 'PCA-1260') : 'ROPE-CUT';
+  const specStr = `${roll ? roll.spec : ''} ${cutM}m절단${fee>0?'+후크가공':''}`.trim().toUpperCase();
+
+  closeModal('ropeCutModal');
+  goTab(prefix === 'es' ? 't-est' : 't-sale');
+  if(prefix === 'es'){
+    estDraft.push({ item: itemCode, spec: specStr, qty: cnt, price: unitLinePrice, sup: unitLinePrice * cnt });
+    recalcEstDraft();
+  } else {
+    saleDraft.push({ item: itemCode, spec: specStr, qty: cnt, price: unitLinePrice, sup: unitLinePrice * cnt, vat: Math.round(unitLinePrice * cnt * 0.1), uCost: Math.round(unitLinePrice * 0.7) });
+    recalcSaleDraft();
+  }
+};
+
+window.addNewRopeRoll = function(){
+  const name = ($('newRollName').value||'').trim();
+  const totalM = num($('newRollTotalM').value) || 200;
+  const pricePerM = num($('newRollUnitP').value) || 6500;
+  if(!name){ alert('드럼(롤) 품명/식별명을 입력하세요.'); return; }
+  const code = extractPureProductCode(name, '') || 'PCA-1260';
+  db.ropeRolls.push({ id: Date.now(), name, code, spec: '', totalM, usedM: 0, pricePerM });
+  $('newRollName').value = '';
+  saveDB('로프드럼등록');
+  renderRopeRollUI();
+};
+
+window.adjustRopeRollRem = function(id){
+  const r = (db.ropeRolls||[]).find(x => Number(x.id) === Number(id));
+  if(!r) return;
+  const curRem = Math.max(0, (Number(r.totalM)||200) - (Number(r.usedM)||0));
+  const ans = prompt(`[${r.name}]\n현재 실제 남아있는 로프 길이(m)를 입력하세요:`, curRem);
+  if(ans === null) return;
+  const newRem = Math.max(0, num(ans));
+  r.usedM = Math.max(0, (Number(r.totalM)||200) - newRem);
+  saveDB('로프잔량조정');
+  renderRopeRollUI();
+  calcRopeCutPreview();
+};
+
+window.deleteRopeRoll = function(id){
+  if(!confirm('이 로프 드럼을 목록에서 삭제하시겠습니까?')) return;
+  db.ropeRolls = (db.ropeRolls||[]).filter(x => Number(x.id) !== Number(id));
+  saveDB('로프드럼삭제');
+  renderRopeRollUI();
+};
+
+// ==================== 5. 💱 [신규 4번] 실시간 환율 전광판 & 외화 송금 타이밍 스나이퍼 ====================
+window.fetchLiveExchangeRates = async function(manual){
+  try{
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    if(data && data.rates && data.rates.KRW){
+      const krwPerUsd = data.rates.KRW;
+      liveFxRates.USD = Math.round(krwPerUsd * 10) / 10;
+      liveFxRates.CNY = Math.round((krwPerUsd / data.rates.CNY) * 10) / 10;
+      liveFxRates.EUR = Math.round((krwPerUsd / data.rates.EUR) * 10) / 10;
+      liveFxRates.JPY = Math.round(((krwPerUsd / data.rates.JPY) * 100) * 10) / 10; // 100엔 기준
+      liveFxRates.updated = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+      sSet('ora_cached_fx', JSON.stringify(liveFxRates));
+    }
+  }catch(e){
+    const cached = sGet('ora_cached_fx');
+    if(cached){ try{ liveFxRates = JSON.parse(cached); }catch(err){} }
+  }
+  const badge = $('fxTopBadge');
+  if(badge){
+    badge.innerHTML = `💱 $1=${fmt(liveFxRates.USD)}원 | ¥1=${liveFxRates.CNY}원`;
+  }
+  if($('fxSniperModal') && $('fxSniperModal').style.display === 'flex'){
+    renderFxSniperModal();
+  }
+  if(manual) alert(`✅ 실시간 환율 업데이트 완료!\n• USD: ${liveFxRates.USD}원\n• CNY: ${liveFxRates.CNY}원\n• EUR: ${liveFxRates.EUR}원\n• JPY(100엔): ${liveFxRates.JPY}원`);
+};
+
+window.openFxSniperModal = function(){
+  renderFxSniperModal();
+  $('fxSniperModal').style.display = 'flex';
+};
+
+function renderFxSniperModal(){
+  if($('fxUpdateStatus')){
+    $('fxUpdateStatus').innerText = `🌐 기준 환율 업데이트 시각: ${liveFxRates.updated} (카드를 클릭하면 매입/시뮬레이터 환율에 즉시 적용됩니다)`;
+  }
+  const cards = [
+    { cur:'USD', name:'미국 달러 ($1)', val: liveFxRates.USD, unit: 1 },
+    { cur:'CNY', name:'중국 위안 (¥1)', val: liveFxRates.CNY, unit: 1 },
+    { cur:'EUR', name:'유럽 유로 (€1)', val: liveFxRates.EUR, unit: 1 },
+    { cur:'JPY', name:'일본 엔 (¥100)', val: liveFxRates.JPY, unit: 100 }
+  ];
+  $('fxBoardCards').innerHTML = cards.map(c => `
+    <div style="background:#f8fafc;border:1.5px solid #142d4c;border-radius:6px;padding:8px 10px;cursor:pointer;text-align:center" onclick="applyLiveFxToForms('${c.cur}',${c.val})">
+      <div style="font-size:11px;color:#555;font-weight:bold">${c.name}</div>
+      <div style="font-size:18px;font-weight:900;color:#0984e3;margin:3px 0">${c.val.toLocaleString()} 원</div>
+      <div style="font-size:10px;color:#27ae60;font-weight:bold">⚡ 클릭시 전표적용</div>
+    </div>
+  `).join('');
+
+  onFxSimCurChange();
+
+  // 외화 매입전표 중 미지급 건 리스트업
+  const fxPurs = (db.purchases||[]).filter(p => (p.currency && p.currency !== 'KRW') || (p.rate && Number(p.rate) > 1));
+  $('fxUnpaidPurTb').innerHTML = fxPurs.slice(0, 15).map(p => {
+    const cur = p.currency || 'USD';
+    const bookR = Number(p.rate) || 1380;
+    const todayR = (cur === 'JPY' ? liveFxRates.JPY / 100 : liveFxRates[cur]) || bookR;
+    const remKrw = (Number(p.totalCost)||0) + (Number(p.vat)||0) - (Number(p.paid)||0);
+    const estForeign = bookR > 0 ? (remKrw / bookR) : 0;
+    const diffKrw = Math.round(estForeign * (bookR - todayR));
+    return `<tr>
+      <td class="c">${esc(p.date)}</td>
+      <td class="b">${esc(p.client)}</td>
+      <td class="c"><span class="bg bg-b">${esc(cur)}</span></td>
+      <td class="r">${bookR.toLocaleString()}원</td>
+      <td class="r b">${todayR.toLocaleString()}원</td>
+      <td class="r">${fmt(remKrw)}원</td>
+      <td class="r b ${diffKrw>=0?'t-grn':'t-red'}">${remKrw<=0 ? '송금완료' : (diffKrw>=0 ? `🟢 +${fmt(diffKrw)}원 이득` : `🔴 ${fmt(diffKrw)}원 손실`)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" class="c" style="padding:15px;color:#888">등록된 외화 수입전표 내역이 없습니다. 위 시뮬레이터에 송금 예정액을 입력해 보세요!</td></tr>`;
+}
+
+window.onFxSimCurChange = function(){
+  const cur = $('fxSimCur').value;
+  const r = cur === 'JPY' ? (liveFxRates.JPY / 100) : (liveFxRates[cur] || 1380);
+  $('fxSimTodayRate').value = r;
+  $('fxSimBookRate').value = Math.round(r * 1.02 * 10) / 10;
+  runFxSniperSim();
+};
+
+window.runFxSniperSim = function(){
+  const cur = $('fxSimCur').value;
+  const amt = Number($('fxSimAmt').value) || 0;
+  const bookR = Number($('fxSimBookRate').value) || 0;
+  const todayR = Number($('fxSimTodayRate').value) || 0;
+
+  const bookKrw = Math.round(amt * bookR);
+  const todayKrw = Math.round(amt * todayR);
+  const diff = bookKrw - todayKrw; // 양수면 오늘 송금할 때 원화가 덜 들어감(환차익)
+
+  $('fxSimResult').innerHTML = diff >= 0
+    ? `<div style="color:#155724;font-size:13.5px">
+        🟢 <b>[송금 추천 타이밍!]</b> 계약/입고 당시(${fmt(bookKrw)}원)보다 오늘 송금 시 <b>${fmt(todayKrw)}원</b>만 소요되어
+        <b style="font-size:16px;color:#27ae60">환차익 +${fmt(diff)}원 이득</b>입니다! 오늘 은행 영업시간 내 T/T 송금을 권장합니다.
+       </div>`
+    : `<div style="color:#721c24;font-size:13.5px">
+        🔴 <b>[환율 상승 주의!]</b> 계약 당시(${fmt(bookKrw)}원)보다 원화 환산액이 <b>${fmt(todayKrw)}원</b>으로 불어나
+        <b style="font-size:16px;color:#d63031">환차손 ${fmt(diff)}원 손해</b> 구간입니다. 납기 여유가 있다면 환율 조정 시점까지 송금 대기를 권장합니다.
+       </div>`;
+};
+
+window.applyLiveFxToForms = function(cur, val){
+  const r = cur === 'JPY' ? (val / 100) : val;
+  if($('pCur')){ $('pCur').value = cur; $('pRate').value = r; recalcPurDraft(); }
+  if($('simCur')){ $('simCur').value = cur; $('simRate').value = r; }
+  if($('poCur')){ $('poCur').value = cur; $('poRate').value = r; }
+  alert(`⚡ [${cur}] 실시간 환율(${val}원)이 수입매입전표·원가시뮬레이터·영문발주서에 모두 반영되었습니다!`);
+};
+
+// ==================== 6. 👨‍👦 [신규 5번] 아버님 ↔ 아드님 실시간 인수인계 포스트잇 & 체크보드 ====================
+function updateFamilyMemoBadge(){
+  const pendCnt = (db.familyMemos||[]).filter(m => !m.done).length;
+  if($('floatMemoCnt')) $('floatMemoCnt').innerText = `미결 ${pendCnt}건`;
+}
+
+window.openFamilyMemoModal = function(){
+  renderFamilyMemos(fmFilterMode);
+  $('familyMemoModal').style.display = 'flex';
+  setTimeout(() => { if($('fmText')) $('fmText').focus(); }, 80);
+};
+
+window.addFamilyMemo = function(){
+  const text = ($('fmText').value||'').trim();
+  if(!text){ alert('전달할 메모 내용을 입력하세요.'); $('fmText').focus(); return; }
+  const writer = $('fmWriter').value;
+  const cat = $('fmCat').value;
+  const now = new Date();
+  const dtStr = `${todayStr()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  if(!Array.isArray(db.familyMemos)) db.familyMemos = [];
+  db.familyMemos.unshift({
+    id: Date.now(),
+    date: dtStr,
+    writer,
+    cat,
+    text,
+    done: false
+  });
+  $('fmText').value = '';
+  saveDB('부자공유메모등록');
+  updateFamilyMemoBadge();
+  renderFamilyMemos(fmFilterMode);
+};
+
+window.voiceToFamilyMemo = function(){
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRec){
+    alert('현재 브라우저에서 마이크 음성인식이 제한되어 있습니다. 키보드로 입력해 주세요.');
+    return;
+  }
+  const rec = new SpeechRec();
+  rec.lang = 'ko-KR';
+  showSyncProgress('🎙️ 부자(父子) 메모 음성인식 중...', '인수인계할 내용을 말씀해 주세요!\n(예: 강릉산림조합 내일 PCW-5000 1대 경동화물 발송)', 60);
+  rec.onresult = ev => {
+    hideSyncProgress();
+    const txt = normalizeVoiceModelText(ev.results[0][0].transcript || '');
+    if(txt){
+      $('fmText').value = txt;
+      addFamilyMemo();
+    }
+  };
+  rec.onerror = () => hideSyncProgress();
+  rec.onend = () => hideSyncProgress();
+  try{ rec.start(); }catch(e){ hideSyncProgress(); }
+};
+
+window.renderFamilyMemos = function(mode){
+  fmFilterMode = mode || 'PEND';
+  if($('fmTabPend')) $('fmTabPend').style.borderColor = fmFilterMode==='PEND' ? '#d35400' : '#888';
+  if($('fmTabAll')) $('fmTabAll').style.borderColor = fmFilterMode==='ALL' ? '#d35400' : '#888';
+
+  const list = (db.familyMemos||[]).filter(m => fmFilterMode === 'ALL' ? true : !m.done);
+  $('familyMemoTb').innerHTML = list.map(m => `
+    <tr style="${m.done ? 'opacity:0.55;background:#f1f5f9' : 'background:#fffdf5'}">
+      <td class="c"><span class="bg ${m.done?'bg-g':'bg-r'}">${m.done?'✅완료':'🔥미결'}</span></td>
+      <td class="c"><b>${esc(m.writer)}</b><div style="font-size:10px;color:#666">${esc(m.date)}</div></td>
+      <td class="c"><span class="bg bg-y">${esc(m.cat)}</span></td>
+      <td style="white-space:normal;font-size:13px;font-weight:bold;${m.done?'text-decoration:line-through;color:#666':''}">${esc(m.text)}</td>
+      <td class="c">
+        <button class="${m.done?'btn-w':'btn-g'}" style="padding:3px 7px;font-size:11px" onclick="toggleFamilyMemoDone(${m.id})">${m.done?'되돌리기':'✅확인완료'}</button>
+        <button class="btn-p" style="padding:3px 7px;font-size:11px" onclick="convertMemoToSaleSlip(${m.id})" title="이 메모 내용으로 매출전표 자동 채우기">⚡전표변환</button>
+        <button class="btn-r" style="padding:3px 5px;font-size:11px" onclick="deleteFamilyMemo(${m.id})">✕</button>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="5" class="c" style="padding:22px;color:#27ae60;font-weight:bold">🎉 현재 미결된 인수인계 메모가 없습니다!</td></tr>`;
+};
+
+window.toggleFamilyMemoDone = function(id){
+  const m = (db.familyMemos||[]).find(x => Number(x.id) === Number(id));
+  if(!m) return;
+  m.done = !m.done;
+  saveDB('부자메모상태변경');
+  updateFamilyMemoBadge();
+  renderFamilyMemos(fmFilterMode);
+};
+
+window.convertMemoToSaleSlip = function(id){
+  const m = (db.familyMemos||[]).find(x => Number(x.id) === Number(id));
+  if(!m) return;
+  closeModal('familyMemoModal');
+  if($('aiOrderText')){
+    $('aiOrderText').value = m.text;
+    m.done = true;
+    saveDB('메모전표전환');
+    updateFamilyMemoBadge();
+    aiParseOrderToSlip('sale');
+  }
+};
+
+window.deleteFamilyMemo = function(id){
+  db.familyMemos = (db.familyMemos||[]).filter(x => Number(x.id) !== Number(id));
+  saveDB('부자메모삭제');
+  updateFamilyMemoBadge();
+  renderFamilyMemos(fmFilterMode);
+};
+
+window.clearDoneFamilyMemos = function(){
+  if(!confirm('완료 처리된 메모들을 일괄 정리하시겠습니까?')) return;
+  db.familyMemos = (db.familyMemos||[]).filter(x => !x.done);
+  saveDB('완료메모정리');
+  updateFamilyMemoBadge();
+  renderFamilyMemos(fmFilterMode);
+};
+</script>
 </body>
 </html>
