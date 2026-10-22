@@ -495,19 +495,67 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   </div>
 </div>
 
+<!-- 📖 모델별 제원·규격·부품 호환 컨닝페이퍼 모달 (#2) -->
+<div class="modal-bg" id="specSheetModal">
+  <div class="modal" style="width:820px;max-height:88vh">
+    <div class="mh" style="background:linear-gradient(90deg,#142d4c,#0984e3)">
+      <span>📖 오라테크 모델별 제원 · 규격 · 호환부품 컨닝페이퍼 (전화 상담 & 전표 즉시 적용)</span>
+      <button class="btn-r" onclick="closeModal('specSheetModal')">✕ 닫기</button>
+    </div>
+    <div class="mb">
+      <div style="background:#eef6ff;border:1px solid #90cdf4;padding:8px 10px;border-radius:4px;margin-bottom:8px;font-size:12px;color:#1e3a8a">
+        💡 <b>전화 상담 중 1초 조회:</b> 고객이 <i>"PCW-5000 견인력이 몇 톤이에요? 무게는요? 호환 로프가 뭐예요?"</i> 물어보실 때 즉시 확인하고 <b>[⚡전표적용]</b>을 누르면 품목칸에 바로 입력됩니다! 나만의 제원도 자유롭게 추가·수정하실 수 있습니다.
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+        <input id="specSearchIn" placeholder="🔍 모델명 / 분류 / 호환부품 검색 (예: PCW-5000, 리모콘, DU-901, 로프)" style="flex:1;padding:7px;font-weight:bold;border:2px solid #0984e3" oninput="renderSpecSheetTable()">
+        <button class="btn-g" onclick="toggleSpecAddBox()">➕ 신규 모델제원 추가/수정</button>
+      </div>
+      <div id="specAddBox" style="display:none;background:#fff8e6;border:1px solid #f39c12;padding:8px;border-radius:4px;margin-bottom:8px">
+        <div class="fg">
+          <div class="c3"><label>모델코드*</label><input id="spModel" placeholder="예: PCW-5000" style="width:100%"></div>
+          <div class="c3"><label>분류/장비명</label><input id="spCat" placeholder="예: 포터블 엔진윈치" style="width:100%"></div>
+          <div class="c3"><label>정격용량/견인력</label><input id="spCap" placeholder="예: 직인 1톤 (도르래 5톤)" style="width:100%"></div>
+          <div class="c3"><label>자중(무게)/전원</label><input id="spWeight" placeholder="예: 16kg / 혼다 GXH50" style="width:100%"></div>
+        </div>
+        <div class="fg" style="margin-top:4px">
+          <div class="c5"><label>표준 와이어/로프/체인 규격</label><input id="spRope" placeholder="예: 전용 로프 12~13mm (PCA-1260 등)" style="width:100%"></div>
+          <div class="c5"><label>호환 부품 / 상담 핵심 메모</label><input id="spParts" placeholder="예: 도르래 PCA-1274, 로프백 PCA-1255" style="width:100%"></div>
+          <div class="c2"><label>&nbsp;</label><button class="btn-p" style="width:100%" onclick="saveCustomSpec()">💾 제원저장</button></div>
+        </div>
+      </div>
+      <div class="tw" style="max-height:420px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:115px">모델코드</th>
+              <th style="width:110px">분류/장비명</th>
+              <th style="width:130px">정격용량 / 견인력</th>
+              <th style="width:120px">중량 / 동력(전원)</th>
+              <th>표준 와이어·로프 / 호환부품 & 상담팁</th>
+              <th style="width:105px">전표적용/수정</th>
+            </tr>
+          </thead>
+          <tbody id="specSheetTb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Top Bar -->
 <div class="topbar">
   <div class="brand">
-    🌐 통합 무역·유통 경리회계 ERP Pro <span>오라테크 v42 풀옵션</span>
+    🌐 통합 무역·유통 경리회계 ERP Pro <span>오라테크 v43 풀옵션</span>
     <span id="cloudBadge" onclick="openTgModal()" style="background:#0088cc;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff">☁️ 클라우드 대기중</span>
     <span id="autoBakBadge" onclick="connectAutoBackupFolder()" style="background:#c0392b;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff" title="클릭하여 내 컴퓨터의 자동백업 폴더(카카오톡/바탕화면 등)를 지정하세요">📁 컴퓨터 자동백업: 미연결(클릭)</span>
   </div>
   <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
     <button id="seniorModeBtn" class="btn-a" style="background:#f39c12;color:#111;border:2px solid #fff;font-weight:900" onclick="toggleSeniorMode()" title="아버님을 위한 큰글씨·고대비 효도모드">🔍 큰글씨 효도모드 OFF</button>
     <button id="hideProfitBtn" class="btn-w" style="border:2px solid #fff;font-weight:900" onclick="toggleHideProfit()" title="손님과 함께 화면을 볼 때 원가와 마진 금액을 즉시 블러(숨김) 처리합니다">👁️ 마진숨김 OFF</button>
+    <button id="voiceTopBtn" class="btn-r" style="background:#e84393;border:1px solid #fff;font-weight:900" onclick="startVoiceRecognition('global')" title="마이크에 대고 거래처명이나 모델명을 말씀하시면 자동 검색·입력됩니다">🎙️ 음성비서</button>
+    <button class="btn-s" style="background:#0984e3;border:1px solid #fff" onclick="openSpecSheetModal()" title="모델별 견인력·중량·와이어·호환부품 컨닝페이퍼">📖 모델제원표</button>
     <button class="btn-pur" style="border:1px solid #fff" onclick="openAiModal()">🤖 AI 주문·비서</button>
     <button class="btn-g" style="background:#16a085;border:1px solid #fff" onclick="openBankMatchModal()">🏦 입금자동매칭</button>
-    <button class="btn-s" style="border:1px solid #fff" onclick="openSnModal()">🔢 시리얼/보증조회</button>
     <input type="file" id="htxQuickIn" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="importHometaxFiles(this.files);this.value=''">
     <button class="btn-a" onclick="$('htxQuickIn').click()">⚡ 홈택스등록</button>
     <button class="btn-p" style="background:#0088cc;border-color:#005580" onclick="tgPush(true)">☁️ 백업전송</button>
@@ -552,6 +600,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         <div class="ph">
           <span id="saleFormTitle">✏️ 매출전표 등록 (다중품목 / 세트출고 / A/S·시리얼)</span>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="btn-r" style="padding:2px 6px;font-size:11px;background:#e84393" onclick="startVoiceRecognition('sale')" title="마이크로 거래처와 품목·수량을 말씀하세요">🎙️ 음성전표입력</button>
+            <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#0984e3" onclick="openSpecSheetModal('s')" title="모델별 제원·규격·호환부품 즉시 확인">📖 모델제원표</button>
             <button class="btn-s" style="padding:2px 6px;font-size:11px" onclick="copyLastOrderByClient()" title="선택된 거래처의 직전 주문을 그대로 불러옵니다">🔁 직전주문불러오기</button>
             <button class="btn-a" style="padding:2px 6px;font-size:11px" onclick="openBomModal()">🎁 세트상품출고</button>
             <button class="btn-pur" style="padding:2px 6px;font-size:11px" onclick="openAiModal()">🤖 카톡주문인식</button>
@@ -594,11 +644,16 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <div class="fg">
               <div class="c5"><label>품목명 (방향키·엔터 선택)</label><input id="sItem" placeholder="품목코드/품명 검색" style="width:100%" oninput="onItemInput('s')" onfocus="onItemInput('s')"></div>
               <div class="c3"><label>규격/단위</label><input id="sSpec" placeholder="규격" style="width:100%" onkeydown="if(event.key==='Enter'){$('sQty').focus();$('sQty').select();}"></div>
-              <div class="c2"><label>수량</label><input type="number" id="sQty" value="1" step="any" style="width:100%" oninput="calcLinePreview('s')" onkeydown="if(event.key==='Enter'){$('sPrice').focus();$('sPrice').select();}"></div>
-              <div class="c2"><label>단가(원)</label><input type="number" id="sPrice" value="0" step="any" style="width:100%" oninput="calcLinePreview('s')" onkeydown="if(event.key==='Enter'){event.preventDefault();addSaleLine();}"></div>
+              <div class="c2"><label>수량(수식가능)</label><input type="text" inputmode="decimal" id="sQty" value="1" style="width:100%" oninput="calcLinePreview('s')" onblur="if(this.value)this.value=evalMathExpr(this.value);calcLinePreview('s')" onkeydown="if(event.key==='Enter'){this.value=evalMathExpr(this.value);$('sPrice').focus();$('sPrice').select();}"></div>
+              <div class="c2"><label>단가(수식: *0.9 등)</label><input type="text" inputmode="decimal" id="sPrice" value="0" placeholder="예: 250000*0.9" style="width:100%" oninput="calcLinePreview('s')" onblur="if(this.value)this.value=evalMathExpr(this.value);calcLinePreview('s')" onkeydown="if(event.key==='Enter'){event.preventDefault();this.value=evalMathExpr(this.value);addSaleLine();}"></div>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;flex-wrap:wrap;gap:4px">
-              <span style="font-size:11.5px;color:#444" class="sec-prof" id="sLinePrev">공급가: 0원 / 예상마진: 0원</span>
+              <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap">
+                <span style="font-size:11.5px;color:#444;margin-right:4px" class="sec-prof" id="sLinePrev">공급가: 0원 / 예상마진: 0원</span>
+                <button class="btn-w" style="padding:2px 6px;font-size:11px;border-color:#0984e3;color:#0984e3" onclick="quickAddFeeLine('s','화물/운반비','1식',30000)" title="명세서에 화물비/용달비 별도 표기 줄을 1클릭으로 추가합니다">🚚 +화물/운반비</button>
+                <button class="btn-w" style="padding:2px 6px;font-size:11px;border-color:#16a085;color:#16a085" onclick="quickAddFeeLine('s','택배운임','1식',5000)" title="명세서에 선불 택배비 줄을 1클릭으로 추가합니다">📦 +택배비</button>
+                <button class="btn-w" style="padding:2px 6px;font-size:11px;border-color:#8e44ad;color:#8e44ad" onclick="quickAddFeeLine('s','수리공임(기술료)','1식',50000)" title="A/S 수리 기술료(공임) 줄을 1클릭으로 추가합니다">🔧 +수리공임</button>
+              </div>
               <div style="display:flex;gap:4px;align-items:center">
                 <select id="sBomQuickSel" style="font-size:11px;padding:3px" onchange="if(this.value){applyBomSetToSlip('s',this.value);this.value='';}">
                   <option value="">🎁 세트상품 즉시추가...</option>
@@ -645,6 +700,15 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <div class="c3"><label>장비 시리얼번호(S/N)</label><input id="sSerialNo" placeholder="예: SN-2610-001" style="width:100%"></div>
             <div class="c3"><label>비고 / 고장증상 / 메모</label><input id="sMemo" placeholder="현장명, A/S증상 등" style="width:100%"></div>
           </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px dashed #cbd5e1;padding:4px 8px;border-radius:4px;margin-top:4px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="file" id="sPhotoIn" accept="image/*" style="display:none" onchange="handlePhotoUpload(this,'sPhotoData','sPhotoPreview')">
+              <input type="hidden" id="sPhotoData" value="">
+              <button class="btn-w" style="padding:2px 8px;font-size:11px" onclick="$('sPhotoIn').click()">📸 수리 전·후 / 납품 실물사진 첨부</button>
+              <span id="sPhotoPreview" style="font-size:11px;color:#666">첨부된 사진 없음 (첨부 시 명세서·수리내역서에 함께 인쇄 가능)</span>
+            </div>
+            <button class="btn-w" style="padding:1px 5px;font-size:10.5px" onclick="$('sPhotoData').value='';$('sPhotoPreview').innerHTML='첨부된 사진 없음';">지우기</button>
+          </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button class="btn-p" style="flex:2;padding:9px;font-size:13.5px" id="sSaveBtn" onclick="saveSale(false)">💾 매출전표 저장 (F8)</button>
             <button class="btn-a" style="flex:1;padding:9px" onclick="saveSale(true)">🖨️ 저장 후 명세서인쇄</button>
@@ -672,6 +736,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
               <option value="SN">🔢시리얼(S/N)보유건</option>
             </select>
             <input id="fSaleKw" placeholder="거래처/품목/시리얼/메모" style="width:130px" oninput="scheduleRender('sales')">
+            <button class="btn-w" style="padding:3px 6px" onclick="startVoiceRecognition('fSaleKw')" title="음성으로 매출전표 검색">🎙️</button>
+            <button class="btn-g" onclick="clearAllUnpaidToZero(false)" title="세금계산서 등 전체 매출·매입 미수금을 0원(완납)으로 일괄 변경합니다">💰 미수금 전체 0원 처리</button>
             <button class="btn-r" onclick="bulkDeleteSales()">🗑️ 선택삭제</button>
           </div>
         </div>
@@ -748,6 +814,14 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         </div>
         <div class="pb" id="dashItemChart" style="max-height:330px;overflow-y:auto"></div>
       </div>
+
+      <div class="panel" style="grid-column: 1 / -1; border: 2px solid #e67e22">
+        <div class="ph" style="background:#fff8e6;color:#d35400">
+          <span>💤 잠자는 단골 거래처 경보 (과거 2회 이상 또는 100만원 이상 거래 후 최근 90일 이상 주문이 끊긴 단골)</span>
+          <button class="btn-a" style="padding:2px 8px;font-size:11px" onclick="goDormantClients()">🏢 거래처 탭에서 전체보기</button>
+        </div>
+        <div class="pb" id="dashDormantChart" style="max-height:280px;overflow-y:auto"></div>
+      </div>
     </div>
   </div>
 
@@ -780,7 +854,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
       <div class="panel">
         <div class="ph">
           <span id="estFormTitle">📋 견적서 작성 (원클릭 매출전표 전환 지원)</span>
-          <div style="display:flex;gap:4px">
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn-s" style="padding:2px 7px;font-size:11px;background:#0984e3" onclick="openSpecSheetModal('es')">📖 모델제원표</button>
             <button class="btn-a" style="padding:2px 7px;font-size:11px" onclick="openBomModal()">🎁 세트상품</button>
             <button class="btn-pur" style="padding:2px 7px;font-size:11px" onclick="openAiModal()">🤖 카톡견적 붙여넣기</button>
             <label style="font-size:11.5px;color:#d63031;cursor:pointer;display:flex;align-items:center;gap:3px;background:#fff3cd;padding:2px 6px;border-radius:4px;border:1px solid #f39c12">
@@ -811,14 +886,21 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <div class="fg">
               <div class="c5"><label>품목명</label><input id="esItem" placeholder="품목 검색" style="width:100%" oninput="onItemInput('es')" onfocus="onItemInput('es')"></div>
               <div class="c3"><label>규격</label><input id="esSpec" style="width:100%" onkeydown="if(event.key==='Enter'){$('esQty').focus();$('esQty').select();}"></div>
-              <div class="c2"><label>수량</label><input type="number" id="esQty" value="1" style="width:100%" onkeydown="if(event.key==='Enter'){$('esPrice').focus();$('esPrice').select();}"></div>
-              <div class="c2"><label>견적단가</label><input type="number" id="esPrice" value="0" style="width:100%" onkeydown="if(event.key==='Enter'){event.preventDefault();addEstLine();}"></div>
+              <div class="c2"><label>수량(수식가능)</label><input type="text" inputmode="decimal" id="esQty" value="1" style="width:100%" onblur="if(this.value)this.value=evalMathExpr(this.value)" onkeydown="if(event.key==='Enter'){this.value=evalMathExpr(this.value);$('esPrice').focus();$('esPrice').select();}"></div>
+              <div class="c2"><label>견적단가(수식가능)</label><input type="text" inputmode="decimal" id="esPrice" value="0" placeholder="예: 250000*0.9" style="width:100%" onblur="if(this.value)this.value=evalMathExpr(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.value=evalMathExpr(this.value);addEstLine();}"></div>
             </div>
-            <div style="display:flex;justify-content:flex-end;gap:4px;margin-top:4px">
-              <select id="esBomQuickSel" style="font-size:11px;padding:3px" onchange="if(this.value){applyBomSetToSlip('es',this.value);this.value='';}">
-                <option value="">🎁 세트상품 즉시추가...</option>
-              </select>
-              <button class="btn-s" onclick="addEstLine()">➕ 견적품목 추가 (Enter)</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:4px;flex-wrap:wrap">
+              <div style="display:flex;gap:3px;flex-wrap:wrap">
+                <button class="btn-w" style="padding:2px 6px;font-size:11px;border-color:#0984e3;color:#0984e3" onclick="quickAddFeeLine('es','화물/운반비','1식',30000)">🚚 +화물/운반비</button>
+                <button class="btn-w" style="padding:2px 6px;font-size:11px;border-color:#16a085;color:#16a085" onclick="quickAddFeeLine('es','택배운임','1식',5000)">📦 +택배비</button>
+                <button class="btn-w" style="padding:2px 6px;font-size:11px;border-color:#8e44ad;color:#8e44ad" onclick="quickAddFeeLine('es','수리공임(기술료)','1식',50000)">🔧 +수리공임</button>
+              </div>
+              <div style="display:flex;gap:4px">
+                <select id="esBomQuickSel" style="font-size:11px;padding:3px" onchange="if(this.value){applyBomSetToSlip('es',this.value);this.value='';}">
+                  <option value="">🎁 세트상품 즉시추가...</option>
+                </select>
+                <button class="btn-s" onclick="addEstLine()">➕ 견적품목 추가 (Enter)</button>
+              </div>
             </div>
           </div>
           <div class="tw" style="max-height:170px;margin-bottom:6px">
@@ -906,8 +988,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <div class="fg">
               <div class="c5"><label>입고 품목명</label><input id="pItem" placeholder="품목 검색" style="width:100%" oninput="onItemInput('p')" onfocus="onItemInput('p')"></div>
               <div class="c2"><label>규격</label><input id="pSpec" style="width:100%" onkeydown="if(event.key==='Enter'){$('pQty').focus();$('pQty').select();}"></div>
-              <div class="c2"><label>입고수량</label><input type="number" id="pQty" value="1" step="any" style="width:100%" onkeydown="if(event.key==='Enter'){$('pPrice').focus();$('pPrice').select();}"></div>
-              <div class="c3"><label id="pPriceLbl">매입단가(외화/원화)</label><input type="number" id="pPrice" value="0" step="any" style="width:100%" onkeydown="if(event.key==='Enter'){event.preventDefault();addPurLine();}"></div>
+              <div class="c2"><label>입고수량(수식)</label><input type="text" inputmode="decimal" id="pQty" value="1" style="width:100%" onblur="if(this.value)this.value=evalMathExpr(this.value)" onkeydown="if(event.key==='Enter'){this.value=evalMathExpr(this.value);$('pPrice').focus();$('pPrice').select();}"></div>
+              <div class="c3"><label id="pPriceLbl">매입단가(외화/원화·수식)</label><input type="text" inputmode="decimal" id="pPrice" value="0" style="width:100%" onblur="if(this.value)this.value=evalMathExpr(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.value=evalMathExpr(this.value);addPurLine();}"></div>
             </div>
             <div style="text-align:right;margin-top:4px">
               <button class="btn-s" onclick="addPurLine()">➕ 입고품목 추가 (부대비용 자동배부)</button>
@@ -1011,11 +1093,17 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         <div class="ph">
           <span>📊 거래처별 채권·채무 총괄원장 & ⏰ 미수금 경과일수 신호등</span>
           <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+            <button class="btn-s" style="background:#0984e3" onclick="openCatalogDoc()" title="선택된 거래처(또는 전체) 기준 A4 공급단가표/카탈로그 발행">📊 단가표(카탈로그) 발행</button>
             <button class="btn-g" style="background:#16a085" onclick="openBankMatchModal()">🏦 입금내역 자동수금</button>
+            <button class="btn-a" onclick="clearAllUnpaidToZero(false)" title="모든 거래처의 미수금·미지급금을 0원(완납)으로 일괄 초기화합니다">💰 미수금 전체 0원 처리</button>
+            <label style="font-size:11.5px;color:#d35400;cursor:pointer;display:flex;align-items:center;gap:3px;background:#fff8e6;padding:3px 7px;border-radius:4px;border:1px solid #e67e22">
+              <input type="checkbox" id="fCliDormantOnly" onchange="renderClients()"> 💤 잠자는단골만(90일+)
+            </label>
             <label style="font-size:11.5px;color:#d63031;cursor:pointer;display:flex;align-items:center;gap:3px;background:#fff3cd;padding:3px 7px;border-radius:4px;border:1px solid #f39c12">
               <input type="checkbox" id="fCliUnpaidOnly" onchange="renderClients()"> 🚨 미수/미지급 있는 곳만
             </label>
             <input id="fCliKw" placeholder="초성(ㅇㄹ)/상호/사업자번호 검색" oninput="scheduleRender('cli')">
+            <button class="btn-w" style="padding:3px 6px" onclick="startVoiceRecognition('fCliKw')" title="음성으로 거래처 검색">🎙️</button>
             <button class="btn-r" onclick="bulkDeleteClients()">🗑️ 선택삭제</button>
           </div>
         </div>
@@ -1058,13 +1146,23 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <div class="c6"><label>규격 / 단위</label><input id="iSpec" placeholder="예: 1EA / 1BOX" style="width:100%"></div>
           </div>
           <div class="fg">
-            <div class="c4"><label>표준 매입원가(원)</label><input type="number" id="iBuy" value="0" style="width:100%"></div>
-            <div class="c4"><label>표준 매출단가(원)</label><input type="number" id="iSell" value="0" style="width:100%"></div>
+            <div class="c4"><label>표준 매입원가(원·수식)</label><input type="text" inputmode="decimal" id="iBuy" value="0" style="width:100%" onblur="if(this.value)this.value=evalMathExpr(this.value)"></div>
+            <div class="c4"><label>표준 매출단가(원·수식)</label><input type="text" inputmode="decimal" id="iSell" value="0" style="width:100%" onblur="if(this.value)this.value=evalMathExpr(this.value)"></div>
             <div class="c4"><label>기초 재고수량</label><input type="number" id="iInitQty" value="0" style="width:100%"></div>
           </div>
           <div class="fg">
-            <div class="c6"><label>안전재고 알림수량</label><input type="number" id="iSafeQty" value="5" style="width:100%"></div>
-            <div class="c6"><label>HS CODE / 품목분류</label><input id="iCat" placeholder="기계/부품/공구 등" style="width:100%"></div>
+            <div class="c4"><label>안전재고 알림수량</label><input type="number" id="iSafeQty" value="5" style="width:100%"></div>
+            <div class="c4"><label>HS CODE / 품목분류</label><input id="iCat" placeholder="엔진윈치/호이스트 등" style="width:100%"></div>
+            <div class="c4"><label>모델제원 / 호환부품 메모</label><input id="iSpecNote" placeholder="예: 1톤, 16kg, 로프 PCA-1260" style="width:100%"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px dashed #cbd5e1;padding:4px 8px;border-radius:4px;margin-top:4px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="file" id="iPhotoIn" accept="image/*" style="display:none" onchange="handlePhotoUpload(this,'iPhotoData','iPhotoPreview')">
+              <input type="hidden" id="iPhotoData" value="">
+              <button class="btn-w" style="padding:2px 8px;font-size:11px" onclick="$('iPhotoIn').click()">📸 제품 실물사진 등록</button>
+              <span id="iPhotoPreview" style="font-size:11px;color:#666">사진 미등록 (등록 시 견적서·단가표에 자동 인쇄)</span>
+            </div>
+            <button class="btn-w" style="padding:1px 5px;font-size:10.5px" onclick="$('iPhotoData').value='';$('iPhotoPreview').innerHTML='사진 미등록';">지우기</button>
           </div>
           <button class="btn-p" style="width:100%;padding:8px;margin-top:6px" onclick="saveItem()">💾 품목 저장</button>
         </div>
@@ -1074,10 +1172,13 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         <div class="ph">
           <span>📊 실시간 재고 수불부 및 세트상품 관리 (헤더 클릭 시 정렬)</span>
           <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn-s" style="background:#0984e3" onclick="openSpecSheetModal('itm')">📖 모델제원/호환표</button>
+            <button class="btn-g" style="background:#16a085" onclick="openCatalogDoc()">📊 단가표(카탈로그) 발행</button>
             <button class="btn-p" style="background:#d35400" onclick="openBomModal()">🎁 세트(묶음)상품 관리</button>
             <button class="btn-s" onclick="openSnModal()">🔢 시리얼/보증 추적기</button>
             <button class="btn-a" onclick="autoCleanItems(true)">✨ 순수 제품코드만 깔끔 정리</button>
             <input id="fItmKw" placeholder="초성/품목명/규격 검색" oninput="scheduleRender('itm')">
+            <button class="btn-w" style="padding:3px 6px" onclick="startVoiceRecognition('fItmKw')" title="음성으로 품목 검색">🎙️</button>
             <button class="btn-r" onclick="bulkDeleteItems()">🗑️ 선택삭제</button>
           </div>
         </div>
@@ -1201,6 +1302,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
           <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn-p" style="background:#8e44ad;border-color:#6c3483" onclick="dedupAllData(true);renderAll()">🧹 중복 데이터 완벽 청소</button>
             <button class="btn-a" onclick="autoCleanItems(true)">✨ 품목 순수 제품코드로 일괄 정리</button>
+            <button class="btn-g" onclick="clearAllUnpaidToZero(false)">💰 전체 미수금 0원 일괄완납 처리</button>
             <button class="btn-s" onclick="loadSampleData()">🧪 무역·유통 샘플데이터 불러오기</button>
             <button class="btn-r" onclick="clearAllData()">⚠️ 전체 데이터 초기화</button>
           </div>
@@ -1210,13 +1312,22 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   </div>
 </div>
 
-<!-- ==================== MODAL 1: 거래명세서 / 견적서 / A/S수리내역서 인쇄 & 카톡복사 ==================== -->
+<!-- ==================== MODAL 1: 거래명세서 / 견적서 / 관공서 납품서류 세트 / 단가표 인쇄 & 카톡복사 ==================== -->
 <div class="modal-bg" id="invModal">
   <div class="modal">
-    <div class="mh no-print">
+    <div class="mh no-print" style="flex-wrap:wrap;gap:6px">
       <span id="invModalTitle">🖨️ 양식 미리보기 및 발행</span>
-      <div style="display:flex;gap:6px">
-        <button class="btn-a" id="toggleAsDocBtn" style="display:none;padding:3px 10px" onclick="toggleInvoiceAsMode()">🛠️ A/S 수리내역서 양식으로 전환</button>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+        <span id="docSwitchBar" style="display:inline-flex;gap:3px;flex-wrap:wrap">
+          <button class="btn-w" style="padding:3px 8px;font-size:11px" onclick="switchDocTemplate('inv')">📄 거래명세서</button>
+          <button class="btn-s" style="padding:3px 8px;font-size:11px;background:#0984e3" onclick="switchDocTemplate('deliv')" title="산림조합·관공서·지자체 납품 검수용">🏛️ 납품확인서(관공서용)</button>
+          <button class="btn-p" style="padding:3px 8px;font-size:11px;background:#8e44ad" onclick="switchDocTemplate('claim')" title="관공서·기업 대금 청구용">📋 대금청구서</button>
+          <button class="btn-g" style="padding:3px 8px;font-size:11px" onclick="switchDocTemplate('comp')" title="수리·설치·납품 완료보고서">✅ 완료보고서</button>
+          <button class="btn-a" id="toggleAsDocBtn" style="padding:3px 8px;font-size:11px" onclick="switchDocTemplate('as')">🛠️ A/S수리내역서</button>
+        </span>
+        <label style="display:inline-flex;align-items:center;gap:3px;font-size:11px;background:rgba(255,255,255,0.18);padding:3px 7px;border-radius:4px;cursor:pointer;color:#fff">
+          <input type="checkbox" id="chkPrintPhoto" checked onchange="refreshCurrentDocView()"> 📸 사진포함
+        </label>
         <button class="btn-r" onclick="closeModal('invModal')">✕ 닫기</button>
       </div>
     </div>
@@ -1258,7 +1369,52 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
 const DB_KEY = 'erp_pro_v17';
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(Number(n)||0).toLocaleString('ko-KR');
-const num = v => Number(String(v||'').replace(/[^0-9.-]/g,'')) || 0;
+
+// ★ 추천 9번: 전표 입력칸 사칙연산 자동 계산기 (예: 250000*0.9, 2860000/1.1, 50000+30000)
+window.evalMathExpr = function(v){
+  if(typeof v === 'number') return isFinite(v) ? Math.round(v) : 0;
+  let s = String(v||'').replace(/,/g,'').trim();
+  if(!s) return 0;
+  const minusCnt = (s.match(/-/g) || []).length;
+  const isMathExpr = /[+*/]/.test(s) || (minusCnt === 1 && /^\s*\d[\d.]*\s*-\s*\d[\d.]*\s*$/.test(s));
+  if(/^[0-9.+\-*/()\s]+$/.test(s) && isMathExpr){
+    try{
+      const res = Function('"use strict"; return (' + s + ')')();
+      if(typeof res === 'number' && isFinite(res)) return Math.round(res);
+    }catch(e){}
+  }
+  return Number(s.replace(/[^0-9.-]/g,'')) || 0;
+};
+const num = v => window.evalMathExpr(v);
+
+// ★ 추천 6번: 금액 한글 표기 자동 변환 (예: 2860000 -> 이백팔십육만)
+window.numToKoreanWon = function(n){
+  let val = Math.round(Math.abs(Number(n)||0));
+  if(val === 0) return '영';
+  const digits = ['','일','이','삼','사','오','육','칠','팔','구'];
+  const units = ['','십','백','천'];
+  const bigUnits = ['','만','억','조'];
+  let result = '';
+  let bigIdx = 0;
+  while(val > 0){
+    const part = val % 10000;
+    if(part > 0){
+      let partStr = '';
+      let p = part;
+      for(let i=0; i<4 && p>0; i++){
+        const d = p % 10;
+        if(d > 0){
+          partStr = digits[d] + units[i] + partStr;
+        }
+        p = Math.floor(p / 10);
+      }
+      result = partStr + bigUnits[bigIdx] + result;
+    }
+    val = Math.floor(val / 10000);
+    bigIdx++;
+  }
+  return result;
+};
 const formatLocalYMD = d => {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1448,6 +1604,7 @@ function dedupAllData(showAlert){
       if(!winner.payLog && loser.payLog) winner.payLog = loser.payLog;
       if(!winner.asStatus && loser.asStatus) winner.asStatus = loser.asStatus;
       if(!winner.serialNo && loser.serialNo) winner.serialNo = loser.serialNo;
+      if(!winner.photo && loser.photo) winner.photo = loser.photo;
       if(!winner.htxKey && loser.htxKey) winner.htxKey = loser.htxKey;
       (winner.lines||[]).forEach(l => { if(l.spec) l.spec = String(l.spec).toUpperCase(); });
       sMap[fp] = winner;
@@ -1500,8 +1657,14 @@ function dedupAllData(showAlert){
   (db.items||[]).forEach(it => {
     if(!it || !it.name) return;
     const key = normSearch(it.name);
-    if(!iMap[key] || (it.sellPrice > 0 && iMap[key].sellPrice === 0)){
+    if(!iMap[key]){
       iMap[key] = it;
+    } else {
+      const ex = iMap[key];
+      if(it.sellPrice > 0 && ex.sellPrice === 0) ex.sellPrice = it.sellPrice;
+      if(it.buyPrice > 0 && ex.buyPrice === 0) ex.buyPrice = it.buyPrice;
+      if(!ex.specNote && it.specNote) ex.specNote = it.specNote;
+      if(!ex.photo && it.photo) ex.photo = it.photo;
     }
   });
   db.items = Object.values(iMap);
@@ -1613,6 +1776,28 @@ function normDB(){
 
   if(!db.clients.some(c => c && c.name === '1회성(기타)거래처')){
     db.clients.unshift({id:1, name:'1회성(기타)거래처', bizNo:'', ceo:'', type:'겸용', tier:0, tel:'', email:'', addr:'', initAr:0, initAp:0});
+  }
+
+  // 세금계산서 연동분 등 기존 미수금·미지급금 전부 0원(완납) 자동 보정 (최초 1회 자동 실행)
+  if(((db.sales && db.sales.length > 0) || (db.purchases && db.purchases.length > 0)) && sGet('ora_zero_ar_migrated_v43') !== '1'){
+    (db.sales||[]).forEach(s => {
+      if(!s) return;
+      s.total = (Number(s.supply)||0) + (Number(s.vat)||0);
+      s.paid = s.total;
+      s.unpaid = 0;
+    });
+    (db.purchases||[]).forEach(p => {
+      if(!p) return;
+      const pTot = (Number(p.totalCost)||0) + (Number(p.vat)||0);
+      p.paid = pTot;
+      p.payable = 0;
+    });
+    (db.clients||[]).forEach(c => {
+      if(!c) return;
+      c.initAr = 0; c.initUnpaid = 0;
+      c.initAp = 0; c.initPayable = 0;
+    });
+    sSet('ora_zero_ar_migrated_v43', '1');
   }
 
   dedupAllData(false);
@@ -1985,11 +2170,12 @@ function buildSlimDB(src){
     c.code||'', c.type||'매출처', c.name||'', c.bizNo||'', c.ceo||'', c.bizType||'', c.bizItem||'', c.tel||'', c.email||'', c.addr||'', Number(c.initAr||c.initUnpaid)||0, Number(c.initAp||c.initPayable)||0, c.memo||''
   ]);
   const slimItm = (src.items || []).map(it => [
-    it.code||'', it.cat||'일반', it.name||'', it.spec||'', it.taxType||'과세', Number(it.buyPrice)||0, Number(it.sellPrice)||0, Number(it.initQty)||0, Number(it.safeQty)||5, it.loc||'창고'
+    it.code||'', it.cat||'일반', it.name||'', it.spec||'', it.taxType||'과세', Number(it.buyPrice)||0, Number(it.sellPrice)||0, Number(it.initQty)||0, Number(it.safeQty)||5, it.loc||'창고', it.specNote||''
   ]);
   return {
     mc: src.comp || src.myCompany, c: slimCli, i: slimItm,
     es: src.estimates || [], ex: src.expenses || [], bomSets: src.bomSets || [],
+    csp: src.customSpecs || [],
     sd: { cl:cList, il:iList, spl:spList, r:slimSales, pr:slimPur }
   };
 }
@@ -2002,6 +2188,7 @@ function restoreSlimDB(slim){
     comp: compObj, myCompany: compObj,
     estimates: slim.es || slim.estimates || [],
     expenses: slim.ex || slim.expenses || [],
+    customSpecs: slim.csp || slim.customSpecs || [],
     bomSets: slim.bomSets || db.bomSets || []
   };
   const rawClients = slim.c || slim.clients || [];
@@ -2016,7 +2203,7 @@ function restoreSlimDB(slim){
   out.items = rawItems.map((a, i) => {
     if(!Array.isArray(a)) return a;
     if(a.length >= 9){
-      return {id:10000+i, code:a[0], cat:a[1], name:a[2], spec:a[3], taxType:a[4], buyPrice:Number(a[5])||0, sellPrice:Number(a[6])||0, initQty:Number(a[7])||0, safeQty:Number(a[8])||5, loc:a[9]||'창고'};
+      return {id:10000+i, code:a[0], cat:a[1], name:a[2], spec:a[3], taxType:a[4], buyPrice:Number(a[5])||0, sellPrice:Number(a[6])||0, initQty:Number(a[7])||0, safeQty:Number(a[8])||5, loc:a[9]||'창고', specNote:a[10]||''};
     }
     return {id:a[0]||(10000+i), name:a[1], spec:a[2], buyPrice:Number(a[3])||0, sellPrice:Number(a[4])||0, initQty:Number(a[5])||0, safeQty:Number(a[6])||5, cat:a[7]||''};
   });
@@ -2342,9 +2529,13 @@ window.tgPull = async function(silent){
 
     db = Object.assign(db, restored);
     if(db.comp) db.comp.pass = pass;
+    if(sGet('ora_zero_ar_cloud_v43') !== '1'){
+      sRem('ora_zero_ar_migrated_v43');
+      sSet('ora_zero_ar_cloud_v43', '1');
+    }
     normDB();
 
-    sSet('ora33_full_cache', fullEnc);
+    try{ sSet('ora33_full_cache', await gzPack(buildSlimDB(db), pass)); }catch(e){ sSet('ora33_full_cache', fullEnc); }
     sSet('ora33_ids', ids.join(','));
     sSet('ora33_db_hash', idxHash || hashStr(fullEnc));
     sSet('ora33_pass', meta.passHash || hashStr(pass));
@@ -2438,57 +2629,238 @@ window.lockERP = function(){
   setTimeout(() => { if($('lockPassIn')) $('lockPassIn').focus(); }, 100);
 };
 
-// ==================== PURE PRODUCT CODE EXTRACTOR ====================
+// ==================== PURE PRODUCT CODE EXTRACTOR & ZERO UNPAID ENGINE ====================
+const BAD_PFX = {
+  'HOIST':1,'WINCH':1,'BLOCK':1,'CHAIN':1,'LEVER':1,'TROLLY':1,'TROLLEY':1,'WIRE':1,'CABLE':1,'MOTOR':1,'MOTER':1,
+  'SWITCH':1,'SWICH':1,'HOOK':1,'DRUM':1,'GEAR':1,'BRAKE':1,'DISC':1,'LOAD':1,'HAND':1,'MINI':1,'TABLE':1,'AIR':1,
+  'PIPE':1,'BEAM':1,'HBEAM':1,'IBEAM':1,'NUT':1,'BOLT':1,'PIN':1,'RING':1,'SPRING':1,'JACK':1,'LIFT':1,'WHEEL':1,
+  'BATTERY':1,'CONTROL':1,'REMOTE':1,'SPEED':1,'PULLING':1,'ENGINE':1,'ELECTRIC':1,'HYDRAULIC':1,'CRANE':1,
+  'CARRIER':1,'CLAMP':1,'SHACKLE':1,'SLING':1,'BELT':1,'ROPE':1,'PART':1,'PARTS':1,'REPAIR':1,'RENTAL':1,'MODEL':1,
+  'TYPE':1,'SIZE':1,'SPEC':1,'LINE':1,'POWER':1,'PHASE':1,'VOLT':1,'AMP':1,'TON':1,'KG':1,'MM':1,'CM':1,'M':1,'HP':1,'KW':1,
+  'SET':1,'EA':1,'ASSY':1,'LOT':1,'PCS':1,'BOX':1,'ROLL':1,'COIL':1,'UNIT':1,'NO':1,'NEW':1,'OLD':1,'STD':1,'SUS':1,'STEEL':1,
+  'IRON':1,'AL':1,'AC':1,'DC':1,'LOADN':1,'CONTORL':1,'CONTRL':1,'PULLIG':1,'RINING':1,'BEM':1,'ELE':1,'TONX':1,'KGX':1,
+  'KX':1,'MX':1,'HPX':1,'KWX':1,'VX':1,'MMX':1,'SQX':1,'INCH':1,'FT':1,'LBS':1,'LB':1,'HZ':1,'PALLET':1,'PUMP':1,'VALVE':1,
+  'AADDLE':1,'ADDLLE':1,'BAG':1,'BISON':1,'BKOCK':1,'BLCOK':1,'CONSOL':1,'CONTOL':1,'CRIP':1,'FORMER':1,'IMPACT':1,
+  'INCHX':1,'JIYAMA':1,'LOOPER':1,'LOORER':1,'NCHSKY':1,'NXLOAD':1,'ONLOAD':1,'ONTROL':1,'ORWORM':1,'POINT':1,'RCABLE':1,
+  'SADDLE':1,'SHACLE':1,'SHAKLE':1,'SIMBLE':1,'SQ':1,'TESYS':1,'TOMY':1,'TONXL':1,'TOYO':1,'TRANS':1,'VCT':1,'WORM':1,'XLOAD':1,'AUTO':1,'GAS':1,'WINCHK':1
+};
+const UNIT_RX = /^\d+(\.\d+)?(M|MM|CM|TON|KG|VOLT|HZ|KW|HP|EA|SET|SQ|AMP|INCH|FT|LB|LBS|단|점식|종|건|개|대|식|조|각|극|호|형|롤|마력|볼트|톤|키로|메다|미터)$/i;
+
+function extractPureProductCode(nameStr, specStr){
+  const srcs = [String(specStr||''), String(nameStr||'')];
+  for(let s=0; s<srcs.length; s++){
+    const cl = srcs[s].replace(/\d+(\.\d+)?\s*(ton|t|kg|k|m|mm|cm|hp|kw|v|volt|a|amp|sq|inch|p|hz|ea|set)\s*[xX*/]\s*\d+[A-Za-z0-9xX*/.-]*/gi, ' ');
+    const matches = cl.match(/[A-Za-z]{1,5}-\d{1,5}[A-Za-z0-9-]{0,6}/g) || [];
+    for(let i=0; i<matches.length; i++){
+      const up = matches[i].toUpperCase().replace(/^-+|-+$/g,'');
+      const pts = up.split('-'), pfx = pts[0];
+      let rest = pts.slice(1).join('-');
+      if(BAD_PFX[pfx] || pts.some(p => BAD_PFX[p])) continue;
+      rest = rest.replace(/(X\d+.*|XWIR.*|XLIFT.*|ROPE.*|DRUM.*|ASSY.*|MOTOR.*|WIRE.*|SWITCH.*|SWICH.*|HOOK.*|BRAKE.*|GEAR.*|TON.*|KG.*|MM.*|HP.*|KW.*|SET.*|EA.*|-12V|-24V|-12|-24)$/g, '').replace(/^-+|-+$/g,'');
+      rest = rest.replace(/(\d+[A-Z])\d+M$/, '$1');
+      if(!rest || !/\d/.test(rest) || UNIT_RX.test(rest)) continue;
+      if(pfx.length === 1){
+        if('FKYCGHPSTUVW'.indexOf(pfx) === -1) continue;
+        const dMatch = rest.match(/^\d+/);
+        if(dMatch && Number(dMatch[0]) < 100) continue;
+      }
+      if((pfx === 'F' || pfx === 'FF') && /^2\d-/.test(rest)) return 'F' + rest;
+      rest = rest.replace(/OOF/g,'00F').replace(/0OF/g,'00F');
+      return pfx + '-' + rest;
+    }
+    // 하이픈 없이 붙어있는 모델명(예: PCW5000, DU901, F21E1B)도 보조 추출
+    const noHyphen = cl.match(/[A-Za-z]{2,5}\d{3,5}[A-Za-z0-9]{0,4}/g) || [];
+    for(let j=0; j<noHyphen.length; j++){
+      const m = noHyphen[j].toUpperCase().match(/^([A-Z]{2,5})(\d{3,5}[A-Z0-9]*)$/);
+      if(m && !BAD_PFX[m[1]] && !UNIT_RX.test(m[2])){
+        return m[1] + '-' + m[2];
+      }
+    }
+  }
+  return null;
+}
+
+function guessCatByCode(lowComb, code){
+  if(/(리모콘|리모트|remote|무선)/.test(lowComb) || /^F2\d-/.test(code)) return '무선리모콘';
+  if(/(트로리|트롤리|troll?y|trolley)/.test(lowComb) || /^(HC-|GT-|PT-)/.test(code)) return '트로리';
+  if(/(체인블럭|체인브럭|chain\s*block)/.test(lowComb) || /^(CB-|C-21|VS-|VP-|SHB)/.test(code)) return '체인블럭';
+  if(/(레버블럭|레바블럭|lever\s*block)/.test(lowComb) || /^(LB-|Y-0)/.test(code)) return '레버블럭';
+  if(/(유압윈치|hydraulic)/.test(lowComb) || /^(RKHN|RKHX|YAK|HV-|HWP)/.test(code)) return '유압윈치';
+  if(/(엔진윈치|engine)/.test(lowComb) || /^(PCW|PCH)/.test(code)) return '엔진윈치';
+  if(/(핸드윈치|수동윈치|hand\s*winch)/.test(lowComb) || /^(DLB|WB-|BHW|PNW|FD-|HWV|KDW)/.test(code)) return '핸드윈치';
+  if(/(미니윈치|mini\s*winch|스카이윈치)/.test(lowComb) || /^(SKY|TY-|YT-|RT-|AT-|SK-|FY-|PA-|SGW|KIO|BH-|DU-2|DU-3)/.test(code)) return '미니윈치';
+  if(/(차량용|dc\s*winch|12v|24v)/.test(lowComb) || /^(RKEX|RKEN|EWN|EWX|CWG|DW-|DR-)/.test(code)) return '차량용DC윈치';
+  if(/(단상호이스트)/.test(lowComb) || /^(DU-9|DU-10|DU-50|DH-)/.test(code)) return '단상호이스트';
+  if(/(호이스트|hoist)/.test(lowComb) || /^(LTH|LTM|LTS|LT-|DA-|DAM|KD-|DS-|DSS|SHK)/.test(code)) return '전동호이스트';
+  if(/(리프트|lift|파렛트)/.test(lowComb) || /^(SPN|DYC|JDYC|JPT|HIW|CBD|EPT|SEF|SYC)/.test(code)) return '리프트/운반하역';
+  return '전동윈치/장비';
+}
+
 function extractPureCode(rawName, rawSpec){
-  const combined = (String(rawName||'') + ' ' + String(rawSpec||'')).toUpperCase();
-  const m1 = combined.match(/\b([A-Z]{2,6})\s*[-_]?\s*(\d{2,5}[A-Z0-9]*)\b/);
-  if(m1) return m1[1] + '-' + m1[2];
-  const m2 = combined.match(/\(([A-Z0-9\-_]{3,20})\)/);
-  if(m2 && /[A-Z]/.test(m2[1]) && /\d/.test(m2[1])) return m2[1];
-  const m3 = combined.match(/\b([A-Z]{1,5}\d{2,5}[A-Z0-9\-]*)\b/);
-  if(m3 && !/^(1EA|1BOX|1SET|1PK|220V|380V|100M|200M)$/.test(m3[1])) return m3[1];
-  return String(rawName||'').trim();
+  return extractPureProductCode(rawName, rawSpec) || String(rawName||'').trim();
 }
 
 window.autoCleanItems = function(showMsg){
-  let chg = 0;
+  const beforeCnt = (db.items||[]).length;
   const codeMap = {};
-  (db.sales||[]).forEach(s => {
-    (s.lines||[]).forEach(l => {
-      const pure = extractPureCode(l.item, l.spec);
-      if(pure && pure !== l.item){ l.item = pure; chg++; }
-      if(l.spec) l.spec = String(l.spec).toUpperCase();
-    });
-  });
-  (db.purchases||[]).forEach(p => {
-    (p.lines||[]).forEach(l => {
-      const pure = extractPureCode(l.item, l.spec);
-      if(pure && pure !== l.item){ l.item = pure; chg++; }
-      if(l.spec) l.spec = String(l.spec).toUpperCase();
-    });
-  });
-  (db.estimates||[]).forEach(es => {
-    (es.lines||[]).forEach(l => {
-      const pure = extractPureCode(l.item, l.spec);
-      if(pure && pure !== l.item){ l.item = pure; chg++; }
-    });
-  });
+  let slipChg = 0;
+
+  // 1) 기존 품목장(db.items)에서 순수 제품코드만 추출 (잡품목/한글서술 품목 완전 제외)
   (db.items||[]).forEach(it => {
-    const pure = extractPureCode(it.name, it.spec);
-    if(pure && pure !== it.name){ it.name = pure; chg++; }
-    if(it.spec) it.spec = String(it.spec).toUpperCase();
-    const key = normSearch(it.name);
-    if(!codeMap[key]) codeMap[key] = it;
-    else {
-      if(!codeMap[key].sellPrice && it.sellPrice) codeMap[key].sellPrice = it.sellPrice;
-      if(!codeMap[key].buyPrice && it.buyPrice) codeMap[key].buyPrice = it.buyPrice;
-      if(!codeMap[key].spec && it.spec) codeMap[key].spec = it.spec;
+    const code = extractPureProductCode(it.name, it.spec);
+    if(!code) return;
+    const low = (String(it.name||'') + ' ' + String(it.spec||'')).toLowerCase();
+    const isSub = /(부품|수리|교체|스위치|swich|와이어|모터|드럼|브레이크|라이닝|외)/.test(low);
+    const prc = Math.abs(Number(it.sellPrice) || 0);
+    const buyP = Math.abs(Number(it.buyPrice) || 0) || Math.round(prc * 0.75);
+    if(!codeMap[code]){
+      codeMap[code] = {
+        id: it.id || (Date.now() + Math.random()),
+        code: 'ITM-0000',
+        cat: guessCatByCode(low, code),
+        name: code,
+        spec: code,
+        taxType: it.taxType || '과세',
+        buyPrice: buyP,
+        sellPrice: prc,
+        initQty: Number(it.initQty) || 10,
+        safeQty: Number(it.safeQty) || 3,
+        loc: it.loc || '창고',
+        _m: !isSub
+      };
+    } else if((!codeMap[code]._m && !isSub && prc > 0) || (codeMap[code].sellPrice === 0 && prc > 0)){
+      codeMap[code].sellPrice = prc;
+      codeMap[code].buyPrice = buyP;
+      codeMap[code]._m = !isSub;
     }
   });
-  db.items = Object.values(codeMap);
-  saveDB('품목코드정리');
+
+  // 2) 매출·매입·견적 전표에서 순수 제품코드 추출 및 전표 내 품목명/규격 통일 + 최신단가 반영
+  const sortedSalesAsc = (db.sales||[]).slice().sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')));
+  sortedSalesAsc.forEach(s => {
+    (s.lines||[]).forEach(l => {
+      const code = extractPureProductCode(l.item, l.spec);
+      if(!code) return;
+      const low = (String(l.item||'') + ' ' + String(l.spec||'')).toLowerCase();
+      const isSub = /(부품|수리|교체|스위치|swich|와이어|모터|드럼|브레이크|라이닝)/.test(low);
+      const prc = Math.abs(Number(l.price) || 0);
+      if(l.item !== code || l.spec !== code){ l.item = code; l.spec = code; slipChg++; }
+      if(!codeMap[code]){
+        codeMap[code] = {
+          id: Date.now() + Math.random(),
+          code: 'ITM-0000',
+          cat: guessCatByCode(low, code),
+          name: code,
+          spec: code,
+          taxType: '과세',
+          buyPrice: Math.round(prc * 0.75),
+          sellPrice: prc,
+          initQty: 10,
+          safeQty: 3,
+          loc: '창고',
+          _m: !isSub
+        };
+      } else if(prc > 0 && (!isSub || !codeMap[code]._m)){
+        codeMap[code].sellPrice = prc;
+        if(!codeMap[code].buyPrice) codeMap[code].buyPrice = Math.round(prc * 0.75);
+        if(!isSub) codeMap[code]._m = true;
+      }
+    });
+  });
+
+  (db.purchases||[]).forEach(p => {
+    (p.lines||[]).forEach(l => {
+      const code = extractPureProductCode(l.item, l.spec);
+      if(!code) return;
+      const costP = Math.abs(Number(l.uCost || l.unitCost || l.price) || 0);
+      if(l.item !== code || l.spec !== code){ l.item = code; l.spec = code; slipChg++; }
+      if(!codeMap[code]){
+        const low = (String(l.item||'') + ' ' + String(l.spec||'')).toLowerCase();
+        codeMap[code] = {
+          id: Date.now() + Math.random(),
+          code: 'ITM-0000',
+          cat: guessCatByCode(low, code),
+          name: code,
+          spec: code,
+          taxType: '과세',
+          buyPrice: costP,
+          sellPrice: Math.round(costP * 1.3),
+          initQty: 10,
+          safeQty: 3,
+          loc: '창고',
+          _m: true
+        };
+      } else if(costP > 0){
+        codeMap[code].buyPrice = costP;
+      }
+    });
+  });
+
+  (db.estimates||[]).forEach(es => {
+    (es.lines||[]).forEach(l => {
+      const code = extractPureProductCode(l.item, l.spec);
+      if(code && (l.item !== code || l.spec !== code)){ l.item = code; l.spec = code; slipChg++; }
+    });
+  });
+
+  db.items = Object.keys(codeMap).sort().map((k, idx) => {
+    const o = codeMap[k];
+    delete o._m;
+    o.code = 'ITM-' + String(idx + 1).padStart(4, '0');
+    return o;
+  });
+  delete db.itemAliases;
+  saveDB('순수제품코드전용정리');
   renderAll();
-  if(showMsg) alert('✨ 품목명에서 불필요한 한글 설명을 제거하고 순수 제품코드(영문+숫자)로 ' + fmt(chg) + '건을 깔끔하게 통합했습니다!');
+  if(showMsg){
+    alert('🎉 [순수 제품코드(PCW-5000 등) 대정리 완료!]\n\n'
+      + '• 품목 목록: ' + fmt(beforeCnt) + '종 ➔ 순수 제품코드 ' + fmt(db.items.length) + '종으로 압축!\n'
+      + '• 전표 내 모델명 자동 표준화: ' + fmt(slipChg) + '건\n'
+      + '• 제품코드가 아닌 잡품목/수리비/운반비 등은 품목 수불부에서 깔끔히 제외되었습니다!');
+  }
+};
+
+window.clearAllUnpaidToZero = function(silent){
+  if(!silent && !confirm('💰 [전체 미수금·미지급금 0원 일괄 초기화]\n\n세금계산서 연동분 등 현재 남아있는 모든 매출 미수금, 매입 미지급금, 거래처 기초미수금을 전부 [0원 (완납)]으로 변경하시겠습니까?')) return;
+  let sFixed = 0, pFixed = 0, cFixed = 0;
+  (db.sales||[]).forEach(s => {
+    if(!s) return;
+    const tot = (Number(s.supply)||0) + (Number(s.vat)||0);
+    s.total = tot;
+    if((Number(s.paid)||0) !== tot || (Number(s.unpaid)||0) !== 0){
+      s.paid = tot;
+      s.unpaid = 0;
+      sFixed++;
+    }
+  });
+  (db.purchases||[]).forEach(p => {
+    if(!p) return;
+    const tot = (Number(p.totalCost)||0) + (Number(p.vat)||0);
+    p.total = tot;
+    if((Number(p.paid)||0) !== tot || (Number(p.payable)||0) !== 0){
+      p.paid = tot;
+      p.payable = 0;
+      pFixed++;
+    }
+  });
+  (db.clients||[]).forEach(c => {
+    if(!c) return;
+    if((Number(c.initAr)||0) !== 0 || (Number(c.initUnpaid)||0) !== 0 || (Number(c.initAp)||0) !== 0 || (Number(c.initPayable)||0) !== 0){
+      c.initAr = 0; c.initUnpaid = 0;
+      c.initAp = 0; c.initPayable = 0;
+      cFixed++;
+    }
+  });
+  sSet('ora_zero_ar_migrated_v43', '1');
+  saveDB('미수금전체0원초기화');
+  renderAll();
+  if(!silent){
+    alert('✅ [미수금 0원 일괄 처리 완료!]\n\n'
+      + '• 매출전표 완납(미수 0원) 처리: ' + fmt(sFixed) + '건\n'
+      + '• 매입전표 완납(미지급 0원) 처리: ' + fmt(pFixed) + '건\n'
+      + '• 거래처 기초미수/미지급 초기화: ' + fmt(cFixed) + '곳\n\n'
+      + '현재 총 미수금 잔액이 0원으로 깔끔하게 정리되었습니다!');
+  }
 };
 
 // ==================== NEW #2: 🔁 단골 거래처 직전 주문 1초 복사 ====================
@@ -3338,6 +3710,29 @@ window.renderDashboard = function(){
       </div>`;
     }).join('') : '<div style="padding:20px;text-align:center;color:#888">해당 연도 품목 판매 데이터가 없습니다.</div>';
   }
+
+  // ★ 추천 4번: 잠자는 단골 거래처 (이탈 위험: 2회 이상 또는 누적 150만원 이상 거래 후 최근 90일 이상 주문 없음) 자동 발굴
+  if($('dashDormantChart')){
+    const dormantList = Object.values(cStats)
+      .filter(st => st.isDormant && st.c.name !== '1회성(기타)거래처')
+      .sort((a,b) => b.sale - a.sale);
+    const maxDm = dormantList.length ? dormantList[0].sale : 1;
+    $('dashDormantChart').innerHTML = dormantList.length ? dormantList.slice(0, 12).map((st, idx) => {
+      const pct = Math.max(8, Math.round((st.sale / maxDm) * 100));
+      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(st.c.name)}')" title="클릭 시 [${esc(st.c.name)}] 과거 주문내역/원장 열기">
+        <div class="bar-lbl">${idx+1}. <b>${esc(st.c.name)}</b> <span class="bg bg-y">${st.saleCnt}회 거래</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#e67e22,#f39c12)">마지막 출고: ${st.lastDate} (${st.daysSinceLast}일 전) ${st.lastItemName ? '| 주력: '+esc(st.lastItemName) : ''}</div></div>
+        <div class="bar-val" style="width:210px;color:#d35400">누적 ${fmt(st.sale)}원 <button class="btn-s" style="padding:1px 6px;font-size:10.5px;margin-left:4px" onclick="event.stopPropagation();openCatalogDoc('${esc(st.c.name)}')">📊단가표</button></div>
+      </div>`;
+    }).join('') : '<div style="padding:16px;text-align:center;color:#27ae60;font-weight:bold">🎉 최근 90일 이상 발주가 끊긴 주요 단골 거래처가 없습니다!</div>';
+  }
+};
+
+window.goDormantClients = function(){
+  goTab('t-cli');
+  if($('fCliDormantOnly')) $('fCliDormantOnly').checked = true;
+  if($('fCliUnpaidOnly')) $('fCliUnpaidOnly').checked = false;
+  renderClients();
 };
 
 // ==================== HOMETAX MULTI-FILE PARSER (v35 다중시트·품목순번 완벽 호환) ====================
@@ -3770,9 +4165,30 @@ function lookupPrice(prefix){
         `<span class="pm-pill" onclick="$('${prefix}Price').value=${h.p};calcLinePreview('${prefix}')">${fmt(h.p)}원 <small>(${h.d.slice(2)})</small></span>`
       ).join('');
     }
+    const specInfo = window.getModelSpec ? window.getModelSpec(itmName) : null;
+    if(specInfo){
+      html += `<div style="margin-top:4px;padding-top:4px;border-top:1px dashed #b2bec3;color:#142d4c;font-size:11.5px">📖 <b>제원:</b> 견인력 <b style="color:#d63031">${esc(specInfo.pull)}</b> / 로프 <b>${esc(specInfo.rope)}</b> / 중량 <b>${esc(specInfo.weight)}</b> / 동력 <b>${esc(specInfo.engine)}</b> | 🔧 <b>호환:</b> ${esc(specInfo.compat)}</div>`;
+    } else if(itm && itm.specNote){
+      html += `<div style="margin-top:4px;padding-top:4px;border-top:1px dashed #b2bec3;color:#142d4c;font-size:11.5px">📖 <b>제원/호환메모:</b> ${esc(itm.specNote)}</div>`;
+    }
     bar.innerHTML = html;
   }
 }
+
+// ★ 추천 5번: 운반비(화물비) / 택배비 / A/S 수리공임 1클릭 추가
+window.quickAddFeeLine = function(prefix, defaultName, defaultSpec, defaultPrice){
+  const ans = prompt(`[${defaultName}] 추가할 금액(원)을 입력하세요 (엔터 시 ${fmt(defaultPrice)}원 자동 입력):`, defaultPrice);
+  if(ans === null) return;
+  const price = num(ans);
+  if(price <= 0) return;
+  if(prefix === 's'){
+    saleDraft.push({ item: defaultName, spec: defaultSpec, qty: 1, price: price, sup: price, vat: Math.round(price * 0.1), uCost: 0 });
+    recalcSaleDraft();
+  } else if(prefix === 'es'){
+    estDraft.push({ item: defaultName, spec: defaultSpec, qty: 1, price: price, sup: price });
+    recalcEstDraft();
+  }
+};
 
 function lookupPurPrice(){
   const cliName = ($('pClient').value||'').trim();
@@ -3908,6 +4324,7 @@ function saveSale(printAfter){
   const asStatus = $('sAsStatus') ? $('sAsStatus').value : '';
   const serialNo = $('sSerialNo') ? $('sSerialNo').value.trim() : '';
   const memo = ($('sMemo').value||'').trim();
+  const photo = $('sPhotoData') ? ($('sPhotoData').value||'') : '';
   const editId = num($('sEditId').value);
 
   const otInfo = isOt ? {
@@ -3935,7 +4352,8 @@ function saveSale(printAfter){
       db.sales[idx] = Object.assign({}, prev, {
         date, client, vatType: $('sVatType').value,
         lines: JSON.parse(JSON.stringify(saleDraft)),
-        supply, vat, total, profit, paid, payMethod, asStatus, serialNo, memo, otInfo
+        supply, vat, total, profit, paid, payMethod, asStatus, serialNo, memo, otInfo,
+        photo: photo || prev.photo || ''
       });
     }
   } else {
@@ -3944,6 +4362,7 @@ function saveSale(printAfter){
       id: savedId, date, client, vatType: $('sVatType').value,
       lines: JSON.parse(JSON.stringify(saleDraft)),
       supply, vat, total, profit, paid, payMethod, asStatus, serialNo, memo, otInfo,
+      photo: photo || '',
       payLog: paid > 0 ? [{date, amt:paid, memo:'출고시수금'}] : []
     };
     const fp = getSaleFp(newSlip);
@@ -3972,6 +4391,9 @@ function resetSaleForm(){
   if($('sAsStatus')) $('sAsStatus').value = '';
   if($('sSerialNo')) $('sSerialNo').value = '';
   $('sMemo').value = '';
+  if($('sPhotoData')) $('sPhotoData').value = '';
+  if($('sPhotoIn')) $('sPhotoIn').value = '';
+  if($('sPhotoPreview')) $('sPhotoPreview').innerHTML = '';
   if($('saleFormTitle')) $('saleFormTitle').innerText = '✏️ 매출전표 등록 (다중품목 / 세트출고 / A/S·시리얼)';
   if($('sSaveBtn')) $('sSaveBtn').innerText = '💾 매출전표 저장 (F8)';
   saleDraft = [];
@@ -4005,6 +4427,12 @@ function editSale(id){
   if($('sAsStatus')) $('sAsStatus').value = s.asStatus || '';
   if($('sSerialNo')) $('sSerialNo').value = s.serialNo || '';
   $('sMemo').value = s.memo || '';
+  if($('sPhotoData')) $('sPhotoData').value = s.photo || '';
+  if($('sPhotoPreview')){
+    $('sPhotoPreview').innerHTML = s.photo
+      ? `<img src="${s.photo}" style="height:28px;border-radius:3px;border:1px solid #0984e3"><button type="button" class="btn-r" style="padding:1px 4px;font-size:10px" onclick="clearPhotoInput('sPhotoIn','sPhotoData','sPhotoPreview')">✕</button>`
+      : '';
+  }
   if($('saleFormTitle')) $('saleFormTitle').innerText = `✏️ 매출전표 수정 중 (#${s.date} ${s.client})`;
   if($('sSaveBtn')) $('sSaveBtn').innerText = '💾 수정사항 저장 완료 (F8)';
   window.scrollTo({top:0, behavior:'smooth'});
@@ -4307,15 +4735,18 @@ function ensureClientAndItems(cliName, defType, lines, isPur){
     db.clients.push({ id:Date.now()+Math.floor(Math.random()*1000), name:cliName, bizNo:'', ceo:'', type:defType, tier:0, tel:'', email:'', addr:'', initAr:0, initAp:0 });
   }
   (lines||[]).forEach(l => {
-    let it = (db.items||[]).find(i => normSearch(i.name) === normSearch(l.item));
+    const pureCode = extractPureProductCode(l.item, l.spec);
+    if(!pureCode) return; // 순수 제품코드가 아닌 잡품목(수리비, 운반비 등)이 품목장을 오염시키지 않도록 방지
+    let it = (db.items||[]).find(i => normSearch(i.name) === normSearch(pureCode));
     if(!it){
       const costVal = l.uCost || l.unitCost || l.price || 0;
+      const low = (String(l.item||'') + ' ' + String(l.spec||'')).toLowerCase();
       db.items.push({
         id: Date.now()+Math.floor(Math.random()*10000),
-        name: l.item, spec: l.spec||'',
+        name: pureCode, spec: pureCode,
         buyPrice: isPur ? costVal : Math.round((l.price||0)*0.75),
         sellPrice: !isPur ? (l.price||0) : Math.round(costVal*1.3),
-        initQty: 0, safeQty: 5, cat: '일반품목'
+        initQty: 10, safeQty: 3, cat: guessCatByCode(low, pureCode)
       });
     } else {
       if(isPur && (l.uCost || l.unitCost) > 0) it.buyPrice = l.uCost || l.unitCost;
@@ -4369,20 +4800,30 @@ function saveItem(){
   if(!rawName){ alert('품목명을 입력하세요.'); return; }
   const spec = ($('iSpec').value||'').trim().toUpperCase();
   const name = extractPureCode(rawName, spec);
+  const specNote = $('iSpecNote') ? ($('iSpecNote').value||'').trim() : '';
+  const photo = $('iPhotoData') ? ($('iPhotoData').value||'') : '';
   const obj = {
     id: num($('iId').value) || Date.now(),
     name, spec, buyPrice: num($('iBuy').value), sellPrice: num($('iSell').value),
-    initQty: num($('iInitQty').value), safeQty: num($('iSafeQty').value), cat: ($('iCat').value||'').trim()
+    initQty: num($('iInitQty').value), safeQty: num($('iSafeQty').value), cat: ($('iCat').value||'').trim(),
+    specNote, photo
   };
   const idx = db.items.findIndex(i => Number(i.id) === obj.id || normSearch(i.name) === normSearch(name));
-  if(idx > -1) db.items[idx] = Object.assign({}, db.items[idx], obj);
-  else db.items.push(obj);
+  if(idx > -1){
+    const prev = db.items[idx];
+    db.items[idx] = Object.assign({}, prev, obj, { photo: photo || prev.photo || '', specNote: specNote || prev.specNote || '' });
+  } else {
+    db.items.push(obj);
+  }
   resetItmForm(); saveDB('품목저장'); renderAll();
 }
 
 function resetItmForm(){
-  ['iId','iName','iSpec','iCat'].forEach(id => $(id).value = '');
+  ['iId','iName','iSpec','iCat','iSpecNote'].forEach(id => { if($(id)) $(id).value = ''; });
   $('iBuy').value = 0; $('iSell').value = 0; $('iInitQty').value = 0; $('iSafeQty').value = 5;
+  if($('iPhotoData')) $('iPhotoData').value = '';
+  if($('iPhotoIn')) $('iPhotoIn').value = '';
+  if($('iPhotoPreview')) $('iPhotoPreview').innerHTML = '';
 }
 
 function editItem(id){
@@ -4391,6 +4832,14 @@ function editItem(id){
   $('iId').value = it.id; $('iName').value = it.name; $('iSpec').value = it.spec||'';
   $('iBuy').value = it.buyPrice||0; $('iSell').value = it.sellPrice||0;
   $('iInitQty').value = it.initQty||0; $('iSafeQty').value = it.safeQty||5; $('iCat').value = it.cat||'';
+  if($('iSpecNote')) $('iSpecNote').value = it.specNote || '';
+  if($('iPhotoData')) $('iPhotoData').value = it.photo || '';
+  if($('iPhotoPreview')){
+    $('iPhotoPreview').innerHTML = it.photo
+      ? `<img src="${it.photo}" style="height:28px;border-radius:3px;border:1px solid #0984e3"><button type="button" class="btn-r" style="padding:1px 4px;font-size:10px" onclick="clearPhotoInput('iPhotoIn','iPhotoData','iPhotoPreview')">✕</button>`
+      : '';
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function saveExpense(){
@@ -4463,18 +4912,22 @@ function getClientStats(){
   const map = {};
   (db.clients||[]).forEach(c => {
     if(!c || !c.name) return;
-    map[normSearch(c.name)] = { c, sale:0, paid:0, pur:0, purPaid:0, ar:Number(c.initAr)||0, ap:Number(c.initAp)||0, lastDate:'', oldestUnpaidDate:'', overdueDays:0 };
+    map[normSearch(c.name)] = { c, sale:0, paid:0, pur:0, purPaid:0, ar:Number(c.initAr)||0, ap:Number(c.initAp)||0, lastDate:'', oldestUnpaidDate:'', overdueDays:0, saleCnt:0, daysSinceLast:0, isDormant:false, lastItemName:'' };
   });
   (db.sales||[]).forEach(s => {
     const k = normSearch(s.client);
-    if(!map[k]) map[k] = { c:{id:Date.now(),name:s.client,type:'매출처'}, sale:0, paid:0, pur:0, purPaid:0, ar:0, ap:0, lastDate:'', oldestUnpaidDate:'', overdueDays:0 };
+    if(!map[k]) map[k] = { c:{id:Date.now(),name:s.client,type:'매출처'}, sale:0, paid:0, pur:0, purPaid:0, ar:0, ap:0, lastDate:'', oldestUnpaidDate:'', overdueDays:0, saleCnt:0, daysSinceLast:0, isDormant:false, lastItemName:'' };
     const tot = (Number(s.supply)||0) + (Number(s.vat)||0);
     const pd = Number(s.paid)||0;
     const rem = tot - pd;
     map[k].sale += tot;
     map[k].paid += pd;
     map[k].ar += rem;
-    if(s.date && s.date > map[k].lastDate) map[k].lastDate = s.date;
+    map[k].saleCnt++;
+    if(s.date && s.date >= map[k].lastDate){
+      map[k].lastDate = s.date;
+      if(s.lines && s.lines[0] && s.lines[0].item) map[k].lastItemName = s.lines[0].item;
+    }
     if(rem > 0 && s.date){
       if(!map[k].oldestUnpaidDate || s.date < map[k].oldestUnpaidDate){
         map[k].oldestUnpaidDate = s.date;
@@ -4483,7 +4936,7 @@ function getClientStats(){
   });
   (db.purchases||[]).forEach(p => {
     const k = normSearch(p.client);
-    if(!map[k]) map[k] = { c:{id:Date.now(),name:p.client,type:'매입처'}, sale:0, paid:0, pur:0, purPaid:0, ar:0, ap:0, lastDate:'', oldestUnpaidDate:'', overdueDays:0 };
+    if(!map[k]) map[k] = { c:{id:Date.now(),name:p.client,type:'매입처'}, sale:0, paid:0, pur:0, purPaid:0, ar:0, ap:0, lastDate:'', oldestUnpaidDate:'', overdueDays:0, saleCnt:0, daysSinceLast:0, isDormant:false, lastItemName:'' };
     const tot = (Number(p.totalCost)||0) + (Number(p.vat)||0);
     const pd = Number(p.paid)||0;
     map[k].pur += tot;
@@ -4499,6 +4952,8 @@ function getClientStats(){
     } else {
       st.overdueDays = 0;
     }
+    st.daysSinceLast = st.lastDate ? calcDaysBetween(st.lastDate) : 999;
+    st.isDormant = (st.saleCnt >= 2 || st.sale >= 1500000) && st.daysSinceLast >= 90 && st.daysSinceLast < 999;
   });
 
   cachedCliStats = map;
@@ -4508,14 +4963,21 @@ function getClientStats(){
 function getItemStats(){
   if(cachedItmStats) return cachedItmStats;
   const map = {};
+  const hasRegisteredItems = (db.items && db.items.length > 0);
   (db.items||[]).forEach(it => {
     if(!it || !it.name) return;
     map[normSearch(it.name)] = { it, inQty:0, outQty:0, curQty:Number(it.initQty)||0, lastDate:'' };
   });
   (db.purchases||[]).forEach(p => {
     (p.lines||[]).forEach(l => {
-      const k = normSearch(l.item);
-      if(!map[k]) map[k] = { it:{id:Date.now(),name:l.item,spec:l.spec||'',buyPrice:l.uCost||l.unitCost||0,sellPrice:0,initQty:0,safeQty:5}, inQty:0, outQty:0, curQty:0, lastDate:'' };
+      const codeOrName = extractPureProductCode(l.item, l.spec) || l.item;
+      const k = normSearch(codeOrName);
+      if(!map[k]){
+        if(hasRegisteredItems) return; // 등록된 품목장이 있을 때는 잡품목이 수불부에 섞이지 않도록 차단
+        const pure = extractPureProductCode(l.item, l.spec);
+        if(!pure) return;
+        map[k] = { it:{id:Date.now()+Math.random(),name:pure,spec:pure,buyPrice:l.uCost||l.unitCost||0,sellPrice:0,initQty:10,safeQty:3}, inQty:0, outQty:0, curQty:10, lastDate:'' };
+      }
       map[k].inQty += (Number(l.qty)||0);
       map[k].curQty += (Number(l.qty)||0);
       if(p.date && p.date > map[k].lastDate) map[k].lastDate = p.date;
@@ -4523,8 +4985,14 @@ function getItemStats(){
   });
   (db.sales||[]).forEach(s => {
     (s.lines||[]).forEach(l => {
-      const k = normSearch(l.item);
-      if(!map[k]) map[k] = { it:{id:Date.now(),name:l.item,spec:l.spec||'',buyPrice:0,sellPrice:l.price||0,initQty:0,safeQty:5}, inQty:0, outQty:0, curQty:0, lastDate:'' };
+      const codeOrName = extractPureProductCode(l.item, l.spec) || l.item;
+      const k = normSearch(codeOrName);
+      if(!map[k]){
+        if(hasRegisteredItems) return; // 등록된 품목장이 있을 때는 잡품목이 수불부에 섞이지 않도록 차단
+        const pure = extractPureProductCode(l.item, l.spec);
+        if(!pure) return;
+        map[k] = { it:{id:Date.now()+Math.random(),name:pure,spec:pure,buyPrice:0,sellPrice:l.price||0,initQty:10,safeQty:3}, inQty:0, outQty:0, curQty:10, lastDate:'' };
+      }
       map[k].outQty += (Number(l.qty)||0);
       map[k].curQty -= (Number(l.qty)||0);
       if(s.date && s.date > map[k].lastDate) map[k].lastDate = s.date;
@@ -4532,7 +5000,7 @@ function getItemStats(){
   });
   Object.values(map).forEach(st => {
     st.val = Math.max(0, st.curQty) * (Number(st.it.buyPrice)||0);
-    st.low = st.curQty <= (Number(st.it.safeQty)||5);
+    st.low = st.curQty <= (Number(st.it.safeQty)||3);
   });
   cachedItmStats = map;
   return map;
@@ -4657,6 +5125,7 @@ function renderSales(sDate, eDate){
     const asSt = s.asStatus || '';
     const asBadge = asSt ? `<span class="bg ${asSt==='AS완료'?'bg-g':(asSt==='AS진행중'?'bg-y':'bg-p')}" style="cursor:pointer;margin-left:4px" onclick="cycleAsStatus(${s.id})" title="클릭 시 A/S 진행상태 변경">🛠️${esc(asSt)}</span>` : '';
     const snBadge = s.serialNo ? `<span class="bg bg-b" style="margin-left:4px" title="시리얼번호">🔢${esc(s.serialNo)}</span>` : '';
+    const phBadge = s.photo ? `<span class="bg bg-g" style="margin-left:4px" title="실물/수리 증빙사진 첨부됨">📸사진</span>` : '';
     const ovDays = rem > 0 ? calcDaysBetween(s.date) : 0;
     const dispCli = (s.client === '1회성(기타)거래처' && s.otInfo && s.otInfo.name) ? `⚡${s.otInfo.name}` : s.client;
 
@@ -4664,7 +5133,7 @@ function renderSales(sDate, eDate){
       <td class="c"><input type="checkbox" class="sChk" value="${s.id}"></td>
       <td class="c">${esc(s.date)}</td>
       <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(s.client)}')">${esc(dispCli)}</td>
-      <td>${itemTitle}${asBadge}${snBadge} ${s.memo?`<div style="font-size:10.5px;color:#666">${esc(s.memo)}</div>`:''}</td>
+      <td>${itemTitle}${asBadge}${snBadge}${phBadge} ${s.memo?`<div style="font-size:10.5px;color:#666">${esc(s.memo)}</div>`:''}</td>
       <td class="r">${fmt(s.supply)}</td>
       <td class="r">${fmt(s.vat)}</td>
       <td class="r b">${fmt(tot)}</td>
@@ -4783,9 +5252,11 @@ function renderPurchases(sDate, eDate){
 function renderClients(){
   const kw = ($('fCliKw').value||'').trim();
   const unpaidOnly = $('fCliUnpaidOnly') && $('fCliUnpaidOnly').checked;
+  const dormantOnly = $('fCliDormantOnly') && $('fCliDormantOnly').checked;
   const cStats = getClientStats();
   const rows = Object.values(cStats).filter(st => {
     if(unpaidOnly && st.ar <= 0 && st.ap <= 0) return false;
+    if(dormantOnly && !st.isDormant) return false;
     return matchKw(st.c.name, kw) || matchKw(st.c.bizNo, kw) || matchKw(st.c.ceo, kw);
   });
 
@@ -4808,10 +5279,11 @@ function renderClients(){
 
   $('cliTb').innerHTML = rows.slice(0, 400).map(st => {
     const c = st.c;
+    const dmBadge = st.isDormant ? ` <span class="bg bg-y" title="최근 ${st.daysSinceLast}일 동안 주문 없음 (${st.saleCnt}회 단골)">💤휴면(${st.daysSinceLast}일)</span>` : '';
     return `<tr>
       <td class="c"><input type="checkbox" class="cChk" value="${c.id}"></td>
       <td class="c">${esc(st.lastDate||'-')}</td>
-      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(c.name)}')">${esc(c.name)}</td>
+      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(c.name)}')">${esc(c.name)}${dmBadge}</td>
       <td class="c"><span class="bg ${c.type==='매출처'?'bg-b':(c.type==='매입처'?'bg-p':'bg-g')}">${esc(c.type||'매출처')}</span></td>
       <td class="c">${esc(c.bizNo||'')}</td>
       <td class="c">${esc(c.ceo||'')}</td>
@@ -4822,16 +5294,17 @@ function renderClients(){
       <td class="r b ${st.ap>0?'t-pur':''}">${fmt(st.ap)}</td>
       <td class="c">
         <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openLedger('${esc(c.name)}')">📊원장</button>
+        <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#27ae60" onclick="openCatalogDoc('${esc(c.name)}')" title="이 거래처 맞춤 단가표 발행">📋단가표</button>
         <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editClient(${c.id})">✏️</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="12" class="c" style="padding:18px;color:#888">등록된 거래처가 없습니다.</td></tr>';
+  }).join('') || '<tr><td colspan="12" class="c" style="padding:18px;color:#888">조회된 거래처가 없습니다.</td></tr>';
 }
 
 function renderItems(){
   const kw = ($('fItmKw').value||'').trim();
   const iStats = getItemStats();
-  const rows = Object.values(iStats).filter(st => matchKw(st.it.name, kw) || matchKw(st.it.spec, kw));
+  const rows = Object.values(iStats).filter(st => matchKw(st.it.name, kw) || matchKw(st.it.spec, kw) || matchKw(st.it.specNote||'', kw));
 
   const sState = sortState.itm;
   rows.sort((a, b) => {
@@ -4853,10 +5326,13 @@ function renderItems(){
 
   $('itmTb').innerHTML = rows.slice(0, 400).map(st => {
     const it = st.it;
+    const spObj = window.getModelSpec ? window.getModelSpec(it.name) : null;
+    const noteText = it.specNote || (spObj ? `견인:${spObj.pull} / 로프:${spObj.rope} / 호환:${spObj.compat}` : '');
+    const phThumb = it.photo ? `<img src="${it.photo}" style="height:22px;width:22px;object-fit:cover;border-radius:3px;vertical-align:middle;margin-right:4px;border:1px solid #cbd5e1">` : '';
     return `<tr>
       <td class="c"><input type="checkbox" class="iChk" value="${it.id}"></td>
       <td class="c">${esc(st.lastDate||'-')}</td>
-      <td class="b">${esc(it.name)}</td>
+      <td class="b">${phThumb}${esc(it.name)} ${noteText?`<div style="font-size:10px;color:#0984e3;font-weight:normal">📖 ${esc(noteText)}</div>`:''}</td>
       <td class="c">${esc(it.spec||'')}</td>
       <td class="r sec-prof">${fmt(it.buyPrice)}</td>
       <td class="r t-blu b">${fmt(it.sellPrice)}</td>
@@ -4921,8 +5397,31 @@ function renderVatAndExp(sDate, eDate){
   `).join('') || '<tr><td colspan="8" class="c" style="padding:14px;color:#888">해당 기간 지출 경비 내역이 없습니다.</td></tr>';
 }
 
-// ==================== A4 DOCUMENT & FEATURE #7 A/S REPAIR RECEIPT BUILDER ====================
-function buildDocHtml(title, slip, isEst){
+// ==================== A4 DOCUMENT & FEATURE #6, #7, #8, #3 BUILDER ====================
+function buildPhotoBoxHtml(slip){
+  const showPhoto = !$('chkPrintPhoto') || $('chkPrintPhoto').checked;
+  if(!showPhoto || !slip) return '';
+  const photos = [];
+  if(slip.photo) photos.push({ label: slip.asStatus ? 'A/S 수리/출고 실물 증빙 사진' : '출고 제품 실물 사진', src: slip.photo });
+  (slip.lines||[]).forEach(l => {
+    const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(l.item));
+    if(itm && itm.photo && !photos.some(p => p.src === itm.photo)){
+      photos.push({ label: `${itm.name} 제품 사진`, src: itm.photo });
+    }
+  });
+  if(!photos.length) return '';
+  return `<div style="margin-top:8px;border:1px solid #142d4c;padding:8px;background:#fff">
+    <div style="font-size:11.5px;font-weight:bold;color:#142d4c;margin-bottom:6px">📸 첨부 제품 실물 / A/S 수리 증빙 사진</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      ${photos.slice(0, 4).map(p => `<div style="text-align:center;border:1px solid #cbd5e1;padding:4px;border-radius:4px">
+        <img src="${p.src}" style="height:105px;max-width:160px;object-fit:contain;display:block;margin:0 auto">
+        <div style="font-size:10.5px;color:#333;margin-top:3px;font-weight:bold">${esc(p.label)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildDocHtml(title, slip, isEst, docSubMode){
   const comp = db.comp || {};
   const isOt = slip.client === '1회성(기타)거래처' || Boolean(slip.otInfo);
   const cli = isOt
@@ -4930,8 +5429,11 @@ function buildDocHtml(title, slip, isEst){
     : ((db.clients||[]).find(c => normSearch(c.name) === normSearch(slip.client)) || { name: slip.client });
   const cStats = getClientStats()[normSearch(slip.client)] || { ar: 0 };
   const tot = (Number(slip.supply)||0) + (Number(slip.vat)||0);
+  const korWon = window.numToKoreanWon ? window.numToKoreanWon(tot) : fmt(tot);
   const lines = slip.lines || [];
-  const padRows = Math.max(0, 12 - lines.length);
+  const hasPhoto = Boolean(buildPhotoBoxHtml(slip));
+  const maxDefaultRows = hasPhoto ? 7 : 11;
+  const padRows = Math.max(0, maxDefaultRows - lines.length);
 
   let rowsHtml = lines.map((l, i) => {
     const sp = Number(l.sup)||Number(l.supply)||Math.round((Number(l.qty)||1)*(Number(l.price)||0));
@@ -4951,17 +5453,42 @@ function buildDocHtml(title, slip, isEst){
     rowsHtml += `<tr><td class="c" style="color:#ccc">${lines.length+i+1}</td><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>`;
   }
 
+  // ★ 추천 7번: 관공서·산림조합 납품용 서류 세트별 하단 공식 확인 문구
+  let govFooterHtml = '';
+  if(docSubMode === 'deliv'){
+    govFooterHtml = `<div style="margin-top:8px;border:2px solid #142d4c;padding:10px;background:#fffdf5;font-size:12.5px;line-height:1.7">
+      <b>🏛️ [관공서·산림조합 납품 확인서]</b> 위 품목 및 수량을 정히 납품(인수)하였음을 확인합니다.<br>
+      <div style="display:flex;justify-content:space-around;margin-top:8px;padding-top:6px;border-top:1px dashed #999;font-weight:bold">
+        <span>납품일자: ${esc(slip.date)}</span>
+        <span>인수자(검수관) 소속/성명: ______________________ (서명 또는 인)</span>
+      </div>
+    </div>`;
+  } else if(docSubMode === 'claim'){
+    govFooterHtml = `<div style="margin-top:8px;border:2px solid #142d4c;padding:10px;background:#eef6ff;font-size:12.5px;line-height:1.7">
+      <b>🏛️ [물품 대금 청구서]</b> 위와 같이 납품 완료된 물품 대금 <b>일금 ${korWon}원 정 (₩${fmt(tot)})</b>을 정히 청구하오니 아래 계좌로 입금하여 주시기 바랍니다.<br>
+      <b>• 지정 입금계좌:</b> <span style="color:#d63031;font-weight:900;font-size:13.5px">${esc(comp.bank)} (예금주: ${esc(comp.ceo)})</span>
+    </div>`;
+  } else if(docSubMode === 'comp'){
+    govFooterHtml = `<div style="margin-top:8px;border:2px solid #142d4c;padding:10px;background:#f0fdf4;font-size:12.5px;line-height:1.7">
+      <b>🏛️ [납품 완료 보고서]</b> 계약(발주)에 의거하여 위 기계·장비(부품)의 납품 및 시운전 점검을 이상 없이 완료하였기에 이에 보고합니다.<br>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-weight:bold">
+        <span>완료일자: ${esc(slip.date)}</span>
+        <span>시공/납품업체: ${esc(comp.name)} 대표 ${esc(comp.ceo)} (인)</span>
+      </div>
+    </div>`;
+  }
+
   return `
     <div class="a4-page">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
           <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
-          <div style="font-size:24px;font-weight:900;letter-spacing:8px;color:#142d4c">${title}</div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:6px;color:#142d4c">${title}</div>
           <div style="font-size:12px;text-align:right"><b>일자:</b> ${esc(slip.date)}<br><b>문서번호:</b> #${String(slip.id).slice(-6)}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
           <table>
-            <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 받 는 자 (고객사)</th></tr>
+            <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 받 는 자 (고객사/기관)</th></tr>
             <tr><th>상 호 명</th><td colspan="3" class="b" style="font-size:13.5px">${esc(cli.name)} 귀하</td></tr>
             <tr><th>사업자번호</th><td>${esc(cli.bizNo||'-')}</td><th>대 표 자</th><td>${esc(cli.ceo||'-')}</td></tr>
             <tr><th>연 락 처</th><td>${esc(cli.tel||'-')}</td><th>이 메 일</th><td>${esc(cli.email||'-')}</td></tr>
@@ -4975,8 +5502,8 @@ function buildDocHtml(title, slip, isEst){
             <tr><th>사업장주소</th><td colspan="3">${esc(comp.addr)}</td></tr>
           </table>
         </div>
-        <div style="background:#f1f5f9;border:2px solid #142d4c;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
-          <span><b>합계금액 (부가세 포함):</b> 일금 <b>${fmt(tot)}</b> 원정 (₩${fmt(tot)})</span>
+        <div style="background:#f1f5f9;border:2px solid #142d4c;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:13.5px">
+          <span><b>합계금액 (부가세 포함):</b> 일금 <b style="color:#142d4c;font-size:15px">${korWon}</b>원 정 (₩${fmt(tot)})</span>
           <span>공급가액: ${fmt(slip.supply)}원 / 세액: ${fmt(slip.vat)}원</span>
         </div>
       </div>
@@ -4995,6 +5522,8 @@ function buildDocHtml(title, slip, isEst){
           </tr>
         </tfoot>
       </table>
+      ${buildPhotoBoxHtml(slip)}
+      ${govFooterHtml}
       <div style="margin-top:8px;display:flex;justify-content:space-between;font-size:12px;border:1px solid #142d4c;padding:8px;background:#f8fafc">
         <div>
           <b>🏦 입금계좌 안내:</b> ${esc(comp.bank)} (예금주: ${esc(comp.ceo)})<br>
@@ -5014,8 +5543,10 @@ function buildAsDocHtml(slip){
     ? (slip.otInfo || { name: '고객' })
     : ((db.clients||[]).find(c => normSearch(c.name) === normSearch(slip.client)) || { name: slip.client });
   const tot = (Number(slip.supply)||0) + (Number(slip.vat)||0);
+  const korWon = window.numToKoreanWon ? window.numToKoreanWon(tot) : fmt(tot);
   const lines = slip.lines || [];
-  const padRows = Math.max(0, 10 - lines.length);
+  const hasPhoto = Boolean(buildPhotoBoxHtml(slip));
+  const padRows = Math.max(0, (hasPhoto ? 6 : 10) - lines.length);
 
   let rowsHtml = lines.map((l, i) => {
     const sp = Number(l.sup)||Number(l.supply)||Math.round((Number(l.qty)||1)*(Number(l.price)||0));
@@ -5055,6 +5586,10 @@ function buildAsDocHtml(slip){
             <tr><th>서비스센터</th><td colspan="3">${esc(comp.addr)}</td></tr>
           </table>
         </div>
+        <div style="background:#f1f5f9;border:2px solid #142d4c;padding:7px 12px;margin-bottom:8px;display:flex;justify-content:space-between;font-size:13.5px">
+          <span><b>청구 합계금액 (부가세 포함):</b> 일금 <b style="color:#d63031">${korWon}</b>원 정 (₩${fmt(tot)})</span>
+          <span>공급가: ${fmt(slip.supply)}원 / 부가세: ${fmt(slip.vat)}원</span>
+        </div>
         <div style="background:#fffdf5;border:1px solid #f39c12;padding:8px 12px;margin-bottom:8px;font-size:12.5px;line-height:1.6">
           <b>🔍 입고 증상 및 수리/점검 소견:</b> ${esc(slip.memo || '장비 정기점검 및 소모성 부품 교체 수리 완료 (정상 작동 테스트 필)')}
         </div>
@@ -5073,6 +5608,7 @@ function buildAsDocHtml(slip){
           </tr>
         </tfoot>
       </table>
+      ${buildPhotoBoxHtml(slip)}
       <div style="margin-top:8px;padding:10px;background:#f8fafc;border:1px solid #142d4c;font-size:12px;line-height:1.6">
         <b>🏦 수리비 입금계좌:</b> <b style="color:#142d4c;font-size:13px">${esc(comp.bank)} (예금주: ${esc(comp.ceo)})</b><br>
         • 수리 완료된 부위는 출고일로부터 3개월간 무상 A/S를 보증합니다. (단, 사용자 과실 및 소모품 마모 제외)
@@ -5086,37 +5622,146 @@ function openInvoice(id){
   if(!s) return;
   const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(s.client));
   const isDefaultAs = Boolean(s.asStatus || (s.memo && s.memo.includes('수리')));
-  currentDocMeta = { type:'inv', client: s.otInfo ? s.otInfo.name : s.client, email: cli ? (cli.email||'') : '', docName: isDefaultAs ? 'AS수리내역서' : '거래명세서', areaId:'invArea', saleId: s.id, isAsDoc: isDefaultAs };
+  currentDocMeta = { type:'inv', docMode: isDefaultAs ? 'as' : 'inv', client: s.otInfo ? s.otInfo.name : s.client, email: cli ? (cli.email||'') : '', docName: isDefaultAs ? 'AS수리내역서' : '거래명세서', areaId:'invArea', saleId: s.id, estId: 0, isAsDoc: isDefaultAs };
 
-  if($('toggleAsDocBtn')){
-    $('toggleAsDocBtn').style.display = 'inline-block';
-    $('toggleAsDocBtn').innerText = isDefaultAs ? '📄 일반 거래명세서 양식으로 전환' : '🛠️ A/S 수리내역서 양식으로 전환';
-  }
-  $('invModalTitle').innerText = isDefaultAs ? '🛠️ A/S 수리내역서 및 청구서 미리보기' : '🖨️ 거래명세서 미리보기 및 발행';
-  $('invArea').innerHTML = isDefaultAs ? buildAsDocHtml(s) : buildDocHtml('거 래 명 세 서', s, false);
+  if($('docSwitchBar')) $('docSwitchBar').style.display = 'flex';
+  switchDocTemplate(isDefaultAs ? 'as' : 'inv');
   $('invModal').style.display = 'flex';
 }
 
-window.toggleInvoiceAsMode = function(){
+// ★ 추천 7번: 관공서·산림조합 납품용 서류 세트 (거래명세서 / 납품확인서 / 대금청구서 / 완료보고서 / A/S수리내역서) 1클릭 변환
+window.switchDocTemplate = function(mode){
+  currentDocMeta.docMode = mode;
+  if(currentDocMeta.type === 'est'){
+    const e = (db.estimates||[]).find(x => Number(x.id) === Number(currentDocMeta.estId));
+    if(!e) return;
+    $('invModalTitle').innerText = '🖨️ 견적서 미리보기 및 발행';
+    $('invArea').innerHTML = buildDocHtml('견 적 서 (ESTIMATE)', e, true, 'est');
+    return;
+  }
   const s = (db.sales||[]).find(x => Number(x.id) === Number(currentDocMeta.saleId));
   if(!s) return;
-  currentDocMeta.isAsDoc = !currentDocMeta.isAsDoc;
-  currentDocMeta.docName = currentDocMeta.isAsDoc ? 'AS수리내역서' : '거래명세서';
-  $('toggleAsDocBtn').innerText = currentDocMeta.isAsDoc ? '📄 일반 거래명세서 양식으로 전환' : '🛠️ A/S 수리내역서 양식으로 전환';
-  $('invModalTitle').innerText = currentDocMeta.isAsDoc ? '🛠️ A/S 수리내역서 및 청구서 미리보기' : '🖨️ 거래명세서 미리보기 및 발행';
-  $('invArea').innerHTML = currentDocMeta.isAsDoc ? buildAsDocHtml(s) : buildDocHtml('거 래 명 세 서', s, false);
+  const mapDoc = {
+    inv:   { title: '거 래 명 세 서', name: '거래명세서', modal: '🖨️ 거래명세서 미리보기 및 발행' },
+    deliv: { title: '납 품 확 인 서', name: '납품확인서', modal: '🏛️ 관공서·산림조합 [납품확인서] 발행' },
+    claim: { title: '대 금 청 구 서', name: '대금청구서', modal: '🏛️ 관공서·산림조합 [대금청구서] 발행' },
+    comp:  { title: '납 품 완 료 보 고 서', name: '납품완료보고서', modal: '🏛️ 관공서·산림조합 [납품완료보고서] 발행' },
+    as:    { title: '🛠️ A/S 수리내역서 및 청구서', name: 'AS수리내역서', modal: '🛠️ A/S 수리내역서 및 청구서 발행' }
+  }[mode] || { title: '거 래 명 세 서', name: '거래명세서', modal: '🖨️ 거래명세서 미리보기 및 발행' };
+
+  currentDocMeta.docName = mapDoc.name;
+  currentDocMeta.isAsDoc = (mode === 'as');
+  $('invModalTitle').innerText = mapDoc.modal;
+  $('invArea').innerHTML = (mode === 'as') ? buildAsDocHtml(s) : buildDocHtml(mapDoc.title, s, false, mode);
+};
+
+window.refreshCurrentDocView = function(){
+  if(currentDocMeta.type === 'cat'){
+    openCatalogDoc(currentDocMeta.client, true);
+  } else {
+    switchDocTemplate(currentDocMeta.docMode || 'inv');
+  }
 };
 
 function openEstInvoice(id){
   const e = (db.estimates||[]).find(x => Number(x.id) === Number(id));
   if(!e) return;
   const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(e.client));
-  currentDocMeta = { type:'est', client: e.otInfo ? e.otInfo.name : e.client, email: cli ? (cli.email||'') : '', docName:'견적서', areaId:'invArea', saleId:0, isAsDoc:false };
-  if($('toggleAsDocBtn')) $('toggleAsDocBtn').style.display = 'none';
+  currentDocMeta = { type:'est', docMode:'est', client: e.otInfo ? e.otInfo.name : e.client, email: cli ? (cli.email||'') : '', docName:'견적서', areaId:'invArea', saleId:0, estId:e.id, isAsDoc:false };
+  if($('docSwitchBar')) $('docSwitchBar').style.display = 'none';
   $('invModalTitle').innerText = '🖨️ 견적서 미리보기 및 발행';
-  $('invArea').innerHTML = buildDocHtml('견 적 서 (ESTIMATE)', e, true);
+  $('invArea').innerHTML = buildDocHtml('견 적 서 (ESTIMATE)', e, true, 'est');
   $('invModal').style.display = 'flex';
 }
+
+// ★ 추천 8번: 거래처별 맞춤 단가표 / 제품 카탈로그 1클릭 발행
+window.openCatalogDoc = function(defaultCli, skipPrompt){
+  let cliName = defaultCli || '';
+  if(!skipPrompt){
+    const ans = prompt('📊 [맞춤 단가표 / 제품 카탈로그 발행]\n단가표를 받으실 거래처 상호명을 입력하세요 (공란 엔터 시 표준 단가표 발행):', defaultCli || ($('cName')&&$('cName').value) || '');
+    if(ans === null) return;
+    cliName = ans.trim();
+  }
+  const comp = db.comp || {};
+  const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(cliName)) || { name: cliName || '귀사 (전국 대리점·산림조합)' };
+  const tierDisc = Number(cli.tier)||0;
+  const cKey = normSearch(cliName);
+  const showPhoto = !$('chkPrintPhoto') || $('chkPrintPhoto').checked;
+
+  currentDocMeta = { type:'cat', docMode:'cat', client: cli.name, email: cli.email||'', docName:'제품단가표_카탈로그', areaId:'invArea', saleId:0, estId:0 };
+  if($('docSwitchBar')) $('docSwitchBar').style.display = 'none';
+  $('invModalTitle').innerText = `📊 [${cli.name}] 맞춤 제품 단가표 / 카탈로그 발행`;
+
+  // 순수 제품코드 품목 + 판매가 있는 품목 우선 정렬
+  const itemList = (db.items||[]).filter(it => it && it.name).slice().sort((a,b) => String(a.name).localeCompare(String(b.name)));
+
+  const rowsHtml = itemList.slice(0, 60).map((it, idx) => {
+    const iKey = normSearch(it.name);
+    let recentPrice = 0;
+    if(cliName && db.priceMem && db.priceMem[cKey] && db.priceMem[cKey][iKey] && db.priceMem[cKey][iKey][0]){
+      recentPrice = db.priceMem[cKey][iKey][0].p;
+    }
+    const stdP = Number(it.sellPrice)||0;
+    const supplyP = recentPrice > 0 ? recentPrice : (tierDisc > 0 ? Math.round(stdP * (1 - tierDisc/100)) : stdP);
+    const spObj = window.getModelSpec ? window.getModelSpec(it.name) : null;
+    const specDesc = it.specNote || (spObj ? `견인:${spObj.pull} / 로프:${spObj.rope} / 중량:${spObj.weight}` : (it.cat || '표준장비/부품'));
+    const phHtml = (showPhoto && it.photo) ? `<img src="${it.photo}" style="height:34px;width:44px;object-fit:contain;display:block;margin:0 auto">` : '-';
+
+    return `<tr>
+      <td class="c">${idx+1}</td>
+      ${showPhoto ? `<td class="c">${phHtml}</td>` : ''}
+      <td class="b" style="color:#142d4c">${esc(it.name)}</td>
+      <td class="c">${esc(it.spec||it.name)}</td>
+      <td style="font-size:11px">${esc(specDesc)}</td>
+      <td class="r" style="color:#666">${stdP > 0 ? fmt(stdP)+'원' : '별도문의'}</td>
+      <td class="r b t-blu">${supplyP > 0 ? fmt(supplyP)+'원' : '별도문의'} ${recentPrice>0?'<span style="font-size:9.5px;color:#27ae60">(실거래가)</span>':''}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" class="c" style="padding:20px">등록된 품목이 없습니다.</td></tr>`;
+
+  $('invArea').innerHTML = `
+    <div class="a4-page">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
+          <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
+          <div style="font-size:21px;font-weight:900;letter-spacing:3px;color:#142d4c">표준 제품 단가표 및 카탈로그</div>
+          <div style="font-size:12px;text-align:right"><b>기준일자:</b> ${todayStr()}<br><b>유효기간:</b> 발행일로부터 30일</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <table>
+            <tr><th colspan="2" style="background:#142d4c;color:#fff">수 신 처 (고객사 / 대리점)</th></tr>
+            <tr><th style="width:85px">상 호 명</th><td class="b" style="font-size:14px">${esc(cli.name)} 귀중</td></tr>
+            <tr><th>적용구분</th><td>${cliName ? `<b>맞춤 공급단가 적용</b> ${tierDisc>0?`(할인율 ${tierDisc}%)`:''}` : '오라테크 공식 표준 공급단가 (부가세 별도)'}</td></tr>
+          </table>
+          <table>
+            <tr><th colspan="4" style="background:#142d4c;color:#fff">공 급 자 (${esc(comp.name)})</th></tr>
+            <tr><th>상 호</th><td class="b">${esc(comp.name)}</td><th>대 표 자</th><td><span class="stamp-wrap">${esc(comp.ceo)}<span class="stamp">${esc(comp.name)}<br>대표인</span></span></td></tr>
+            <tr><th>연락처</th><td class="b">${esc(comp.tel)}</td><th>사업자번호</th><td>${esc(comp.bizNo)}</td></tr>
+            <tr><th>주 소</th><td colspan="3">${esc(comp.addr)}</td></tr>
+          </table>
+        </div>
+      </div>
+      <table class="a4-tbl">
+        <thead>
+          <tr>
+            <th style="width:34px">No</th>
+            ${showPhoto ? '<th style="width:52px">사진</th>' : ''}
+            <th style="width:125px">모델코드 (품목명)</th>
+            <th style="width:95px">규격</th>
+            <th>주요 제원 및 특징 / 호환 안내</th>
+            <th style="width:95px">표준단가</th>
+            <th style="width:110px">공급단가(VAT별도)</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div style="margin-top:8px;padding:8px 12px;background:#f8fafc;border:1px solid #142d4c;font-size:11.5px;line-height:1.6">
+        <b>📌 안내사항:</b> 위 단가는 부가세(VAT 10%) 별도 기준이며, 환율 및 원자재 변동에 따라 일부 조정될 수 있습니다.<br>
+        <b>🏦 입금계좌:</b> ${esc(comp.bank)} (예금주: ${esc(comp.ceo)}) | <b>문의전화:</b> ${esc(comp.tel)}
+      </div>
+    </div>
+  `;
+  $('invModal').style.display = 'flex';
+};
 
 function openLedger(cliName){
   const cKey = normSearch(cliName);
@@ -5449,6 +6094,304 @@ function clearAllData(){
   normDB(); saveDB('초기화'); renderAll();
 }
 
+// ==================== FEATURE #2: 모델별 제원·규격·부품 호환 컨닝페이퍼 ====================
+const DEFAULT_MODEL_SPECS = [
+  { code:'PCW-5000', cat:'엔진윈치', pull:'직선 1,000kg (도르래 5,000kg)', rope:'12mm ~ 13mm (권장 12mm 더블브레이드)', weight:'16.0 kg', engine:'혼다 GXH-50 (4행정 가솔린)', compat:'PCA-1260(로프), PCA-1274(활차), PCA-1256(케이스)' },
+  { code:'PCW-5000HS', cat:'엔진윈치(고속)', pull:'직선 700kg (고속형 18m/분)', rope:'12mm ~ 13mm', weight:'16.0 kg', engine:'혼다 GXH-50 (4행정 가솔린)', compat:'PCW-5000 드럼/부품 호환, PCA-1260' },
+  { code:'PCW-4000', cat:'엔진윈치', pull:'직선 1,000kg (자동원심클러치+역회전방지)', rope:'10mm ~ 12mm (권장 10mm)', weight:'12.0 kg', engine:'혼다 GX-50 (360도 전방향 4행정)', compat:'PCA-1205M(10mm로프), PCA-1275(단활차)' },
+  { code:'PCW-3000', cat:'엔진윈치(경량)', pull:'직선 700kg (도르래 3,500kg)', rope:'10mm ~ 12mm (권장 10mm)', weight:'9.5 kg', engine:'혼다 GX-35 (4행정 35cc)', compat:'PCA-1205M(로프), PCA-0104(배낭형케이스)' },
+  { code:'PCW-3000LI', cat:'배터리윈치', pull:'직선 700kg (3단 속도조절 8~11.6m/분)', rope:'10mm ~ 12mm', weight:'9.5 kg (배터리제외)', engine:'80V/82V 리튬이온 브러시리스 모터', compat:'PCA-0200(배터리), PCA-0231(충전기), PCW-3000 악세사리 호환' },
+  { code:'PCH-1000', cat:'다목적윈치(인양/견인)', pull:'견인 775kg / 인양(리프팅) 250kg', rope:'12mm 전용 (자동 그립 브레이크)', weight:'19.0 kg', engine:'혼다 GXH-50 (4행정 50cc)', compat:'PCA-1260, 인양용 타워/마운트 브라켓' },
+  { code:'PCH-2000', cat:'고하중윈치(인양/견인)', pull:'견인 1,050kg / 인양(리프팅) 450kg', rope:'12mm ~ 13mm', weight:'19.6 kg', engine:'혼다 GXH-50 (4행정 50cc)', compat:'PCA-1260, PCA-1274' },
+  { code:'DU-200', cat:'전동윈치(DUKE)', pull:'정격인양 200kg (양정 30m)', rope:'와이어로프 5mm x 30m', weight:'16.0 kg', engine:'단상 220V (유선/무선 겸용)', compat:'DU-200 무선리모컨셋, 5mm 와이어로프' },
+  { code:'DU-250', cat:'전동윈치(DUKE)', pull:'정격인양 250kg (양정 30m)', rope:'와이어로프 5mm x 30m', weight:'17.5 kg', engine:'단상 220V 고출력 모터', compat:'DU-200/250 브라켓, 유무선 컨트롤러' },
+  { code:'DU-300', cat:'전동윈치(DUKE)', pull:'정격인양 300kg (양정 30m)', rope:'와이어로프 6mm x 30m', weight:'22.0 kg', engine:'단상 220V 중량형', compat:'6mm 와이어로프, 상하리미트 스위치' },
+  { code:'DU-500', cat:'전동윈치(DUKE)', pull:'정격인양 500kg', rope:'와이어로프 7mm ~ 8mm', weight:'38.0 kg', engine:'단상 220V / 삼상 380V', compat:'중량물 거치대, 펜던트 스위치' },
+  { code:'KD-100', cat:'소형전동호이스트', pull:'단줄 100kg / 복줄(도르래) 200kg', rope:'와이어로프 3mm x 12m/20m', weight:'11.0 kg', engine:'단상 220V 가정/현장용', compat:'KD 전용 거치대(암대), 상하한 리미트편' },
+  { code:'KDJ-300', cat:'다목적전동윈치', pull:'정격 300kg (고속/안정형)', rope:'와이어로프 6mm x 30m', weight:'32.0 kg', engine:'단상 220V / 삼상 380V', compat:'KDJ 브레이크라이닝, 무선리모컨' },
+  { code:'PCA-1260', cat:'전용로프(부품)', pull:'파단하중 3,300kg', rope:'12mm x 50m / 100m (더블브레이드 폴리에스터)', weight:'5.5 kg (50m기준)', engine:'-', compat:'PCW-5000, PCW-5000HS, PCH-1000, PCH-2000 전용' },
+  { code:'PCA-1205M', cat:'전용로프(부품)', pull:'파단하중 2,200kg', rope:'10mm x 50m / 100m (더블브레이드)', weight:'3.6 kg (50m기준)', engine:'-', compat:'PCW-3000, PCW-3000LI, PCW-4000 전용' },
+  { code:'PCA-1274', cat:'스테인리스활차', pull:'사용하중 2,200kg (견인력 2배 증폭)', rope:'최대 13mm 로프 호환', weight:'1.3 kg', engine:'-', compat:'PCW-5000, PCW-4000 (스윙사이드 오픈형)' },
+  { code:'PCA-1275', cat:'경량단활차', pull:'사용하중 1,400kg (견인력 2배 증폭)', rope:'최대 10mm 로프 호환', weight:'0.6 kg', engine:'-', compat:'PCW-3000, PCW-3000LI 전용 활차' },
+  { code:'PCA-1290', cat:'스키딩콘(견인캡)', pull:'통나무 걸림방지 콘 (직경 50cm 목재용)', rope:'쵸커체인(PCA-1295)과 결합 사용', weight:'5.3 kg', engine:'고충격 폴리머 (영하 40도 내한성)', compat:'전 모델 산림집재 작업 필수품' }
+];
+
+let specTargetPrefix = 's';
+
+window.getModelSpec = function(code){
+  if(!code) return null;
+  const k = normSearch(code);
+  const customList = Array.isArray(db.customSpecs) ? db.customSpecs : [];
+  const all = customList.concat(DEFAULT_MODEL_SPECS);
+  return all.find(x => normSearch(x.code) === k) || all.find(x => k.includes(normSearch(x.code)) || normSearch(x.code).includes(k)) || null;
+};
+
+window.openSpecSheetModal = function(prefix){
+  specTargetPrefix = prefix || 's';
+  renderSpecSheetTable();
+  if($('specSheetModal')) $('specSheetModal').style.display = 'flex';
+  if($('specSearchIn')) $('specSearchIn').focus();
+};
+
+window.toggleSpecAddBox = function(){
+  const b = $('specAddBox');
+  if(b) b.style.display = (b.style.display === 'none' || !b.style.display) ? 'block' : 'none';
+};
+
+window.saveCustomSpec = function(){
+  const gv = id => ($(id) ? ($(id).value||'').trim() : '');
+  const code = gv('spModel').toUpperCase();
+  if(!code){ alert('모델코드를 입력하세요 (예: PCW-5000).'); return; }
+  const wRaw = gv('spWeight');
+  const wParts = wRaw.split('/');
+  const obj = {
+    code,
+    cat: gv('spCat') || '자체등록',
+    pull: gv('spCap') || '-',
+    rope: gv('spRope') || '-',
+    weight: (wParts[0]||'').trim() || '-',
+    engine: (wParts[1]||'').trim() || '-',
+    compat: gv('spParts') || '-'
+  };
+  if(!Array.isArray(db.customSpecs)) db.customSpecs = [];
+  const idx = db.customSpecs.findIndex(x => normSearch(x.code) === normSearch(code));
+  if(idx > -1) db.customSpecs[idx] = obj;
+  else db.customSpecs.unshift(obj);
+
+  // 품목장에도 메모 동기화
+  const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(code));
+  if(itm) itm.specNote = `견인:${obj.pull} / 로프:${obj.rope} / 중량:${obj.weight} / 호환:${obj.compat}`;
+
+  ['spModel','spCat','spCap','spWeight','spRope','spParts'].forEach(id => { if($(id)) $(id).value = ''; });
+  if($('specAddBox')) $('specAddBox').style.display = 'none';
+  saveDB('모델제원등록');
+  renderSpecSheetTable();
+  renderItems();
+};
+
+window.renderSpecSheetTable = function(){
+  const kw = ($('specSearchIn') ? $('specSearchIn').value : '').trim();
+  const customList = Array.isArray(db.customSpecs) ? db.customSpecs : [];
+  const map = {};
+  customList.concat(DEFAULT_MODEL_SPECS).forEach(sp => {
+    const k = normSearch(sp.code);
+    if(!map[k]) map[k] = sp;
+  });
+  // 품목장에 specNote가 있는 품목도 자동 병합 표시
+  (db.items||[]).forEach(it => {
+    if(it && it.name && it.specNote){
+      const k = normSearch(it.name);
+      if(!map[k]){
+        map[k] = { code: it.name, cat: it.cat||'품목장', pull: it.specNote, rope: '-', weight: '-', engine: '-', compat: '-' };
+      }
+    }
+  });
+
+  const rows = Object.values(map).filter(sp => {
+    if(!kw) return true;
+    const allTxt = `${sp.code} ${sp.cat} ${sp.pull} ${sp.rope} ${sp.weight} ${sp.engine} ${sp.compat}`;
+    return matchKw(allTxt, kw);
+  });
+
+  if($('specSheetTb')){
+    $('specSheetTb').innerHTML = rows.map(sp => {
+      const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(sp.code));
+      const priceTxt = (itm && itm.sellPrice > 0) ? `<div style="font-size:10.5px;color:#0984e3">표준가: ${fmt(itm.sellPrice)}원</div>` : '';
+      return `<tr>
+        <td class="b" style="color:#142d4c;font-size:13px">${esc(sp.code)}${priceTxt}</td>
+        <td class="c"><span class="bg bg-b">${esc(sp.cat||'장비')}</span></td>
+        <td class="b t-red">${esc(sp.pull)}</td>
+        <td class="c">${esc(sp.weight)}<div style="font-size:10.5px;color:#666">${esc(sp.engine)}</div></td>
+        <td style="font-size:11.5px;color:#142d4c"><b>로프:</b> ${esc(sp.rope)}<br><b>호환:</b> ${esc(sp.compat)}</td>
+        <td class="c">
+          <button class="btn-p" style="padding:3px 8px;font-size:11px" onclick="applySpecToForm('${esc(sp.code)}')">⚡전표적용</button>
+          <button class="btn-w" style="padding:3px 6px;font-size:11px" onclick="editSpecRow('${esc(sp.code)}')">✏️</button>
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" class="c" style="padding:18px;color:#888">검색된 모델 제원이 없습니다. [➕ 신규 모델제원 추가/수정]으로 등록해보세요!</td></tr>';
+  }
+};
+
+window.editSpecRow = function(code){
+  const sp = window.getModelSpec(code);
+  if(!sp) return;
+  if($('specAddBox')) $('specAddBox').style.display = 'block';
+  const sv = (id, v) => { if($(id)) $(id).value = (v && v !== '-') ? v : ''; };
+  sv('spModel', sp.code); sv('spCat', sp.cat); sv('spCap', sp.pull);
+  sv('spWeight', [sp.weight, sp.engine].filter(x => x && x !== '-').join(' / '));
+  sv('spRope', sp.rope); sv('spParts', sp.compat);
+};
+
+window.applySpecToForm = function(code){
+  closeModal('specSheetModal');
+  const p = specTargetPrefix || 's';
+  if($(p + 'Item')){
+    $(p + 'Item').value = code;
+    const itm = (db.items||[]).find(i => normSearch(i.name) === normSearch(code));
+    if($(p + 'Spec')) $(p + 'Spec').value = itm ? (itm.spec||code) : code;
+    if(p === 's' || p === 'es'){ lookupPrice(p); calcLinePreview(p); }
+    else if(p === 'p') lookupPurPrice();
+    if($(p + 'Qty')) $(p + 'Qty').focus();
+  }
+};
+
+// ==================== FEATURE #3: 사진 초경량 압축 첨부 (Canvas 220px JPEG) ====================
+window.handlePhotoUpload = function(inputEl, hiddenId, previewId){
+  const f = inputEl && inputEl.files && inputEl.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_W = 240, MAX_H = 240;
+      let w = img.width, h = img.height;
+      if(w > h){
+        if(w > MAX_W){ h = Math.round(h * (MAX_W / w)); w = MAX_W; }
+      } else {
+        if(h > MAX_H){ w = Math.round(w * (MAX_H / h)); h = MAX_H; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      if($(hiddenId)) $(hiddenId).value = dataUrl;
+      if($(previewId)){
+        $(previewId).innerHTML = `<img src="${dataUrl}" style="height:28px;border-radius:3px;border:1px solid #0984e3"><button type="button" class="btn-r" style="padding:1px 4px;font-size:10px" onclick="clearPhotoInput('${inputEl.id}','${hiddenId}','${previewId}')">✕</button>`;
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(f);
+};
+
+window.clearPhotoInput = function(fileId, hiddenId, previewId){
+  if($(fileId)) $(fileId).value = '';
+  if($(hiddenId)) $(hiddenId).value = '';
+  if($(previewId)) $(previewId).innerHTML = '';
+};
+
+// ==================== FEATURE #10: 아버님(대표님) 전용 음성인식 검색 & 전표 자동입력 비서 ====================
+function normalizeVoiceModelText(raw){
+  let s = String(raw || '').trim();
+  // 한국어 발음을 영문 제품코드로 자동 치환
+  const mapKor = [
+    [/피\s*씨\s*더\s*블\s*유\s*오\s*천|피씨더블유\s*5000|pcw\s*5000/gi, 'PCW-5000'],
+    [/피\s*씨\s*더\s*블\s*유\s*사\s*천|피씨더블유\s*4000|pcw\s*4000/gi, 'PCW-4000'],
+    [/피\s*씨\s*더\s*블\s*유\s*삼\s*천|피씨더블유\s*3000|pcw\s*3000/gi, 'PCW-3000'],
+    [/피\s*씨\s*에\s*이\s*치\s*천|pch\s*1000/gi, 'PCH-1000'],
+    [/피\s*씨\s*에\s*이\s*치\s*이\s*천|pch\s*2000/gi, 'PCH-2000'],
+    [/디\s*유\s*이\s*백|du\s*200/gi, 'DU-200'],
+    [/디\s*유\s*이\s*백\s*오\s*십|du\s*250/gi, 'DU-250'],
+    [/디\s*유\s*삼\s*백|du\s*300/gi, 'DU-300'],
+    [/디\s*유\s*오\s*백|du\s*500/gi, 'DU-500'],
+    [/케\s*이\s*디\s*백|kd\s*100/gi, 'KD-100'],
+    [/케\s*이\s*디\s*제\s*이\s*삼\s*백|kdj\s*300/gi, 'KDJ-300'],
+    [/피\s*씨\s*에\s*이\s*/gi, 'PCA-']
+  ];
+  mapKor.forEach(([rx, rep]) => { s = s.replace(rx, rep); });
+  return s;
+}
+
+window.startVoiceRecognition = function(targetMode){
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRec){
+    const manual = prompt('🎙️ 현재 브라우저에서 마이크 음성인식이 제한되어 텍스트 입력창으로 대체합니다.\n검색어나 전표 내용(예: 강릉산림조합 PCW-5000 1대 250만원)을 입력하세요:');
+    if(manual) processVoiceCommand(manual, targetMode);
+    return;
+  }
+  const rec = new SpeechRec();
+  rec.lang = 'ko-KR';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+
+  showSyncProgress('🎙️ 음성인식 대기 중...', '마이크에 대고 말씀해주세요!\n\n• 검색 예시: "강릉산림조합" 또는 "PCW-5000"\n• 전표입력 예시: "강릉산림조합 PCW-5000 2대 250만원"', 60);
+
+  rec.onresult = ev => {
+    hideSyncProgress();
+    const transcript = ev.results[0][0].transcript || '';
+    processVoiceCommand(transcript, targetMode);
+  };
+  rec.onerror = err => {
+    hideSyncProgress();
+    alert('🎙️ 음성을 인식하지 못했습니다 (' + (err.error || '마이크 권한 확인') + '). 다시 시도해주세요.');
+  };
+  rec.onend = () => {
+    hideSyncProgress();
+  };
+  try{ rec.start(); }catch(e){ hideSyncProgress(); }
+};
+
+function processVoiceCommand(rawText, targetMode){
+  const clean = normalizeVoiceModelText(rawText);
+  if(!clean) return;
+
+  if(targetMode === 'saleSearch'){
+    goTab('t-sale');
+    $('fSaleKw').value = clean;
+    setPeriod('all');
+    renderSales();
+    return;
+  }
+  if(targetMode === 'cliSearch'){
+    goTab('t-cli');
+    $('fCliKw').value = clean;
+    renderClients();
+    return;
+  }
+  if(targetMode === 'itmSearch'){
+    goTab('t-itm');
+    $('fItmKw').value = clean;
+    renderItems();
+    return;
+  }
+
+  if(targetMode === 'saleForm' || targetMode === 'global'){
+    // 품목코드가 포함되어 있거나 수량/금액 표현이 있으면 전표 자동 입력 지원
+    const pureCode = extractPureProductCode(clean, '');
+    const matchedCli = (db.clients||[]).find(c => c.name && c.name !== '1회성(기타)거래처' && clean.includes(stripCorp(c.name)));
+
+    if(targetMode === 'saleForm' || (pureCode && matchedCli)){
+      goTab('t-sale');
+      if(matchedCli){
+        $('sClient').value = matchedCli.name;
+      } else {
+        const words = clean.split(/\s+/);
+        if(words[0] && words[0] !== pureCode) $('sClient').value = words[0];
+      }
+      if(pureCode){
+        $('sItem').value = pureCode;
+      }
+      // 수량 추출 (예: 2대, 3개, 5롤)
+      const qMatch = clean.match(/(\d+)\s*(?:대|개|롤|세\s*트|ea)/i);
+      if(qMatch) $('sQty').value = Number(qMatch[1]) || 1;
+
+      // 금액 추출 (예: 250만원, 260만, 150000원)
+      const manMatch = clean.match(/(\d+(?:\.\d+)?)\s*만\s*원?/);
+      const wonMatch = clean.match(/(\d{4,})\s*원?/);
+      if(manMatch){
+        $('sPrice').value = Math.round( parseFloat(manMatch[1]) * 10000 );
+      } else if(wonMatch){
+        $('sPrice').value = Number(wonMatch[1]);
+      } else {
+        lookupPrice('s');
+      }
+      calcLinePreview('s');
+      alert(`🎙️ 음성 인식 완료: "${clean}"\n\n• 거래처: ${$('sClient').value||'(미지정)'}\n• 품목: ${$('sItem').value||'(미지정)'}\n• 수량: ${$('sQty').value} / 단가: ${fmt($('sPrice').value)}원\n\n확인 후 [＋ 품목추가] 또는 [💾 매출전표 저장]을 누르세요!`);
+      return;
+    }
+
+    // 일반 글로벌 음성 검색: AI 검색 또는 매출 검색으로 연결
+    goTab('t-sale');
+    $('fSaleKw').value = clean;
+    setPeriod('all');
+    renderSales();
+  }
+}
+
 // ==================== INITIALIZATION ====================
 window.addEventListener('DOMContentLoaded', async () => {
   if(sGet('ora_senior_mode') === '1') toggleSeniorMode(true);
@@ -5469,7 +6412,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   checkInitialLock();
 
   if(scoreDB(db) > 0){
-    idbSave(db);
+    await idbSave(db);
+    try{
+      const p = String((db.comp && db.comp.pass) || '0000').trim();
+      sSet('ora33_full_cache', await gzPack(buildSlimDB(db), p));
+    }catch(e){}
   }
 });
 </script>
