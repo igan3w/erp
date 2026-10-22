@@ -6420,7 +6420,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 </script>
-  <!-- ==================== 🚀 오라테크 v45 확장 플러그인 (#3 윈치·호이스트 사양 역추적 마법사 & #6 영문발주서/재고소진예측) ==================== -->
+<!-- ==================== 🚀 오라테크 v45 확장 플러그인 (#3 윈치·호이스트 사양 역추적 마법사 & #6 영문발주서/재고소진예측) ==================== -->
 
 <!-- 🧙‍♂️ [기능 3번] AI 윈치·호이스트 현장 맞춤 사양 역추적 & 모델 추천 마법사 모달 -->
 <div class="modal-bg" id="winchWizardModal" style="z-index:1280">
@@ -6832,6 +6832,211 @@ function getItemDepletionStats(){
 function enhanceItemsTableWithDepletion(){
   const tb = $('itmTb');
   if(!tb) return;
-  const depMap = getItemDepl
+  const depMap = getItemDepletionStats();
+  tb.querySelectorAll('tr').forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    if(tds.length < 12) return;
+    const nameCell = tds[2];
+    const statusCell = tds[11];
+    if(statusCell.querySelector('.dep-badge')) return;
+    const rawName = (nameCell.childNodes[0] ? nameCell.childNodes[0].textContent : nameCell.innerText).trim();
+    const dep = depMap[normSearch(rawName)];
+    if(dep && dep.daysLeft < 60 && dep.qty180 > 0){
+      const badge = document.createElement('div');
+      badge.className = 'dep-badge';
+      badge.style.cssText = 'font-size:10px;color:#d63031;font-weight:bold;margin-top:2px';
+      badge.innerText = dep.daysLeft === 0 ? '🚨 즉시발주(품절)' : `⏳ 약 ${dep.daysLeft}일 뒤 소진`;
+      badge.title = `최근 6개월 판매: ${dep.qty180}개 (월평균 ${dep.monthlyAvg}개 출고)`;
+      statusCell.appendChild(badge);
+    }
+  });
+}
+
+window.openIntlPoModal = function(){
+  if(!poLines.length) autoFillLowStockToPo(true);
+  renderIntlPoDoc();
+  $('intlPoModal').style.display = 'flex';
+};
+
+window.onPoCurChange = function(){
+  const cur = $('poCur').value;
+  const defRates = { USD:1380, CNY:192, EUR:1490, JPY:9.2 };
+  $('poRate').value = defRates[cur] || 1380;
+  const rate = num($('poRate').value) || 1380;
+  poLines.forEach(l => {
+    if(l.krwBaseCost > 0){
+      l.fob = Math.round((l.krwBaseCost / rate) * 100) / 100;
+    }
+  });
+  renderIntlPoDoc();
+};
+
+window.autoFillLowStockToPo = function(silent){
+  const iStats = getItemStats();
+  const depMap = getItemDepletionStats();
+  const rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+
+  let candidates = Object.values(iStats).filter(st => {
+    const dep = depMap[normSearch(st.it.name)];
+    return st.low || (dep && dep.daysLeft <= 45 && dep.qty180 > 0);
+  });
+  if(!candidates.length){
+    candidates = Object.values(iStats).slice(0, 5);
+  }
+
+  poLines = candidates.slice(0, 12).map(st => {
+    const it = st.it;
+    const sp = window.getModelSpec ? window.getModelSpec(it.name) : null;
+    const krwCost = Number(it.buyPrice) || Math.round((Number(it.sellPrice)||1000000) * 0.65);
+    const fob = Math.max(10, Math.round((krwCost / rate) * 100) / 100);
+    const dep = depMap[normSearch(it.name)] || { monthlyAvg: 5 };
+    const recQty = Math.max(5, Math.ceil((dep.monthlyAvg || 5) * 2));
+    return {
+      model: it.name,
+      desc: sp ? `${sp.cat} (${sp.pull})` : (it.cat || 'Winch & Hoist Equipment'),
+      qty: recQty,
+      fob: fob,
+      krwBaseCost: krwCost
+    };
+  });
+  renderIntlPoDoc();
+  if(!silent) alert(`⚡ 안전재고 부족 및 소진 임박 품목 ${poLines.length}종이 발주서에 자동 입력되었습니다!`);
+};
+
+window.addPoLineItem = function(){
+  const model = ($('poAddModel').value||'').trim().toUpperCase();
+  if(!model){ alert('모델코드를 입력하세요.'); return; }
+  const desc = ($('poAddDesc').value||'').trim() || 'Industrial Winch / Hoist';
+  const qty = Math.max(1, num($('poAddQty').value));
+  const fob = Number($('poAddFob').value) || 100;
+  const rate = num($('poRate').value) || 1380;
+  poLines.push({ model, desc, qty, fob, krwBaseCost: Math.round(fob * rate) });
+  $('poAddModel').value = ''; $('poAddDesc').value = '';
+  renderIntlPoDoc();
+};
+
+window.renderIntlPoDoc = function(){
+  const comp = db.comp || {};
+  const supplier = ($('poSupplier') ? $('poSupplier').value : 'PORTABLE WINCH CO.').trim();
+  const cur = $('poCur') ? $('poCur').value : 'USD';
+  const rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+  const terms = $('poTerms') ? $('poTerms').value : 'FOB';
+  const payTerms = $('poPayTerms') ? $('poPayTerms').value : 'T/T';
+  const sym = { USD:'$', CNY:'¥', EUR:'€', JPY:'¥' }[cur] || '$';
+  const poNo = 'ORA-PO-' + todayStr().replace(/-/g,'');
+
+  let totalForeign = 0, totalQty = 0;
+  const rowsHtml = poLines.map((l, idx) => {
+    const amt = Math.round(l.qty * l.fob * 100) / 100;
+    totalForeign += amt;
+    totalQty += Number(l.qty)||0;
+    return `<tr>
+      <td class="c">${idx+1}</td>
+      <td class="b" style="color:#142d4c">${esc(l.model)}</td>
+      <td>${esc(l.desc)}</td>
+      <td class="r"><input type="number" class="no-print" value="${l.qty}" style="width:55px;text-align:right;margin-right:4px" oninput="poLines[${idx}].qty=num(this.value);renderIntlPoDoc()"><span class="only-print">${fmt(l.qty)}</span> EA</td>
+      <td class="r">${sym} <input type="number" class="no-print" value="${l.fob}" step="any" style="width:75px;text-align:right" oninput="poLines[${idx}].fob=Number(this.value)||0;renderIntlPoDoc()"><span class="only-print">${l.fob.toLocaleString()}</span></td>
+      <td class="r b">${sym} ${amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td class="c no-print"><button class="btn-r" style="padding:1px 5px" onclick="poLines.splice(${idx},1);renderIntlPoDoc()">✕</button></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" class="c" style="padding:20px;color:#888">위 [⚡ 발주필요 품목 자동채우기] 또는 [＋ 품목추가]를 눌러주세요.</td></tr>`;
+
+  const estKrw = Math.round(totalForeign * rate);
+
+  $('poDocArea').innerHTML = `
+    <style>.only-print{display:none}@media print{.only-print{display:inline!important}}</style>
+    <div class="a4-page" style="min-height:245mm">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px double #142d4c;padding-bottom:10px;margin-bottom:12px">
+          <div>
+            <img src="${ORA_LOGO}" alt="ORATECH" style="height:36px;object-fit:contain">
+            <div style="font-size:11px;color:#444;margin-top:2px"><b>ORATECH (오라테크)</b> | Seoul, Republic of Korea</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:24px;font-weight:900;color:#142d4c;letter-spacing:2px">PURCHASE ORDER</div>
+            <div style="font-size:12px"><b>P/O No.:</b> ${poNo} | <b>Date:</b> ${todayStr()}</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;font-size:12px">
+          <div style="border:1px solid #142d4c;padding:10px;background:#f8fafc">
+            <div style="font-weight:900;color:#142d4c;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px">TO (SUPPLIER / VENDOR):</div>
+            <div style="font-size:15px;font-weight:900;color:#000">${esc(supplier)}</div>
+            <div style="margin-top:6px"><b>Incoterms:</b> ${esc(terms)}</div>
+            <div><b>Payment Terms:</b> ${esc(payTerms)}</div>
+            <div><b>Currency:</b> ${esc(cur)} (${sym})</div>
+          </div>
+          <div style="border:1px solid #142d4c;padding:10px;background:#fff">
+            <div style="font-weight:900;color:#142d4c;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px">BUYER / CONSIGNEE (IMPORTER):</div>
+            <div style="font-size:14px;font-weight:900">ORATECH (${esc(comp.name)})</div>
+            <div><b>CEO:</b> ${esc(comp.ceo)} | <b>Tel:</b> +82-2-2266-0989</div>
+            <div><b>Email:</b> ${esc(comp.email)}</div>
+            <div><b>Address:</b> 1F, 110 Cheonggyecheon-ro, Jung-gu, Seoul, Korea</div>
+          </div>
+        </div>
+
+        <table class="a4-tbl">
+          <thead>
+            <tr>
+              <th style="width:36px">No.</th>
+              <th style="width:130px">Model / Item Code</th>
+              <th>Description of Goods</th>
+              <th style="width:95px">Q'ty</th>
+              <th style="width:115px">Unit Price (${cur})</th>
+              <th style="width:125px">Amount (${cur})</th>
+              <th class="no-print" style="width:42px">Del</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot>
+            <tr style="background:#f1f5f9;font-weight:900;font-size:13px">
+              <td colspan="3" class="c">TOTAL (${poLines.length} Models)</td>
+              <td class="r">${fmt(totalQty)} EA</td>
+              <td class="r">TOTAL (${cur}):</td>
+              <td class="r t-red">${sym} ${totalForeign.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              <td class="no-print"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div style="margin-top:12px;border-top:2px solid #142d4c;padding-top:10px;display:flex;justify-content:space-between;align-items:flex-end;font-size:12px">
+        <div>
+          <b>Remarks & Shipping Instructions:</b><br>
+          1. Please send Proforma Invoice (P/I) and Packing List upon confirmation.<br>
+          2. Country of Origin marking is required on all cartons.<br>
+          <span class="no-print" style="color:#0984e3;font-weight:bold">※ 원화 환산 예상 물대 (환율 ${fmt(rate)}원 기준): 약 ₩${fmt(estKrw)} 원</span>
+        </div>
+        <div style="text-align:center;min-width:200px">
+          <div style="margin-bottom:25px;font-weight:bold;color:#142d4c">Confirmed & Authorized by:</div>
+          <div style="border-top:1px solid #000;padding-top:4px;font-weight:900">
+            <span class="stamp-wrap">ORATECH / CEO ${esc(comp.ceo)}<span class="stamp">${esc(comp.name)}<br>대표인</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.convertPoToPurchaseSlip = function(){
+  if(!poLines.length){ alert('발주 품목이 없습니다.'); return; }
+  closeModal('intlPoModal');
+  goTab('t-pur');
+  resetPurForm();
+  $('pDate').value = todayStr();
+  $('pClient').value = ($('poSupplier').value||'').trim() || '해외공급처';
+  $('pCur').value = $('poCur').value;
+  $('pRate').value = num($('poRate').value) || 1380;
+  purDraft = poLines.map(l => ({
+    item: l.model,
+    spec: l.model,
+    qty: Number(l.qty)||1,
+    price: Number(l.fob)||0,
+    krwAmt: 0, incAmt: 0, uCost: 0
+  }));
+  recalcPurDraft();
+  alert('🚢 영문 발주서(PO) 내역이 [수입·매입전표] 입력창으로 그대로 복사되었습니다!\n관세·운임 입력 후 저장하시면 입고 처리됩니다.');
+};
+</script>
 </body>
 </html>
