@@ -495,6 +495,212 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   </div>
 </div>
 
+<!-- 🌐 홈페이지 실시간 견적요청 & 구글/텔레그램 연동 모달 -->
+<div class="modal-bg" id="webQuoteConfigModal">
+  <div class="modal" style="width:680px;max-height:88vh">
+    <div class="mh" style="background:linear-gradient(90deg,#001B5E,#0284c7)">
+      <span>🌐 홈페이지 실시간 온라인 견적연동 설정 센터</span>
+      <button class="btn-r" onclick="closeModal('webQuoteConfigModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px;line-height:1.6">
+      <div style="background:#e0f2fe;border:1px solid #7dd3fc;padding:10px 12px;border-radius:6px;margin-bottom:12px;color:#0369a1">
+        <b>💡 오라테크 홈페이지 ➔ ERP 견적서 자동 접수 3중 시스템</b><br>
+        • <b>① 실시간 로컬/미리보기 동기화:</b> 별도 설정 없이도 <b>미리보기 또는 같은 브라우저에서 견적 요청 시 0.01초 만에 ERP로 즉시 전송</b>됩니다.<br>
+        • <b>② 텔레그램 실시간 알람:</b> 고객이 견적을 요청하면 <b>김향래 대표님 텔레그램으로 모델명·수량·연락처가 즉시 도착</b>합니다.<br>
+        • <b>③ Google Apps Script(무료) 완전 자동 중계:</b> 구글 시트에 영구 저장되고, 외부 고객의 견적 요청이 24시간 ERP로 자동 수신됩니다!
+      </div>
+
+      <div class="fg">
+        <div class="c12">
+          <label style="font-weight:900;color:#001B5E">🔗 Google Apps Script 웹앱 URL (배포 URL)</label>
+          <input id="cfgGasQuoteUrl" placeholder="예: https://script.google.com/macros/s/AKfycb.../exec (선택사항 - 미입력 시에도 텔레그램+로컬 실시간 즉시 동작)" style="width:100%;font-weight:bold;color:#0284c7">
+        </div>
+        <div class="c12" style="margin-top:6px">
+          <label style="font-weight:900;color:#001B5E">📱 텔레그램 알림 수신 상태</label>
+          <div id="cfgTgStatusBox" style="background:#f8fafc;border:1px solid #cbd5e1;padding:8px 12px;border-radius:6px;font-size:12px;display:flex;justify-content:space-between;align-items:center">
+            <span id="cfgTgStatusText">확인 중...</span>
+            <button class="btn-s" style="padding:2px 8px;font-size:11px" onclick="closeModal('webQuoteConfigModal');openTgModal()">⚙️ 텔레그램 설정 열기</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;background:#fff8e6;border:1px solid #fcd34d;padding:12px;border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b style="color:#b45309;font-size:13px">📋 Google Apps Script 원클릭 복사 (5분 무료 세팅)</b>
+          <button class="btn-p" style="padding:4px 10px;font-size:11.5px;background:#0284c7;border-color:#0369a1" onclick="copyGasScriptCode()">📋 스크립트 코드 복사</button>
+        </div>
+        <div style="font-size:12px;color:#78350f;line-height:1.7">
+          <b>1단계:</b> <a href="https://drive.google.com" target="_blank" style="color:#0284c7;font-weight:bold;text-decoration:underline">Google 드라이브</a> 접속 ➔ <b>[+ 새로 만들기]</b> ➔ <b>[더보기]</b> ➔ <b>[Google Apps Script]</b> 클릭<br>
+          <b>2단계:</b> 위 <b>[📋 스크립트 코드 복사]</b> 버튼을 누른 뒤, 구글 편집창의 기존 내용을 지우고 붙여넣기(Ctrl+V)<br>
+          <b>3단계:</b> 우측 상단 파란색 <b>[배포]</b> ➔ <b>[새 배포]</b> 클릭 ➔ 유형: <b>[웹 앱]</b> 선택<br>
+          <b>4단계:</b> 액세스 권한: <b>[모든 사용자 (Anyone)]</b> 로 선택 후 <b>[배포]</b> 클릭<br>
+          <b>5단계:</b> 발급된 <b>'웹 앱 URL'</b>을 복사하여 위 URL 칸에 붙여넣고 [저장] 누르면 평생 무료 연동 완료!
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:6px">
+        <button class="btn-g" style="flex:1;padding:9px;font-weight:bold" onclick="testSendWebQuote()">🧪 가상 견적요청 테스트 (ERP + 텔레그램 시험)</button>
+        <button class="btn-p" style="flex:1;padding:9px;font-weight:bold" onclick="saveWebQuoteConfig()">💾 연동 설정 저장</button>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-w" onclick="closeModal('webQuoteConfigModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📷 스마트폰/PC 바코드·QR 창고 실사 & 라벨 인쇄 센터 (#5-A) -->
+<div class="modal-bg" id="barcodeAuditModal" style="z-index:1260">
+  <div class="modal" style="width:840px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#0f172a,#1e40af)">
+      <span>📷 스마트 바코드·QR 창고 실사 & 라벨 출력 센터</span>
+      <button class="btn-r" onclick="closeModal('barcodeAuditModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px">
+      <div style="background:#e0f2fe;border:1px solid #7dd3fc;padding:8px 12px;border-radius:6px;margin-bottom:8px;color:#0369a1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <div>
+          💡 <b>스마트폰 카메라 / 바코드 건 / 키보드 입력 실시간 지원</b><br>
+          제품 박스나 라벨의 바코드·QR을 스캔하면 실사 수량이 자동 누적되며, 장부 재고와의 오차를 즉시 파악해 1클릭 보정합니다.
+        </div>
+        <button class="btn-p" id="btnToggleCamera" style="padding:6px 12px;font-size:12px;background:#0284c7;border-color:#0369a1" onclick="toggleBarcodeCamera()">📷 스마트폰 카메라 스캐너 켜기</button>
+      </div>
+
+      <!-- Camera Preview Box -->
+      <div id="barcodeVideoWrap" style="display:none;background:#000;border-radius:8px;padding:8px;margin-bottom:10px;text-align:center;position:relative">
+        <video id="barcodeVideo" playsinline autoplay muted style="width:100%;max-height:220px;border-radius:6px;object-fit:cover;background:#000"></video>
+        <div style="position:absolute;top:16px;left:16px;background:rgba(0,0,0,0.65);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px">
+          🔴 카메라 실시간 스캔 활성 중 (박스 바코드를 화면 중앙에 비추세요)
+        </div>
+      </div>
+
+      <!-- Barcode Direct Input & Search Bar -->
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input id="barcodeDirectInput" placeholder="바코드 스캔 또는 품목명/코드 입력 후 Enter (예: PCW-5000, 8809...)" style="flex:1;padding:8px 12px;font-size:13.5px;font-weight:bold;border:2px solid #2563eb;border-radius:4px" onkeydown="if(event.key==='Enter') handleBarcodeInput(this.value)">
+        <button class="btn-p" style="padding:8px 14px;font-size:13px" onclick="handleBarcodeInput($('barcodeDirectInput').value)">🔍 스캔/검색</button>
+        <input id="barcodeSearchKw" placeholder="목록 필터 검색..." style="width:160px;padding:8px;font-size:12px" oninput="renderStockAuditTable()">
+      </div>
+
+      <div id="barcodeStatusToast" style="display:none;background:#dcfce7;border:1px solid #86efac;color:#166534;padding:8px 12px;border-radius:6px;margin-bottom:8px;font-size:13px"></div>
+
+      <!-- Summary KPI Counters -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+        <div style="background:#f8fafc;border:1px solid #cbd5e1;padding:8px;border-radius:6px;text-align:center">
+          <div style="font-size:11px;color:#64748b;font-weight:bold">실사 품목수</div>
+          <div style="font-size:18px;font-weight:900;color:#0f172a" id="auditKpiTotal">0종</div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:8px;border-radius:6px;text-align:center">
+          <div style="font-size:11px;color:#166534;font-weight:bold">재고 일치 (오차 0)</div>
+          <div style="font-size:18px;font-weight:900;color:#16a34a" id="auditKpiMatch">0종</div>
+        </div>
+        <div style="background:#fff1f2;border:1px solid #fecdd3;padding:8px;border-radius:6px;text-align:center">
+          <div style="font-size:11px;color:#9f1239;font-weight:bold">재고 불일치 (차이 발생)</div>
+          <div style="font-size:18px;font-weight:900;color:#e11d48" id="auditKpiMismatch">0종</div>
+        </div>
+      </div>
+
+      <!-- Audit Inventory Table -->
+      <div class="tw" style="max-height:360px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px">품목코드</th>
+              <th>품목명 & 규격</th>
+              <th style="width:110px">바코드/QR</th>
+              <th style="width:80px">전산(장부)재고</th>
+              <th style="width:130px">실사(스캔)수량</th>
+              <th style="width:100px">오차(차이)</th>
+              <th style="width:60px">라벨</th>
+            </tr>
+          </thead>
+          <tbody id="barcodeAuditTb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+      <div style="display:flex;gap:6px">
+        <button class="btn-g" style="padding:7px 14px;font-weight:bold" onclick="applyStockAudit()">✅ 실사 수량으로 전산재고 즉시 일괄 반영</button>
+        <button class="btn-s" style="padding:7px 12px" onclick="printAllItemLabels()">🏷️ 품목 바코드·QR 라벨 인쇄</button>
+        <button class="btn-w" style="padding:7px 10px" onclick="resetStockAudit()">🔄 실사 초기화</button>
+      </div>
+      <button class="btn-w" onclick="closeModal('barcodeAuditModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🌀 와이어로프 드럼 원통 잔량 트래커 & 스마트 절단기 (#5-B) -->
+<div class="modal-bg" id="ropeDrumModal" style="z-index:1260">
+  <div class="modal" style="width:900px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#0c4a6e,#0284c7)">
+      <span>🌀 와이어로프 드럼 원통 잔량 트래커 & 스마트 절단 최적화기</span>
+      <button class="btn-r" onclick="closeModal('ropeDrumModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px">
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;padding:8px 12px;border-radius:6px;margin-bottom:8px;color:#0369a1">
+        💡 <b>원통 드럼(200m / 300m / 500m) 로프 잔여 길이 실시간 추적 & 자투리 손실 방지</b><br>
+        현장 출고 시 자른 길이만큼 드럼 잔여 미터수가 즉시 자동 차감되며, <b>주문 길이에 맞춰 버려지는 자투리(Dead Scrap)가 가장 적은 최적 드럼을 AI로 자동 추천</b>합니다.
+      </div>
+
+      <!-- Drum Summary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+        <div style="background:#f8fafc;border:1px solid #cbd5e1;padding:8px;border-radius:6px;text-align:center">
+          <div style="font-size:11px;color:#64748b;font-weight:bold">보유 드럼 수량</div>
+          <div style="font-size:18px;font-weight:900;color:#0f172a" id="ropeKpiTotal">0개 드럼</div>
+        </div>
+        <div style="background:#e0f2fe;border:1px solid #7dd3fc;padding:8px;border-radius:6px;text-align:center">
+          <div style="font-size:11px;color:#0369a1;font-weight:bold">총 보유 로프 길이</div>
+          <div style="font-size:18px;font-weight:900;color:#0284c7" id="ropeKpiMeters">0 m</div>
+        </div>
+        <div style="background:#fff7ed;border:1px solid #fed7aa;padding:8px;border-radius:6px;text-align:center">
+          <div style="font-size:11px;color:#c2410c;font-weight:bold">잔량 부족/교체권장 드럼</div>
+          <div style="font-size:18px;font-weight:900;color:#ea580c" id="ropeKpiLow">0개 드럼</div>
+        </div>
+      </div>
+
+      <!-- Smart Cut Optimizer Section -->
+      <div style="background:#f8fafc;border:1px solid #94a3b8;border-radius:8px;padding:10px 12px;margin-bottom:12px">
+        <div style="font-weight:900;color:#0f172a;font-size:13px;margin-bottom:6px">🧠 스마트 절단 로스(Loss) 최소화 추천기</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <label style="font-weight:bold;color:#475569">고객 주문 절단 길이:</label>
+          <input type="number" id="optRopeReqLen" placeholder="예: 70" value="50" style="width:90px;padding:6px;text-align:right;font-weight:900">
+          <span style="font-weight:bold">미터(m)</span>
+          <button class="btn-p" style="padding:6px 14px;font-size:12.5px;background:#0284c7" onclick="optimizeRopeCut()">🔍 최적 드럼 찾기</button>
+          <span style="font-size:11.5px;color:#64748b;margin-left:6px">(자투리 손실이 가장 적게 남는 원통을 계산하여 추천합니다)</span>
+        </div>
+        <div id="optRopeResultBox"></div>
+      </div>
+
+      <!-- Quick Add New Drum Toggle Form -->
+      <details style="background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:8px 10px;margin-bottom:10px">
+        <summary style="font-weight:bold;cursor:pointer;color:#0f172a">➕ 신규 원통 드럼 입고 등록 (클릭하여 열기)</summary>
+        <div class="fg" style="margin-top:8px">
+          <div class="c4"><label>로프 품목명 *</label><input id="newDrumName" placeholder="예: PCW 10mm 더블브레이드 로프" style="width:100%"></div>
+          <div class="c3"><label>규격 / 사양</label><input id="newDrumSpec" placeholder="예: 10mm x 500m" style="width:100%"></div>
+          <div class="c2"><label>최초 길이(m) *</label><input type="number" id="newDrumInitLen" value="500" style="width:100%;text-align:right"></div>
+          <div class="c3"><label>로트번호 / 제조사</label><input id="newDrumLot" placeholder="예: PW-2026-CA" style="width:100%"></div>
+        </div>
+        <div class="fg" style="margin-top:4px">
+          <div class="c4"><label>보관 위치</label><input id="newDrumLoc" placeholder="예: 창고 A구역 로프드럼대" style="width:100%"></div>
+          <div class="c4"><label>연동 품목코드 (선택)</label><input id="newDrumItemCode" placeholder="예: PCA-1260" style="width:100%"></div>
+          <div class="c4" style="text-align:right;margin-top:14px">
+            <button class="btn-g" style="padding:6px 14px" onclick="saveNewRopeDrum()">💾 신규 드럼 입고 등록</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Drum Cards Container -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-weight:bold;color:#0f172a">📦 원통 드럼 실시간 잔여량 현황</span>
+        <input id="ropeDrumSearchKw" placeholder="드럼코드 / 품목명 / 로트 검색..." style="width:200px;padding:4px 8px;font-size:12px" oninput="renderRopeDrums()">
+      </div>
+
+      <div id="ropeDrumGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));gap:10px;max-height:360px;overflow-y:auto;padding-right:4px"></div>
+    </div>
+    <div class="mf">
+      <button class="btn-w" onclick="closeModal('ropeDrumModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 📖 모델별 제원·규격·부품 호환 컨닝페이퍼 모달 (#2) -->
 <div class="modal-bg" id="specSheetModal">
   <div class="modal" style="width:820px;max-height:88vh">
@@ -555,6 +761,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     <button id="voiceTopBtn" class="btn-r" style="background:#e84393;border:1px solid #fff;font-weight:900" onclick="startVoiceRecognition('global')" title="마이크에 대고 거래처명이나 모델명을 말씀하시면 자동 검색·입력됩니다">🎙️ 음성비서</button>
     <button class="btn-s" style="background:#0984e3;border:1px solid #fff" onclick="openSpecSheetModal()" title="모델별 견인력·중량·와이어·호환부품 컨닝페이퍼">📖 모델제원표</button>
     <button class="btn-pur" style="border:1px solid #fff" onclick="openAiModal()">🤖 AI 주문·비서</button>
+    <button class="btn-p" style="background:#2563eb;border:2px solid #fff;font-weight:900;padding:5px 12px;font-size:12.5px;box-shadow:0 2px 4px rgba(0,0,0,0.2)" onclick="openBarcodeAuditModal()" title="스마트폰 카메라 / 바코드 건으로 창고 재고 실사 & 라벨 출력">📷 바코드 실사</button>
+    <button class="btn-g" style="background:#0284c7;border:2px solid #fff;font-weight:900;padding:5px 12px;font-size:12.5px;box-shadow:0 2px 4px rgba(0,0,0,0.2)" onclick="openRopeDrumModal()" title="200m/300m/500m 원통 드럼 로프 잔여량 실시간 추적 & AI 절단 최적화">🌀 로프드럼 관리</button>
     <button class="btn-g" style="background:#16a085;border:1px solid #fff" onclick="openBankMatchModal()">🏦 입금자동매칭</button>
     <input type="file" id="htxQuickIn" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="importHometaxFiles(this.files);this.value=''">
     <button class="btn-a" onclick="$('htxQuickIn').click()">⚡ 홈택스등록</button>
@@ -579,6 +787,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   <div class="tab" onclick="goTab('t-itm',this)">📦 품목·세트·단가이력</div>
   <div class="tab" onclick="goTab('t-vat',this)">🏛️ 부가세·홈택스·경비</div>
   <div class="tab" onclick="goTab('t-cfg',this)">⚙️ 기초정보·단가청소</div>
+  <div class="tab" style="color:#60a5fa;font-weight:900;border:1px dashed #3b82f6" onclick="openBarcodeAuditModal()" title="클릭 시 바코드 재고 실사창 열기">📷 스마트 바코드 실사</div>
+  <div class="tab" style="color:#38bdf8;font-weight:900;border:1px dashed #0ea5e9" onclick="openRopeDrumModal()" title="클릭 시 와이어로프 드럼 잔량 트래커 열기">🌀 와이어로프 드럼</div>
 </div>
 
 <div class="wrap">
@@ -604,6 +814,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#0984e3" onclick="openSpecSheetModal('s')" title="모델별 제원·규격·호환부품 즉시 확인">📖 모델제원표</button>
             <button class="btn-s" style="padding:2px 6px;font-size:11px" onclick="copyLastOrderByClient()" title="선택된 거래처의 직전 주문을 그대로 불러옵니다">🔁 직전주문불러오기</button>
             <button class="btn-a" style="padding:2px 6px;font-size:11px" onclick="openBomModal()">🎁 세트상품출고</button>
+            <button class="btn-p" style="padding:2px 6px;font-size:11px;background:#2563eb" onclick="openBarcodeAuditModal()">📷 바코드실사</button>
+            <button class="btn-g" style="padding:2px 6px;font-size:11px;background:#0284c7" onclick="openRopeDrumModal()">🌀 로프드럼</button>
             <button class="btn-pur" style="padding:2px 6px;font-size:11px" onclick="openAiModal()">🤖 카톡주문인식</button>
             <label style="font-size:11px;color:#d63031;cursor:pointer;display:flex;align-items:center;gap:2px;background:#fff3cd;padding:2px 5px;border-radius:4px;border:1px solid #f39c12">
               <input type="checkbox" id="sOneTime" onchange="toggleOneTime('s',this.checked)"> ⚡1회성
@@ -850,6 +1062,25 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
 
   <!-- ==================== 2. 견적서·주문관리 ==================== -->
   <div id="t-est" class="page">
+    <!-- 🌐 홈페이지 실시간 온라인 견적접수함 패널 -->
+    <div class="panel" id="webQuotePanel" style="margin-bottom:12px;border:2px solid #0284c7;background:#f0f9ff">
+      <div class="ph" style="background:linear-gradient(90deg,#001B5E,#0284c7);color:#fff;display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px;font-weight:900">🌐 홈페이지 실시간 온라인 견적접수함</span>
+          <span id="webQuoteBadge" style="background:#ef4444;color:#fff;font-size:11px;font-weight:900;padding:2px 8px;border-radius:12px">🔔 0건 접수대기</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn-w" style="padding:3px 9px;font-size:11.5px;font-weight:bold" onclick="refreshWebQuotes(true)">🔄 실시간 확인</button>
+          <button class="btn-s" style="padding:3px 9px;font-size:11.5px;background:#0f172a;color:#fff" onclick="openWebQuoteConfigModal()">⚙️ 구글스프레드시트·텔레그램 연동설정</button>
+          <button class="btn-g" style="padding:3px 9px;font-size:11.5px;background:#10b981;border-color:#059669;font-weight:bold" onclick="previewModernHomepageModal()">👁️ 홈페이지 견적창 테스트</button>
+        </div>
+      </div>
+      <div class="pb" style="padding:8px 10px">
+        <div id="webQuoteListArea">
+          <!-- Dynamically populated web quote cards -->
+        </div>
+      </div>
+    </div>
     <div class="grid-2">
       <div class="panel">
         <div class="ph">
@@ -1176,6 +1407,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <button class="btn-g" style="background:#16a085" onclick="openCatalogDoc()">📊 단가표(카탈로그) 발행</button>
             <button class="btn-p" style="background:#d35400" onclick="openBomModal()">🎁 세트(묶음)상품 관리</button>
             <button class="btn-s" onclick="openSnModal()">🔢 시리얼/보증 추적기</button>
+            <button class="btn-p" style="background:#2563eb;font-weight:bold" onclick="openBarcodeAuditModal()">📷 스마트 바코드 실사</button>
+            <button class="btn-g" style="background:#0284c7;font-weight:bold" onclick="openRopeDrumModal()">🌀 와이어로프 드럼 트래커</button>
             <button class="btn-a" onclick="autoCleanItems(true)">✨ 순수 제품코드만 깔끔 정리</button>
             <input id="fItmKw" placeholder="초성/품목명/규격 검색" oninput="scheduleRender('itm')">
             <button class="btn-w" style="padding:3px 6px" onclick="startVoiceRecognition('fItmKw')" title="음성으로 품목 검색">🎙️</button>
@@ -1685,7 +1918,9 @@ function dedupAllData(showAlert){
   return sRemoved + pRemoved + cRemoved + iRemoved;
 }
 
+window.db = db;
 function normDB(){
+  window.db = db;
   if(!db || typeof db !== 'object') db = {};
   if(db.myCompany && typeof db.myCompany === 'object'){
     db.comp = Object.assign({}, db.comp || {}, {
@@ -1716,6 +1951,7 @@ function normDB(){
   if(!Array.isArray(db.purchases)) db.purchases = [];
   if(!Array.isArray(db.expenses)) db.expenses = [];
   if(!Array.isArray(db.deletedFp)) db.deletedFp = [];
+  if(!Array.isArray(db.ropeDrums)) db.ropeDrums = [];
   if(!Array.isArray(db.bomSets) || !db.bomSets.length){
     db.bomSets = [
       { id: 1, name: 'PCW-5000 기본세트', items: [{item:'PCW-5000', qty:1}, {item:'PCA-1260', qty:1}] },
@@ -2175,7 +2411,10 @@ function buildSlimDB(src){
   return {
     mc: src.comp || src.myCompany, c: slimCli, i: slimItm,
     es: src.estimates || [], ex: src.expenses || [], bomSets: src.bomSets || [],
+    rd: (src.ropeDrums || []).slice(0, 50),
     csp: src.customSpecs || [],
+    wq: (src.webQuotes || []).slice(0, 30),
+    gUrl: src.gasQuoteUrl || "",
     sd: { cl:cList, il:iList, spl:spList, r:slimSales, pr:slimPur }
   };
 }
@@ -2189,7 +2428,10 @@ function restoreSlimDB(slim){
     estimates: slim.es || slim.estimates || [],
     expenses: slim.ex || slim.expenses || [],
     customSpecs: slim.csp || slim.customSpecs || [],
-    bomSets: slim.bomSets || db.bomSets || []
+    webQuotes: slim.wq || slim.webQuotes || [],
+    gasQuoteUrl: slim.gUrl || slim.gasQuoteUrl || "",
+    bomSets: slim.bomSets || db.bomSets || [],
+    ropeDrums: slim.rd || slim.ropeDrums || []
   };
   const rawClients = slim.c || slim.clients || [];
   out.clients = rawClients.map((a, i) => {
@@ -4481,6 +4723,1248 @@ function delSale(id){
   renderAll();
 }
 
+// ==================== 🌐 HOMEPAGE WEB QUOTE INCOMING SYSTEM ====================
+function openWebQuoteConfigModal(){
+  const cfgUrl = db.gasQuoteUrl || sGet('ora_gas_url') || '';
+  if($('cfgGasQuoteUrl')) $('cfgGasQuoteUrl').value = cfgUrl;
+
+  const c = getTgConfig();
+  const hasTg = Boolean(c.token && c.cid);
+  if($('cfgTgStatusText')){
+    $('cfgTgStatusText').innerHTML = hasTg
+      ? `<span style="color:#10b981;font-weight:bold">✅ 텔레그램 연동 정상 (Chat ID: ${c.cid})</span>`
+      : `<span style="color:#ef4444;font-weight:bold">⚠️ 텔레그램 미연동 (Chat ID 필요)</span>`;
+  }
+  if($('webQuoteConfigModal')) $('webQuoteConfigModal').style.display = 'flex';
+};
+
+function saveWebQuoteConfig(){
+  const url = ($('cfgGasQuoteUrl') ? $('cfgGasQuoteUrl').value.trim() : '');
+  db.gasQuoteUrl = url;
+  sSet('ora_gas_url', url);
+  saveDB('웹견적설정저장');
+  alert('✅ 홈페이지 견적 연동 설정이 저장되었습니다!');
+  closeModal('webQuoteConfigModal');
+};
+
+const GAS_RELAY_CODE_TEXT = `// =========================================================================
+// 🌐 오라테크(ORATECH) 홈페이지 견적요청 & 텔레그램 알람 중계 스크립트 v1.0
+// =========================================================================
+var SHEET_NAME = '홈페이지견적접수';
+var DEF_TG_TOKEN = '${DEF_TOK}';
+var DEF_TG_CHAT_ID = '${DEF_CID}';
+
+function doPost(e) {
+  try {
+    var raw = e.postData.contents;
+    var data = JSON.parse(raw);
+    var quote = data.quote || data;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow(['접수일시', '업체/기관명', '연락처', '이메일', '요청품목', '고객메모', '상태', '고유ID', 'JSON원문']);
+      sheet.getRange(1, 1, 1, 9).setBackground('#001B5E').setFontColor('#FFFFFF').setFontWeight('bold');
+      sheet.setFrozenRows(1);
+    }
+
+    var linesSummary = (quote.lines || []).map(function(l) {
+      return (l.code || l.item || '') + '(' + (l.qty || 1) + '대)';
+    }).join(', ');
+
+    var now = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+    var quoteId = quote.id || new Date().getTime();
+
+    sheet.appendRow([
+      now,
+      quote.client || quote.clientName || '고객',
+      quote.tel || '',
+      quote.email || '',
+      linesSummary,
+      quote.memo || '',
+      '신규접수',
+      String(quoteId),
+      JSON.stringify(quote)
+    ]);
+
+    var token = data.tgToken || DEF_TG_TOKEN;
+    var chatId = data.tgChatId || DEF_TG_CHAT_ID;
+    var tgMsg = data.tgMsg;
+    if (!tgMsg) {
+      var linesDetail = (quote.lines || []).map(function(l, i) {
+        return (i + 1) + '. ' + (l.code || l.item) + ' × ' + (l.qty || 1) + '대';
+      }).join('\\n');
+      tgMsg = '🔔 [오라테크 홈페이지 신규 견적요청 도착!]\\n'
+        + '━━━━━━━━━━━━━━━━━━━\\n'
+        + '🏢 업체/기관명: ' + (quote.client || '고객') + '\\n'
+        + '📞 연락처: ' + (quote.tel || '미기재') + (quote.email ? ('\\n📧 이메일: ' + quote.email) : '') + '\\n'
+        + (quote.memo ? ('📝 요청사항: ' + quote.memo + '\\n') : '')
+        + '━━━━━━━━━━━━━━━━━━━\\n'
+        + '📦 견적 요청 모델:\\n' + linesDetail + '\\n'
+        + '━━━━━━━━━━━━━━━━━━━\\n'
+        + '⏰ 접수일시: ' + now + '\\n'
+        + '👉 오라테크 ERP [견적서 관리] 탭에서 1클릭으로 공식 견적서를 발행하실 수 있습니다!';
+    }
+
+    if (token && chatId) {
+      UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+        method: 'post',
+        contentType: 'application/json',
+        payload: JSON.stringify({ chat_id: chatId, text: tgMsg }),
+        muteHttpExceptions: true
+      });
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({ ok: true, id: quoteId, time: now }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  var action = (e && e.parameter && e.parameter.action) || 'status';
+  if (action === 'get_quotes') {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    var list = [];
+    if (sheet) {
+      var rows = sheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        var r = rows[i];
+        var qObj = null;
+        try { if (r[8]) qObj = JSON.parse(r[8]); } catch(err) {}
+        list.push({
+          row: i + 1,
+          time: r[0],
+          client: r[1],
+          tel: r[2],
+          email: r[3],
+          itemsSummary: r[4],
+          memo: r[5],
+          status: r[6] || '신규접수',
+          id: r[7] || (i + 1),
+          raw: qObj
+        });
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ ok: true, quotes: list.reverse() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput('✅ 오라테크(ORATECH) ERP 홈페이지 견적 중계 시스템이 정상 작동 중입니다.')
+    .setMimeType(ContentService.MimeType.TEXT);
+}`;
+
+function copyGasScriptCode(){
+  navigator.clipboard.writeText(GAS_RELAY_CODE_TEXT).then(() => {
+    alert('📋 [Google Apps Script 코드 복사 완료!]\\n\\nGoogle 드라이브 ➔ 새 Google Apps Script 편집기에 붙여넣기(Ctrl+V) 하신 뒤 [배포]하시면 됩니다!');
+  });
+};
+
+function playWebQuoteChime(){
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.46);
+  } catch(e){}
+}
+
+function showQuoteToast(q){
+  let t = $('oraQuoteToast');
+  if(!t){
+    t = document.createElement('div');
+    t.id = 'oraQuoteToast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#001B5E;color:#fff;padding:16px 20px;border-radius:10px;border:2px solid #38BDF8;box-shadow:0 12px 36px rgba(0,0,0,0.4);z-index:99999;font-size:13px;max-width:380px;line-height:1.6;cursor:pointer;';
+    document.body.appendChild(t);
+  }
+  const linesTxt = (q.lines || []).map(l => `${l.code||l.item}(${l.qty||1}대)`).join(', ');
+  t.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <b style="font-size:14.5px;color:#38BDF8">🔔 홈페이지 신규 견적요청 도착!</b>
+    <span onclick="event.stopPropagation();this.parentNode.parentNode.style.display='none'" style="font-weight:bold;padding:2px 6px">✕</span>
+  </div>
+  <div><b>업체명:</b> ${esc(q.client || '고객')} (${esc(q.tel || '-')})</div>
+  <div><b>요청품목:</b> ${esc(linesTxt)}</div>
+  <div style="font-size:11.5px;color:#94A3B8;margin-top:6px;font-weight:bold">👉 클릭하시면 [견적서 관리] 탭으로 이동하여 1클릭 작성합니다.</div>`;
+  t.onclick = function(){
+    t.style.display = 'none';
+    goTab('t-est');
+    loadWebQuoteToEstDraft(q.id);
+  };
+  t.style.display = 'block';
+  setTimeout(() => { if(t) t.style.display = 'none'; }, 10000);
+}
+
+function addWebQuoteToErp(q, showAlert){
+  if(!q || !q.id) return;
+  if(!Array.isArray(db.webQuotes)) db.webQuotes = [];
+  if(db.webQuotes.some(x => Number(x.id) === Number(q.id))) return;
+
+  db.webQuotes.unshift(q);
+  if(db.webQuotes.length > 50) db.webQuotes = db.webQuotes.slice(0, 50);
+
+  saveDB('웹견적수신');
+  renderWebQuotes();
+  playWebQuoteChime();
+  if(showAlert) showQuoteToast(q);
+};
+
+function renderWebQuotes(){
+  const area = $('webQuoteListArea');
+  const badge = $('webQuoteBadge');
+  if(!area) return;
+
+  const quotes = db.webQuotes || [];
+  const pendingCount = quotes.filter(q => q.status !== '견적서작성완료' && q.status !== '취소').length;
+
+  if(badge){
+    badge.innerText = `🔔 ${pendingCount}건 접수대기`;
+    badge.style.background = pendingCount > 0 ? '#ef4444' : '#64748b';
+  }
+
+  const estTab = document.querySelectorAll('.nav .tab')[3];
+  if(estTab){
+    let b = estTab.querySelector('.tab-badge-est');
+    if(!b){
+      b = document.createElement('span');
+      b.className = 'tab-badge-est bg bg-r';
+      b.style.cssText = 'margin-left:4px;font-size:10px;padding:1px 5px;border-radius:8px';
+      estTab.appendChild(b);
+    }
+    b.innerText = pendingCount > 0 ? `웹${pendingCount}` : '';
+    b.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+  }
+
+  if(!quotes.length){
+    area.innerHTML = `<div style="padding:14px;text-align:center;color:#64748b;font-size:12.5px;background:#fff;border-radius:6px;border:1px dashed #cbd5e1">
+      💡 <b>현재 접수된 홈페이지 견적요청이 없습니다.</b><br>
+      홈페이지(온라인 카탈로그)에서 고객이 <b>[✉️ 견적문의 담기]</b> 후 <b>[🚀 공식 견적서 발송 요청]</b>을 누르면 0.1초 만에 이곳에 카드가 생성되고 텔레그램으로 알람이 옵니다.<br>
+      우측 상단 <b>[👁️ 홈페이지 견적창 테스트]</b>를 눌러 즉시 시험해보실 수 있습니다!
+    </div>`;
+    return;
+  }
+
+  area.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:8px;max-height:220px;overflow-y:auto;padding-right:4px">` +
+    quotes.map(q => {
+      const isNew = q.status === '신규접수' || !q.status;
+      const statusBadge = isNew
+        ? `<span class="bg bg-r" style="animation:pulse 2s infinite">🔔 신규접수</span>`
+        : (q.status === '견적서작성완료' ? `<span class="bg bg-g">📋 견적서작성완료</span>` : `<span class="bg bg-b">${esc(q.status)}</span>`);
+
+      const linesTxt = (q.lines || []).map(l => {
+        return `<b>${esc(l.code || l.item)}</b> <span style="color:#d63031;font-weight:bold">${l.qty||1}대</span>`;
+      }).join(', ') || '-';
+
+      return `<div style="background:#fff;border:1.5px solid ${isNew ? '#0284c7' : '#cbd5e1'};border-left:5px solid ${isNew ? '#0284c7' : '#10b981'};border-radius:6px;padding:9px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.05)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div>
+            <b style="font-size:14px;color:#142d4c">${esc(q.client || '문의고객')}</b>
+            <span style="font-size:11px;color:#64748b;margin-left:4px">${esc(q.time || q.date || '')}</span>
+          </div>
+          <div>${statusBadge}</div>
+        </div>
+        <div style="font-size:12px;color:#334155;margin-bottom:4px">
+          📞 <b>${esc(q.tel || '-')}</b> ${q.email ? ` | 📧 ${esc(q.email)}` : ''}
+        </div>
+        <div style="background:#f8fafc;padding:5px 8px;border-radius:4px;font-size:12px;margin-bottom:6px;border:1px solid #e2e8f0">
+          📦 <b>요청모델:</b> ${linesTxt}
+          ${q.memo ? `<div style="font-size:11px;color:#64748b;margin-top:2px">💬 ${esc(q.memo)}</div>` : ''}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;padding-top:4px;border-top:1px dashed #e2e8f0">
+          <div style="display:flex;gap:4px">
+            <button class="btn-p" style="padding:3px 8px;font-size:11px;background:#0284c7;border-color:#0369a1" onclick="loadWebQuoteToEstDraft(${q.id})" title="견적서 입력창에 자동으로 채워넣습니다">⚡ 1클릭 견적서 작성</button>
+            <button class="btn-s" style="padding:3px 6px;font-size:11px;background:#27ae60" onclick="copyWebQuoteText(${q.id})" title="카톡/문자 회신용 텍스트 복사">📋 복사</button>
+          </div>
+          <button class="btn-r" style="padding:2px 6px;font-size:10.5px" onclick="deleteWebQuote(${q.id})">✕ 삭제</button>
+        </div>
+      </div>`;
+    }).join('') +
+  `</div>`;
+};
+
+function loadWebQuoteToEstDraft(id){
+  const q = (db.webQuotes || []).find(x => Number(x.id) === Number(id));
+  if(!q) return;
+
+  resetEstForm();
+
+  const cliName = (q.client || '').trim();
+  $('esClient').value = cliName;
+
+  const existingCli = (db.clients || []).find(c => normSearch(c.name) === normSearch(cliName));
+  if(!existingCli){
+    $('esOneTime').checked = true;
+    toggleOneTime('es', true);
+    if($('esOtName')) $('esOtName').value = cliName;
+    if($('esOtTel')) $('esOtTel').value = q.tel || '';
+    if($('esOtAddr')) $('esOtAddr').value = q.email ? (`이메일: ${q.email}`) : '';
+  }
+
+  estDraft = [];
+  (q.lines || []).forEach(l => {
+    const code = (l.code || l.item || '').trim();
+    if(!code) return;
+    const qty = Number(l.qty) || 1;
+
+    const itmObj = (db.items || []).find(i => normSearch(i.name) === normSearch(code) || normSearch(i.spec) === normSearch(code));
+    let price = itmObj ? (Number(itmObj.sellPrice) || 0) : 0;
+    let spec = (itmObj ? (itmObj.spec || '') : (l.spec || l.cap || ''));
+
+    if(!price && l.price) price = Number(l.price);
+    if(!price && window.SPLIT_SERIES_GROUPS){
+      for(let g of window.SPLIT_SERIES_GROUPS){
+        const m = (g.models || []).find(x => normSearch(x[0]) === normSearch(code));
+        if(m && m[4]){ price = Number(m[4]); break; }
+      }
+    }
+
+    estDraft.push({
+      item: code,
+      spec: spec,
+      qty: qty,
+      price: price,
+      sup: Math.round(qty * price)
+    });
+  });
+
+  recalcEstDraft();
+
+  if($('esMemo')){
+    $('esMemo').value = `[홈페이지견적접수] ${q.memo || ''}${q.tel ? ` / 연락처: ${q.tel}` : ''}${q.email ? ` / 이메일: ${q.email}` : ''}`.trim();
+  }
+
+  q.status = '견적서작성완료';
+  saveDB('웹견적변환');
+  renderWebQuotes();
+
+  const formPanel = document.querySelector('#t-est .grid-2 > .panel:first-child');
+  if(formPanel) formPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  alert(`⚡ [${cliName}] 님의 홈페이지 견적요청이 견적서 입력창에 자동으로 채워졌습니다!\n\n• 품목: ${estDraft.length}종\n• 금액: 공급가 ${fmt($('esSumSup').value)}원 (합계: ${fmt($('esSumTot').value)}원)\n\n단가를 확인하신 후 [💾 견적서 저장] 또는 [🖨️ 저장 후 견적서 인쇄]를 누르세요!`);
+};
+
+function copyWebQuoteText(id){
+  const q = (db.webQuotes || []).find(x => Number(x.id) === Number(id));
+  if(!q) return;
+  const linesTxt = (q.lines || []).map((l, i) => `${i+1}. ${l.code || l.item} × ${l.qty||1}대`).join('\n');
+  const txt = `[오라테크 견적 회신 안내]\n`
+    + `• 고객명: ${q.client || '고객사'}\n`
+    + `• 요청모델:\n${linesTxt}\n\n`
+    + `문의주신 모델의 공식 견적서 및 납기 안내를 준비 중입니다. 상세 문의: 1600-5157 (오라테크)`;
+  navigator.clipboard.writeText(txt).then(() => {
+    alert('📋 고객 회신용 견적 안내 텍스트가 클립보드에 복사되었습니다!\n카카오톡이나 문자에 바로 붙여넣기(Ctrl+V) 하세요.');
+  });
+};
+
+function deleteWebQuote(id){
+  if(!confirm('이 홈페이지 견적요청을 목록에서 삭제하시겠습니까?')) return;
+  db.webQuotes = (db.webQuotes || []).filter(x => Number(x.id) !== Number(id));
+  saveDB('웹견적삭제');
+  renderWebQuotes();
+};
+
+async function refreshWebQuotes(manual){
+  let addedCount = 0;
+
+  try {
+    const raw = localStorage.getItem('ora_web_quotes');
+    if(raw){
+      const arr = JSON.parse(raw);
+      if(Array.isArray(arr)){
+        arr.forEach(q => {
+          if(!db.webQuotes.some(x => Number(x.id) === Number(q.id))){
+            db.webQuotes.unshift(q);
+            addedCount++;
+          }
+        });
+      }
+    }
+  } catch(e){}
+
+  const gasUrl = db.gasQuoteUrl || sGet('ora_gas_url') || '';
+  if(gasUrl){
+    try {
+      const res = await fetch(gasUrl + (gasUrl.includes('?') ? '&' : '?') + 'action=get_quotes');
+      const json = await res.json();
+      if(json && json.ok && Array.isArray(json.quotes)){
+        json.quotes.forEach(row => {
+          const qId = Number(row.id) || (row.time ? new Date(row.time).getTime() : 0);
+          if(qId && !db.webQuotes.some(x => Number(x.id) === qId)){
+            const itemLines = [];
+            if(row.raw && Array.isArray(row.raw.lines)){
+              row.raw.lines.forEach(l => itemLines.push(l));
+            } else if(row.itemsSummary){
+              row.itemsSummary.split(',').forEach(s => {
+                const parts = s.trim().split('(');
+                const code = parts[0].trim();
+                const qty = parts[1] ? (parseInt(parts[1]) || 1) : 1;
+                itemLines.push({ code: code, qty: qty });
+              });
+            }
+            db.webQuotes.unshift({
+              id: qId,
+              date: row.time ? String(row.time).slice(0, 10) : todayStr(),
+              time: row.time || '',
+              client: row.client || '웹고객',
+              tel: row.tel || '',
+              email: row.email || '',
+              memo: row.memo || '',
+              lines: itemLines,
+              status: row.status || '신규접수'
+            });
+            addedCount++;
+          }
+        });
+      }
+    } catch(err){
+      if(manual) console.warn("GAS fetch warning:", err);
+    }
+  }
+
+  if(addedCount > 0){
+    saveDB('신규웹견적추가');
+    renderWebQuotes();
+    playWebQuoteChime();
+    if(manual) alert(`🎉 신규 홈페이지 견적요청 ${addedCount}건을 새로 수신했습니다!`);
+  } else {
+    renderWebQuotes();
+    if(manual) alert('✅ 현재 대기 중인 모든 홈페이지 견적요청이 최신 상태입니다.');
+  }
+};
+
+async function testSendWebQuote(){
+  const testQuote = {
+    id: Date.now(),
+    date: todayStr(),
+    time: todayStr() + ' ' + new Date().toTimeString().slice(0,8),
+    client: '강릉산림조합 (테스트)',
+    tel: '010-2266-0989',
+    email: 'test@forest.or.kr',
+    memo: '임도 개설용 혼다 엔진윈치 및 로프 2세트 견적 요청',
+    lines: [
+      { code: 'PCW-5000', name: '포터블 혼다 엔진윈치', qty: 2, price: 2600000 },
+      { code: 'PCA-1260', name: '12mm 더블브레이드 로프 50m', qty: 2, price: 240000 }
+    ],
+    status: '신규접수'
+  };
+
+  addWebQuoteToErp(testQuote, true);
+
+  const c = getTgConfig();
+  if(c.token && c.cid){
+    try {
+      const msg = `🔔 [오라테크 홈페이지 가상 테스트 견적 도착!]\n`
+        + `━━━━━━━━━━━━━━━━━━━\n`
+        + `🏢 업체/기관명: ${testQuote.client}\n`
+        + `📞 연락처: ${testQuote.tel} | 📧 ${testQuote.email}\n`
+        + `📝 요청사항: ${testQuote.memo}\n`
+        + `━━━━━━━━━━━━━━━━━━━\n`
+        + `📦 견적요청 모델:\n1. PCW-5000 × 2대\n2. PCA-1260 × 2대\n`
+        + `━━━━━━━━━━━━━━━━━━━\n`
+        + `⏰ 접수시간: ${testQuote.time}\n`
+        + `👉 오라테크 ERP [견적서 관리] 탭에서 1클릭 발행 가능!`;
+      await tgCall(c.token, 'sendMessage', { chat_id: c.cid, text: msg });
+      alert('🧪 [테스트 완료!]\n\n1. ERP [견적서 관리] 탭에 가상 견적이 0.1초 만에 접수되었습니다.\n2. 대표님 텔레그램으로도 시험 알람이 발송되었습니다!');
+    } catch(e){
+      alert('🧪 ERP 접수 완료 (텔레그램 발송 오류: ' + e.message + ')');
+    }
+  } else {
+    alert('🧪 [테스트 완료!]\n\nERP [견적서 관리] 탭에 가상 견적이 즉시 생성되었습니다!');
+  }
+}
+window.openWebQuoteConfigModal = openWebQuoteConfigModal;
+window.saveWebQuoteConfig = saveWebQuoteConfig;
+window.copyGasScriptCode = copyGasScriptCode;
+window.addWebQuoteToErp = addWebQuoteToErp;
+window.renderWebQuotes = renderWebQuotes;
+window.loadWebQuoteToEstDraft = loadWebQuoteToEstDraft;
+window.copyWebQuoteText = copyWebQuoteText;
+window.deleteWebQuote = deleteWebQuote;
+window.refreshWebQuotes = refreshWebQuotes;
+window.testSendWebQuote = testSendWebQuote;
+
+// ==================== 📷 #5-A: 스마트 바코드·QR 창고 실사 & 라벨 인쇄 ====================
+let barcodeCameraStream = null;
+let barcodeScanTimer = null;
+let barcodeDetectorInstance = null;
+let auditInventoryList = [];
+
+function generateCode128Svg(text, width, height) {
+  text = String(text || '').trim() || 'ORA-0000';
+  width = width || 200;
+  height = height || 46;
+  const PATTERNS = [
+    '212222','222122','222221','121223','121322','131222','122213','122312','132212','221213',
+    '221312','231212','112232','122132','122231','113222','123122','123221','223211','221132',
+    '221231','213212','223112','312131','311222','321122','321221','312212','322112','322211',
+    '212123','212321','232121','111323','131123','131321','112313','132113','132311','211313',
+    '231113','231311','112133','112331','132131','113123','113321','133121','313121','211331',
+    '231131','213113','213311','213131','311123','311321','331121','312113','312311','332111',
+    '314111','221411','431111','111224','111422','121124','121421','141122','141221','112214',
+    '112412','122114','122411','142112','142211','241211','221114','413111','241112','134111',
+    '111242','121142','121241','114212','124112','124211','411212','421112','421211','212141',
+    '214121','412121','111143','111341','131141','114113','114311','411113','411311','113141',
+    '114131','311141','411131','211412','211214','211232','2331112'
+  ];
+  let values = [104];
+  let checkSum = 104;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i) - 32;
+    const val = (code >= 0 && code <= 95) ? code : 0;
+    values.push(val);
+    checkSum += val * (i + 1);
+  }
+  values.push(checkSum % 103);
+  values.push(106);
+
+  let patternStr = '';
+  for (const v of values) patternStr += (PATTERNS[v] || PATTERNS[0]);
+
+  let x = 0, isBar = true, rects = '';
+  for (let i = 0; i < patternStr.length; i++) {
+    const w = parseInt(patternStr[i], 10);
+    if (isBar) rects += `<rect x="${x}" y="0" width="${w}" height="${height}" fill="#000" />`;
+    x += w;
+    isBar = !isBar;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${x} ${height + 13}" width="${width}" height="${height + 13}" shape-rendering="crispEdges"><rect width="${x}" height="${height + 13}" fill="#fff" />${rects}<text x="${x / 2}" y="${height + 11}" text-anchor="middle" font-family="monospace, sans-serif" font-size="10" font-weight="bold" fill="#333">${esc(text)}</text></svg>`;
+}
+
+function playScanBeep(success) {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(success ? 880 : 310, ctx.currentTime);
+    if (!success) {
+      setTimeout(() => { try { osc.frequency.setValueAtTime(220, ctx.currentTime); } catch(e){} }, 90);
+    }
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.16);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.18);
+  } catch(e) {}
+}
+
+function openBarcodeAuditModal() {
+  if ($('barcodeAuditModal')) $('barcodeAuditModal').style.display = 'flex';
+  initStockAuditData(false);
+  renderStockAuditTable();
+  setTimeout(() => {
+    if ($('barcodeDirectInput')) $('barcodeDirectInput').focus();
+  }, 120);
+}
+
+function initStockAuditData(resetAll) {
+  if (auditInventoryList.length > 0 && !resetAll) return;
+  const items = db.items || [];
+  auditInventoryList = items.map((it, idx) => {
+    let curStock = 0;
+    if (typeof calcItemCurQty === 'function') {
+      curStock = calcItemCurQty(it.name);
+    } else {
+      curStock = Number(it.initQty || 0);
+    }
+    return {
+      id: it.id || (10000 + idx),
+      code: it.code || it.name,
+      name: it.name,
+      spec: it.spec || '',
+      barcode: it.barcode || it.code || it.name,
+      bookQty: curStock,
+      scannedQty: curStock,
+      diff: 0,
+      lastScanTime: ''
+    };
+  });
+}
+
+function renderStockAuditTable() {
+  const kw = ($('barcodeSearchKw') ? $('barcodeSearchKw').value : '').trim().toLowerCase();
+  const tb = $('barcodeAuditTb');
+  if (!tb) return;
+
+  let filtered = auditInventoryList;
+  if (kw) {
+    filtered = auditInventoryList.filter(x =>
+      x.name.toLowerCase().includes(kw) ||
+      x.code.toLowerCase().includes(kw) ||
+      (x.spec && x.spec.toLowerCase().includes(kw)) ||
+      (x.barcode && x.barcode.toLowerCase().includes(kw))
+    );
+  }
+
+  let totalItems = auditInventoryList.length;
+  let matchCount = 0;
+  let mismatchCount = 0;
+
+  auditInventoryList.forEach(x => {
+    x.diff = x.scannedQty - x.bookQty;
+    if (x.diff === 0) matchCount++;
+    else mismatchCount++;
+  });
+
+  if ($('auditKpiTotal')) $('auditKpiTotal').innerText = `${totalItems}종`;
+  if ($('auditKpiMatch')) $('auditKpiMatch').innerText = `${matchCount}종`;
+  if ($('auditKpiMismatch')) {
+    $('auditKpiMismatch').innerText = `${mismatchCount}종`;
+    $('auditKpiMismatch').style.color = mismatchCount > 0 ? '#e11d48' : '#16a34a';
+  }
+
+  if (filtered.length === 0) {
+    tb.innerHTML = `<tr><td colspan="7" class="c" style="padding:24px;color:#888">실사 대상 품목이 없습니다.</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = filtered.map(x => {
+    let diffBadge = `<span class="bg bg-g">일치 (0)</span>`;
+    let rowBg = '';
+    if (x.diff > 0) {
+      diffBadge = `<span class="bg bg-b" style="font-weight:900">+${x.diff}개 초과</span>`;
+      rowBg = 'background:#f0f9ff;';
+    } else if (x.diff < 0) {
+      diffBadge = `<span class="bg bg-r" style="font-weight:900">${x.diff}개 부족</span>`;
+      rowBg = 'background:#fff1f2;';
+    }
+
+    return `<tr id="audit_row_${x.id}" style="${rowBg}">
+      <td class="c b t-blu">${esc(x.code)}</td>
+      <td class="b">${esc(x.name)} <span style="font-size:11px;color:#64748b">(${esc(x.spec||'-')})</span></td>
+      <td class="c font-mono" style="font-size:11px">${esc(x.barcode)}</td>
+      <td class="r b">${fmt(x.bookQty)}개</td>
+      <td class="c">
+        <div style="display:inline-flex;align-items:center;gap:3px">
+          <button class="btn-w" style="padding:1px 6px;font-size:11px" onclick="updateAuditQty(${x.id}, -1)">-</button>
+          <input type="number" value="${x.scannedQty}" style="width:52px;text-align:right;font-weight:900" onchange="setAuditQtyDirect(${x.id}, this.value)">
+          <button class="btn-p" style="padding:1px 6px;font-size:11px" onclick="updateAuditQty(${x.id}, 1)">+</button>
+        </div>
+      </td>
+      <td class="c">${diffBadge}</td>
+      <td class="c">
+        <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="printSingleLabel('${esc(x.name)}')">🏷️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateAuditQty(id, delta) {
+  const item = auditInventoryList.find(x => x.id === id);
+  if (!item) return;
+  item.scannedQty = Math.max(0, item.scannedQty + delta);
+  item.lastScanTime = new Date().toLocaleTimeString();
+  renderStockAuditTable();
+}
+
+function setAuditQtyDirect(id, val) {
+  const item = auditInventoryList.find(x => x.id === id);
+  if (!item) return;
+  item.scannedQty = Math.max(0, parseInt(val, 10) || 0);
+  renderStockAuditTable();
+}
+
+function handleBarcodeInput(inputVal) {
+  const val = String(inputVal || '').trim();
+  if (!val) return;
+  if ($('barcodeDirectInput')) $('barcodeDirectInput').value = '';
+
+  const pure = val.toUpperCase().replace(/\s+/g, '');
+  let target = auditInventoryList.find(x =>
+    (x.barcode && x.barcode.toUpperCase().replace(/\s+/g, '') === pure) ||
+    (x.code && x.code.toUpperCase().replace(/\s+/g, '') === pure) ||
+    (x.name && x.name.toUpperCase().replace(/\s+/g, '') === pure)
+  );
+
+  if (!target) {
+    target = auditInventoryList.find(x =>
+      x.name.toUpperCase().includes(pure) || pure.includes(x.code.toUpperCase())
+    );
+  }
+
+  if (target) {
+    target.scannedQty += 1;
+    target.lastScanTime = new Date().toLocaleTimeString();
+    playScanBeep(true);
+    renderStockAuditTable();
+
+    const row = document.getElementById(`audit_row_${target.id}`);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const orig = row.style.background;
+      row.style.background = '#fef08a';
+      setTimeout(() => { row.style.background = orig; }, 700);
+    }
+    if ($('barcodeStatusToast')) {
+      $('barcodeStatusToast').innerHTML = `✅ <b>[${esc(target.name)}]</b> 바코드 스캔 완료! (현재 실사: <b>${target.scannedQty}개</b>)`;
+      $('barcodeStatusToast').style.display = 'block';
+      setTimeout(() => { if ($('barcodeStatusToast')) $('barcodeStatusToast').style.display = 'none'; }, 2200);
+    }
+  } else {
+    playScanBeep(false);
+    if ($('barcodeStatusToast')) {
+      $('barcodeStatusToast').innerHTML = `⚠️ <b>[${esc(val)}]</b> 매칭되는 품목이 없습니다.`;
+      $('barcodeStatusToast').style.display = 'block';
+      setTimeout(() => { if ($('barcodeStatusToast')) $('barcodeStatusToast').style.display = 'none'; }, 2600);
+    }
+  }
+}
+
+async function toggleBarcodeCamera() {
+  const video = $('barcodeVideo');
+  const btn = $('btnToggleCamera');
+  const wrap = $('barcodeVideoWrap');
+  if (!video) return;
+
+  if (barcodeCameraStream) {
+    barcodeCameraStream.getTracks().forEach(t => t.stop());
+    barcodeCameraStream = null;
+    if (barcodeScanTimer) clearInterval(barcodeScanTimer);
+    video.style.display = 'none';
+    if (wrap) wrap.style.display = 'none';
+    if (btn) btn.innerHTML = '📷 스마트폰 카메라 스캐너 켜기';
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } }
+    });
+    barcodeCameraStream = stream;
+    video.srcObject = stream;
+    video.style.display = 'block';
+    if (wrap) wrap.style.display = 'block';
+    if (btn) btn.innerHTML = '🛑 카메라 스캐너 끄기';
+
+    if ('BarcodeDetector' in window) {
+      barcodeDetectorInstance = new BarcodeDetector({
+        formats: ['code_128', 'qr_code', 'ean_13', 'ean_8', 'code_39', 'upc_a']
+      });
+      barcodeScanTimer = setInterval(async () => {
+        if (!barcodeCameraStream || video.readyState < 2) return;
+        try {
+          const codes = await barcodeDetectorInstance.detect(video);
+          if (codes && codes.length > 0) {
+            handleBarcodeInput(codes[0].rawValue);
+          }
+        } catch(e) {}
+      }, 350);
+    }
+  } catch(err) {
+    alert('카메라 권한을 얻을 수 없습니다: ' + err.message);
+  }
+}
+
+function applyStockAudit() {
+  const diffItems = auditInventoryList.filter(x => x.diff !== 0);
+  if (diffItems.length === 0) {
+    alert('모든 품목의 실사 수량이 전산 재고와 100% 일치합니다!');
+    return;
+  }
+
+  const msg = `⚠️ 전산 재고와 차이가 있는 품목이 총 ${diffItems.length}종 있습니다.\n\n` +
+    diffItems.slice(0, 8).map(x => `• ${x.name}: 장부 ${x.bookQty}개 ➔ 실사 ${x.scannedQty}개 (${x.diff > 0 ? '+' : ''}${x.diff}개)`).join('\n') +
+    (diffItems.length > 8 ? `\n... 외 ${diffItems.length - 8}종` : '') +
+    `\n\n실사 수량을 ERP 현재재고로 즉시 일괄 반영하시겠습니까?`;
+
+  if (!confirm(msg)) return;
+
+  diffItems.forEach(d => {
+    const it = (db.items || []).find(i => (i.code && i.code === d.code) || i.name === d.name);
+    if (it) {
+      const curStock = typeof calcItemCurQty === 'function' ? calcItemCurQty(it.name) : Number(it.initQty||0);
+      const diff = d.scannedQty - curStock;
+      it.initQty = (Number(it.initQty) || 0) + diff;
+    }
+  });
+
+  saveDB('실사수량일괄반영');
+  renderAll();
+  initStockAuditData(true);
+  renderStockAuditTable();
+  alert(`✅ 총 ${diffItems.length}종의 전산 재고가 실사 수량으로 정확히 일괄 보정되었습니다!`);
+}
+
+function resetStockAudit() {
+  if (!confirm('실사 진행 데이터를 초기화하고 전산 장부 재고를 다시 불러오시겠습니까?')) return;
+  initStockAuditData(true);
+  renderStockAuditTable();
+}
+
+function printAllItemLabels() {
+  const items = db.items || [];
+  if (items.length === 0) { alert('등록된 품목이 없습니다.'); return; }
+  openBarcodePrintWindow(items);
+}
+
+function printSingleLabel(itemName) {
+  const it = (db.items || []).find(x => x.name === itemName);
+  if (!it) return;
+  openBarcodePrintWindow([it]);
+}
+
+function openBarcodePrintWindow(items) {
+  const w = window.open('', '_blank', 'width=840,height=720,scrollbars=yes');
+  if (!w) { alert('팝업 차단을 해제해 주세요.'); return; }
+
+  const labelsHtml = items.map(it => {
+    const code = it.code || it.name;
+    const barcodeSvg = generateCode128Svg(code, 210, 44);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(code)}`;
+    return `
+      <div class="label-card">
+        <div class="lbl-head">
+          <span class="lbl-brand">ORA TECH 오라테크</span>
+          <span class="lbl-spec">${esc(it.spec || '정품 자재')}</span>
+        </div>
+        <div class="lbl-title">${esc(it.name)}</div>
+        <div class="lbl-body">
+          <div class="lbl-bc">${barcodeSvg}</div>
+          <div class="lbl-qr"><img src="${qrUrl}" alt="QR" width="56" height="56" /></div>
+        </div>
+        <div class="lbl-foot">
+          <span>코드: <b>${esc(code)}</b></span>
+          <span>단가: <b>${fmt(it.sellPrice || 0)}원</b></span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  w.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>오라테크 품목 바코드/QR 라벨 출력</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; margin: 15px; background: #f8fafc; color: #1e293b; }
+        .no-print { margin-bottom: 16px; padding: 10px; background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+        .label-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; box-sizing: border-box; page-break-inside: avoid; }
+        .lbl-head { display: flex; justify-content: space-between; font-size: 10.5px; color: #64748b; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-bottom: 4px; font-weight: bold; }
+        .lbl-brand { color: #0284c7; }
+        .lbl-title { font-size: 13px; font-weight: 900; color: #0f172a; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lbl-body { display: flex; justify-content: space-between; align-items: center; gap: 4px; margin-bottom: 4px; }
+        .lbl-bc svg { width: 100%; height: auto; max-height: 48px; }
+        .lbl-foot { display: flex; justify-content: space-between; font-size: 10.5px; border-top: 1px dashed #cbd5e1; padding-top: 3px; color: #475569; }
+        @media print {
+          .no-print { display: none !important; }
+          body { background: #fff; margin: 0; }
+          .grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+          .label-card { border: 1px solid #94a3b8; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="no-print">
+        <div><b>🖨️ 바코드 & QR 라벨 인쇄 프리뷰</b> (총 ${items.length}종)</div>
+        <button onclick="window.print()" style="background:#0284c7;color:#fff;border:none;padding:8px 16px;font-weight:bold;border-radius:4px;cursor:pointer">🖨️ 라벨 인쇄하기</button>
+      </div>
+      <div class="grid">${labelsHtml}</div>
+    </body>
+    </html>
+  `);
+  w.document.close();
+}
+
+// ==================== 🌀 #5-B: 와이어로프 드럼 잔량 트래커 & 스마트 절단기 ====================
+function ensureDefaultRopeDrums() {
+  if (!Array.isArray(db.ropeDrums)) db.ropeDrums = [];
+  if (db.ropeDrums.length === 0) {
+    db.ropeDrums = [
+      {
+        id: 'DRUM-2601',
+        name: 'PCW 10mm 더블브레이드 로프 (500m 원통)',
+        itemCode: 'PCA-1260',
+        spec: '10mm x 500m / 파단하중 3,300kg',
+        lotNo: 'PW-2026-CA01',
+        initLen: 500,
+        remLen: 380,
+        loc: '창고 A열 로프드럼대',
+        cuts: [
+          { date: '2026-10-15', client: '강릉산림조합', len: 70, note: 'PCW-5000 긴급납품용 70m', remAfter: 430 },
+          { date: '2026-10-20', client: '삼척국유림관리소', len: 50, note: '산림작업 예비용 50m', remAfter: 380 }
+        ]
+      },
+      {
+        id: 'DRUM-2602',
+        name: 'PCA-1259 12mm 고강도 폴리에스터 로프 (300m 원통)',
+        itemCode: 'PCA-1259',
+        spec: '12mm x 300m / 파단하중 4,500kg',
+        lotNo: 'PW-2026-CA02',
+        initLen: 300,
+        remLen: 160,
+        loc: '창고 A열 로프드럼대',
+        cuts: [
+          { date: '2026-10-18', client: '한국전력공사 강원지사', len: 140, note: '지중선 케이블 견인용', remAfter: 160 }
+        ]
+      },
+      {
+        id: 'DRUM-2603',
+        name: '8mm 항공용 고강도 와이어로프 (200m 원통)',
+        itemCode: 'WR-8MM-200',
+        spec: '8mm x 200m 6x19 IWRC 아연도금',
+        lotNo: 'KOR-2026-W08',
+        initLen: 200,
+        remLen: 200,
+        loc: '창고 B열 와이어선반',
+        cuts: []
+      }
+    ];
+  }
+}
+
+function openRopeDrumModal() {
+  ensureDefaultRopeDrums();
+  if ($('ropeDrumModal')) $('ropeDrumModal').style.display = 'flex';
+  renderRopeDrums();
+  populateRopeDrumSelects();
+}
+
+function renderRopeDrums() {
+  ensureDefaultRopeDrums();
+  const kw = ($('ropeDrumSearchKw') ? $('ropeDrumSearchKw').value : '').trim().toLowerCase();
+  const drums = db.ropeDrums || [];
+
+  let totalDrums = drums.length;
+  let totalMeters = 0;
+  let lowDrums = 0;
+
+  drums.forEach(d => {
+    totalMeters += Number(d.remLen) || 0;
+    const pct = d.initLen > 0 ? (d.remLen / d.initLen) * 100 : 0;
+    if (pct < 20 || d.remLen <= 50) lowDrums++;
+  });
+
+  if ($('ropeKpiTotal')) $('ropeKpiTotal').innerText = `${totalDrums}개 드럼`;
+  if ($('ropeKpiMeters')) $('ropeKpiMeters').innerText = `${fmt(totalMeters)} m`;
+  if ($('ropeKpiLow')) {
+    $('ropeKpiLow').innerText = `${lowDrums}개 드럼`;
+    $('ropeKpiLow').style.color = lowDrums > 0 ? '#ea580c' : '#16a34a';
+  }
+
+  const grid = $('ropeDrumGrid');
+  if (!grid) return;
+
+  const filtered = drums.filter(d =>
+    !kw ||
+    d.id.toLowerCase().includes(kw) ||
+    d.name.toLowerCase().includes(kw) ||
+    (d.spec && d.spec.toLowerCase().includes(kw)) ||
+    (d.lotNo && d.lotNo.toLowerCase().includes(kw)) ||
+    (d.loc && d.loc.toLowerCase().includes(kw))
+  );
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:#888">등록되거나 검색된 와이어로프 드럼이 없습니다.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(d => {
+    const init = Number(d.initLen) || 1;
+    const rem = Number(d.remLen) || 0;
+    const pct = Math.min(100, Math.max(0, Math.round((rem / init) * 100)));
+
+    let barColor = '#10b981';
+    let statusBadge = `<span class="bg bg-g">🟢 정상 (${pct}%)</span>`;
+    if (pct === 0) {
+      barColor = '#ef4444';
+      statusBadge = `<span class="bg bg-r">🔴 소진완료</span>`;
+    } else if (pct < 20 || rem <= 50) {
+      barColor = '#f59e0b';
+      statusBadge = `<span class="bg bg-y">🟠 잔량부족/발주권장 (${pct}%)</span>`;
+    }
+
+    const lastCut = (d.cuts && d.cuts.length > 0) ? d.cuts[d.cuts.length - 1] : null;
+    const lastCutStr = lastCut ? `${lastCut.date} (${lastCut.client} ${lastCut.len}m 출고)` : '절단 이력 없음';
+
+    return `
+      <div class="drum-card" style="background:#fff;border:1px solid #cbd5e1;border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-weight:900;color:#0284c7;font-size:13px;background:#e0f2fe;padding:2px 8px;border-radius:4px">${esc(d.id)}</span>
+            ${statusBadge}
+          </div>
+          <div style="font-size:13.5px;font-weight:900;color:#0f172a;margin-bottom:2px">${esc(d.name)}</div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:8px">규격: ${esc(d.spec||'-')} / 위치: <b>${esc(d.loc||'창고')}</b> (로트: ${esc(d.lotNo||'-')})</div>
+
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:bold;margin-bottom:3px">
+              <span>잔여: <b style="font-size:15px;color:#0369a1">${fmt(rem)} m</b></span>
+              <span style="color:#64748b">최초 ${fmt(init)} m</span>
+            </div>
+            <div style="height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:${barColor};transition:width 0.3s"></div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#64748b;background:#f8fafc;padding:4px 8px;border-radius:4px;margin-bottom:10px">
+            🕒 최근절단: <b>${esc(lastCutStr)}</b>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px dashed #cbd5e1;padding-top:8px">
+          <button class="btn-p" style="flex:1;padding:5px;font-size:12px" onclick="quickCutRope('${d.id}')">✂️ 절단 출고</button>
+          <button class="btn-w" style="padding:5px 8px;font-size:12px" onclick="printDrumQr('${d.id}')">🏷️ QR라벨</button>
+          <button class="btn-s" style="padding:5px 8px;font-size:12px" onclick="showDrumCutsHistory('${d.id}')">📜 이력 (${(d.cuts||[]).length})</button>
+          <button class="btn-r" style="padding:5px 7px;font-size:12px" onclick="deleteRopeDrum('${d.id}')">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function populateRopeDrumSelects() {
+  const drums = db.ropeDrums || [];
+  const sel = $('cutSelectDrum');
+  if (sel) {
+    sel.innerHTML = drums.map(d => `<option value="${d.id}">[${d.id}] ${d.name} (잔여: ${d.remLen}m)</option>`).join('');
+  }
+}
+
+function quickCutRope(drumId) {
+  const d = (db.ropeDrums || []).find(x => x.id === drumId);
+  if (!d) return;
+  const cutLenStr = prompt(`✂️ [${d.id} - ${d.name}]\n현재 잔여 길이: ${d.remLen}m\n\n출고할 절단 길이(미터: m)를 입력하세요:`, '50');
+  if (!cutLenStr) return;
+  const len = parseFloat(cutLenStr);
+  if (isNaN(len) || len <= 0) { alert('유효한 길이를 입력하세요.'); return; }
+  if (len > d.remLen) { alert(`⚠️ 잔여 길이(${d.remLen}m)보다 긴 길이를 자를 수 없습니다!`); return; }
+
+  const client = prompt('출고 거래처명을 입력하세요:', '강릉산림조합') || '일반고객';
+  const memo = prompt('용도 또는 작업 메모:', '현장 납품 절단 출고') || '';
+
+  executeDrumCut(d.id, len, client, memo);
+}
+
+function executeDrumCut(drumId, len, client, memo) {
+  const d = (db.ropeDrums || []).find(x => x.id === drumId);
+  if (!d) return;
+
+  d.remLen = Math.max(0, Math.round((d.remLen - len) * 10) / 10);
+  if (!Array.isArray(d.cuts)) d.cuts = [];
+  const today = new Date().toISOString().slice(0, 10);
+  d.cuts.push({
+    date: today,
+    client: client,
+    len: len,
+    note: memo,
+    remAfter: d.remLen
+  });
+
+  saveDB('로프드럼절단출고');
+  renderRopeDrums();
+  populateRopeDrumSelects();
+  playScanBeep(true);
+  alert(`✂️ [${d.id}] ${len}m 절단 출고 완료!\n• 잔여 길이: ${d.remLen}m\n• 출고 거래처: ${client}`);
+}
+
+function saveNewRopeDrum() {
+  const name = ($('newDrumName').value || '').trim();
+  if (!name) { alert('로프 품목명 및 드럼명을 입력하세요.'); return; }
+  const initLen = parseFloat($('newDrumInitLen').value) || 500;
+  const spec = ($('newDrumSpec').value || '').trim();
+  const lotNo = ($('newDrumLot').value || '').trim() || 'PW-' + new Date().getFullYear();
+  const loc = ($('newDrumLoc').value || '').trim() || '창고 드럼보관대';
+  const itemCode = ($('newDrumItemCode').value || '').trim();
+
+  const nextSeq = (db.ropeDrums || []).length + 1;
+  const newId = `DRUM-${new Date().getFullYear().toString().slice(2)}${String(nextSeq).padStart(2, '0')}`;
+
+  db.ropeDrums.push({
+    id: newId,
+    name: name,
+    itemCode: itemCode,
+    spec: spec,
+    lotNo: lotNo,
+    initLen: initLen,
+    remLen: initLen,
+    loc: loc,
+    cuts: []
+  });
+
+  saveDB('신규로프드럼입고');
+  renderRopeDrums();
+  populateRopeDrumSelects();
+  $('newDrumName').value = '';
+  $('newDrumSpec').value = '';
+  alert(`✅ 신규 원통 드럼 [${newId}]이 성공적으로 입고 등록되었습니다!`);
+}
+
+function deleteRopeDrum(id) {
+  if (!confirm(`선택한 드럼 [${id}]을(를) 삭제하시겠습니까?`)) return;
+  db.ropeDrums = (db.ropeDrums || []).filter(x => x.id !== id);
+  saveDB('로프드럼삭제');
+  renderRopeDrums();
+  populateRopeDrumSelects();
+}
+
+function showDrumCutsHistory(drumId) {
+  const d = (db.ropeDrums || []).find(x => x.id === drumId);
+  if (!d) return;
+  const cuts = d.cuts || [];
+  if (cuts.length === 0) {
+    alert(`[${d.id}] 해당 드럼에서 진행된 절단 출고 이력이 아직 없습니다.`);
+    return;
+  }
+
+  const historyStr = cuts.map((c, i) =>
+    `${i + 1}. [${c.date}] ${c.client} - ${c.len}m 절단 (잔여: ${c.remAfter !== undefined ? c.remAfter : '-'}m) / 메모: ${c.note || '-'}`
+  ).join('\n');
+
+  alert(`📜 [${d.id} - ${d.name}] 절단 출고 이력 (${cuts.length}건)\n최초: ${d.initLen}m / 현재잔여: ${d.remLen}m\n\n${historyStr}`);
+}
+
+function optimizeRopeCut() {
+  const reqLen = parseFloat($('optRopeReqLen').value);
+  if (isNaN(reqLen) || reqLen <= 0) {
+    alert('고객이 주문한 절단 미터(m)를 입력하세요.');
+    return;
+  }
+
+  const drums = (db.ropeDrums || []).filter(d => (d.remLen || 0) >= reqLen);
+  const resBox = $('optRopeResultBox');
+  if (!resBox) return;
+
+  if (drums.length === 0) {
+    resBox.innerHTML = `
+      <div style="background:#fff1f2;border:1px solid #fecdd3;padding:12px;border-radius:6px;color:#9f1239;margin-top:8px">
+        ⚠️ <b>주문 길이(${reqLen}m)를 단일 충족하는 드럼이 없습니다!</b><br>
+        보유 드럼들의 잔여량이 부족하므로 신규 드럼 개봉 또는 고객 협의(분할 출고)가 필요합니다.
+      </div>
+    `;
+    return;
+  }
+
+  drums.forEach(d => {
+    const leftover = d.remLen - reqLen;
+    let score = 50;
+    let reason = '';
+    if (leftover === 0) {
+      score = 100;
+      reason = '🎯 완벽 일치! 자투리 손실(Loss) 0m (드럼 완전 소진)';
+    } else if (leftover >= 50) {
+      score = 80 + Math.min(15, leftover / 20);
+      reason = `✅ 우수! 절단 후 잔여 ${leftover}m는 50m 단위 규격품으로 재판매 가능`;
+    } else if (leftover >= 30) {
+      score = 65;
+      reason = `ℹ️ 양호! 절단 후 잔여 ${leftover}m`;
+    } else {
+      score = 30;
+      reason = `⚠️ 주의! 절단 후 ${leftover}m의 자투리 로스(Dead Scrap) 발생 위험`;
+    }
+    d._tempScore = score;
+    d._leftover = leftover;
+    d._reason = reason;
+  });
+
+  drums.sort((a, b) => b._tempScore - a._tempScore);
+
+  const best = drums[0];
+  resBox.innerHTML = `
+    <div style="background:#f0fdf4;border:2px solid #86efac;padding:12px;border-radius:8px;margin-top:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:14px;font-weight:900;color:#166534">🥇 AI 최적 드럼 추천: [${best.id}] ${best.name}</span>
+        <span class="bg bg-g" style="font-size:12px">적합도 점수: ${Math.round(best._tempScore)}점</span>
+      </div>
+      <div style="font-size:12.5px;color:#1e293b;line-height:1.6;margin-bottom:8px">
+        • 현재 잔여: <b>${best.remLen}m</b> ➔ <b>${reqLen}m</b> 절단 후 잔여: <b style="color:#0284c7">${best._leftover}m</b><br>
+        • 분석 결과: <b>${best._reason}</b> (위치: ${esc(best.loc||'창고')})
+      </div>
+      <button class="btn-p" style="padding:6px 14px;font-size:13px;background:#15803d;border-color:#166534" onclick="executeDrumCut('${best.id}', ${reqLen}, '주문고객', 'AI 최적절단 추천 출고')">
+        ✂️ [${best.id}] 드럼에서 ${reqLen}m 즉시 절단 출고 실행
+      </button>
+    </div>
+  `;
+}
+
+function printDrumQr(drumId) {
+  const d = (db.ropeDrums || []).find(x => x.id === drumId);
+  if (!d) return;
+
+  const w = window.open('', '_blank', 'width=520,height=560');
+  if (!w) { alert('팝업 차단을 해제해 주세요.'); return; }
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`ORA_DRUM:${d.id}:${d.remLen}M`)}`;
+  w.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>드럼 관리 라벨 - ${d.id}</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; margin: 20px; text-align: center; }
+        .card { border: 3px solid #0284c7; border-radius: 12px; padding: 20px; max-width: 380px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .brand { font-size: 13px; font-weight: bold; color: #0284c7; margin-bottom: 4px; }
+        .drum-id { font-size: 24px; font-weight: 900; color: #0f172a; margin-bottom: 8px; }
+        .name { font-size: 15px; font-weight: bold; color: #334155; margin-bottom: 6px; }
+        .spec { font-size: 12px; color: #64748b; margin-bottom: 12px; }
+        .qr { margin: 12px 0; }
+        .len-box { background: #e0f2fe; border: 1px solid #7dd3fc; padding: 10px; border-radius: 6px; margin-top: 10px; }
+        .len-val { font-size: 22px; font-weight: 900; color: #0369a1; }
+        @media print { button { display: none; } body { margin: 0; } }
+      </style>
+    </head>
+    <body>
+      <button onclick="window.print()" style="margin-bottom:15px;padding:8px 16px;background:#0284c7;color:#fff;border:none;border-radius:4px;font-weight:bold;cursor:pointer">🖨️ 원통 드럼 부착용 라벨 인쇄</button>
+      <div class="card">
+        <div class="brand">오라테크 ORA TECH • 와이어로프 관리원통</div>
+        <div class="drum-id">${esc(d.id)}</div>
+        <div class="name">${esc(d.name)}</div>
+        <div class="spec">${esc(d.spec||'')} | 로트: ${esc(d.lotNo||'-')}</div>
+        <div class="qr"><img src="${qrUrl}" width="160" height="160" alt="QR" /></div>
+        <div class="len-box">
+          <div style="font-size:12px;color:#0284c7;font-weight:bold">원통 총 길이: ${fmt(d.initLen)} m</div>
+          <div class="len-val">잔여: ${fmt(d.remLen)} m</div>
+          <div style="font-size:11px;color:#64748b;margin-top:4px">보관위치: ${esc(d.loc||'창고')}</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
+  w.document.close();
+}
+
+window.generateCode128Svg = generateCode128Svg;
+window.playScanBeep = playScanBeep;
+window.openBarcodeAuditModal = openBarcodeAuditModal;
+window.initStockAuditData = initStockAuditData;
+window.renderStockAuditTable = renderStockAuditTable;
+window.updateAuditQty = updateAuditQty;
+window.setAuditQtyDirect = setAuditQtyDirect;
+window.handleBarcodeInput = handleBarcodeInput;
+window.toggleBarcodeCamera = toggleBarcodeCamera;
+window.applyStockAudit = applyStockAudit;
+window.resetStockAudit = resetStockAudit;
+window.printAllItemLabels = printAllItemLabels;
+window.printSingleLabel = printSingleLabel;
+window.openBarcodePrintWindow = openBarcodePrintWindow;
+
+window.ensureDefaultRopeDrums = ensureDefaultRopeDrums;
+window.openRopeDrumModal = openRopeDrumModal;
+window.renderRopeDrums = renderRopeDrums;
+window.populateRopeDrumSelects = populateRopeDrumSelects;
+window.quickCutRope = quickCutRope;
+window.executeDrumCut = executeDrumCut;
+window.saveNewRopeDrum = saveNewRopeDrum;
+window.deleteRopeDrum = deleteRopeDrum;
+window.showDrumCutsHistory = showDrumCutsHistory;
+window.optimizeRopeCut = optimizeRopeCut;
+window.printDrumQr = printDrumQr;
+
+
 // ==================== ESTIMATES CRUD (es prefix) ====================
 function addEstLine(){
   const rawName = ($('esItem').value||'').trim();
@@ -5009,19 +6493,24 @@ function getItemStats(){
 function renderAll(){
   cachedCliStats = null;
   cachedItmStats = null;
-  const sDate = $('fStart').value || '2000-01-01';
-  const eDate = $('fEnd').value || '2099-12-31';
+  const sDate = ($('fStart') && $('fStart').value) || '2000-01-01';
+  const eDate = ($('fEnd') && $('fEnd').value) || '2099-12-31';
 
-  renderKPI(sDate, eDate);
-  renderSales(sDate, eDate);
-  renderEstimates(sDate, eDate);
-  renderPurchases(sDate, eDate);
-  renderClients();
-  renderItems();
-  renderVatAndExp(sDate, eDate);
-  renderDashboard();
-  renderCalendar();
-  renderBomSelects();
+  if(typeof renderKPI === 'function') renderKPI(sDate, eDate);
+  if(typeof renderSales === 'function') renderSales(sDate, eDate);
+  if(typeof renderEstimates === 'function') renderEstimates(sDate, eDate);
+  if(typeof renderPurchases === 'function') renderPurchases(sDate, eDate);
+  if(typeof renderClients === 'function') renderClients();
+  if(typeof renderItems === 'function') renderItems();
+  if(typeof renderVatAndExp === 'function') renderVatAndExp(sDate, eDate);
+  if(typeof renderDashboard === 'function') renderDashboard();
+  else if(typeof window.renderDashboard === 'function') window.renderDashboard();
+  if(typeof renderWebQuotes === 'function') renderWebQuotes();
+  else if(typeof window.renderWebQuotes === 'function') window.renderWebQuotes();
+  if(typeof renderCalendar === 'function') renderCalendar();
+  else if(typeof window.renderCalendar === 'function') window.renderCalendar();
+  if(typeof renderBomSelects === 'function') renderBomSelects();
+  else if(typeof window.renderBomSelects === 'function') window.renderBomSelects();
 }
 
 function renderKPI(sDate, eDate){
@@ -6039,6 +7528,7 @@ window.goTab = function(target, tabEl){
   document.querySelectorAll('.page').forEach((el, i) => el.classList.toggle('active', i === idx));
   document.querySelectorAll('.nav .tab').forEach((el, i) => el.classList.toggle('active', i === idx));
   if(tabs[idx] === 't-dash') renderDashboard();
+  if(tabs[idx] === 't-est') renderWebQuotes();
   if(tabs[idx] === 't-cal') renderCalendar();
 };
 
@@ -6048,7 +7538,8 @@ window.goUnpaidClients = function(){
   renderClients();
 };
 
-window.setPeriod = function(mode){
+function setPeriod(mode){
+  window.setPeriod = setPeriod;
   const now = new Date();
   const y = now.getFullYear(), m = now.getMonth();
   if(mode === 'today'){
@@ -6394,6 +7885,36 @@ function processVoiceCommand(rawText, targetMode){
 
 // ==================== INITIALIZATION ====================
 window.addEventListener('DOMContentLoaded', async () => {
+  // Web Quote Event Listeners (PostMessage from preview iframe, BroadcastChannel, Storage)
+  window.addEventListener('message', function(ev){
+    if(ev && ev.data && ev.data.type === 'ORA_WEB_QUOTE'){
+      addWebQuoteToErp(ev.data.data, true);
+    }
+  });
+
+  try {
+    if(typeof BroadcastChannel !== 'undefined'){
+      const bc = new BroadcastChannel('ora_erp_channel');
+      bc.onmessage = function(ev){
+        if(ev && ev.data && ev.data.type === 'ORA_WEB_QUOTE'){
+          addWebQuoteToErp(ev.data.data, true);
+        }
+      };
+    }
+  } catch(e){}
+
+  window.addEventListener('storage', function(ev){
+    if(ev.key === 'ora_web_quotes'){
+      refreshWebQuotes(false);
+    }
+  });
+
+  setInterval(function(){
+    if(typeof isSyncBusy !== 'undefined' && !isSyncBusy && document.visibilityState !== 'hidden'){
+      refreshWebQuotes(false);
+    }
+  }, 45000);
+
   if(sGet('ora_senior_mode') === '1') toggleSeniorMode(true);
   if(sGet('ora_hide_profit') === '1') toggleHideProfit(true);
 
@@ -6830,11 +8351,16 @@ let fmFilterMode = 'PEND';
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    normDB();
-    injectAllShortcutButtons();
-    fetchLiveExchangeRates(false);
-    updateFamilyMemoBadge();
-    setTimeout(() => { enhanceItemsTableWithDepletion(); }, 350);
+    if(typeof normDB === 'function') normDB();
+    if(typeof injectAllShortcutButtons === 'function') injectAllShortcutButtons();
+    if(typeof window.fetchLiveExchangeRates === 'function') window.fetchLiveExchangeRates(false);
+    else if(typeof fetchLiveExchangeRates === 'function') fetchLiveExchangeRates(false);
+    if(typeof window.updateFamilyMemoBadge === 'function') window.updateFamilyMemoBadge();
+    else if(typeof updateFamilyMemoBadge === 'function') updateFamilyMemoBadge();
+    setTimeout(() => {
+      if(typeof window.enhanceItemsTableWithDepletion === 'function') window.enhanceItemsTableWithDepletion();
+      else if(typeof enhanceItemsTableWithDepletion === 'function') enhanceItemsTableWithDepletion();
+    }, 350);
   });
 
   const origRenderItems = window.renderItems;
@@ -6874,6 +8400,22 @@ function injectAllShortcutButtons(){
     wBtn.style.cssText = 'background:#d35400;border:1px solid #fff;font-weight:900';
     wBtn.innerHTML = '🧙‍♂️ 윈치추천마법사';
     wBtn.onclick = () => openWinchWizard();
+
+    const bcBtn = document.createElement('button');
+    bcBtn.id = 'btnTopBarcodeInjected';
+    bcBtn.className = 'btn-p';
+    bcBtn.style.cssText = 'background:#2563eb;border:2px solid #fff;font-weight:900;box-shadow:0 2px 4px rgba(0,0,0,0.2)';
+    bcBtn.innerHTML = '📷 바코드실사';
+    bcBtn.onclick = () => openBarcodeAuditModal();
+    if(topRight) topRight.insertBefore(bcBtn, topRight.firstChild);
+
+    const rdBtn = document.createElement('button');
+    rdBtn.id = 'btnTopRopeDrumInjected';
+    rdBtn.className = 'btn-g';
+    rdBtn.style.cssText = 'background:#0284c7;border:2px solid #fff;font-weight:900;box-shadow:0 2px 4px rgba(0,0,0,0.2)';
+    rdBtn.innerHTML = '🌀 로프드럼';
+    rdBtn.onclick = () => openRopeDrumModal();
+    if(topRight) topRight.insertBefore(rdBtn, topRight.firstChild);
 
     const rBtn = document.createElement('button');
     rBtn.id = 'btnTopRope';
@@ -8695,6 +10237,8 @@ window.clearDoneFamilyMemos = function(){
       addr:'서울특별시 중구 청계천로 110, 1층(수표동)',
       bank:'우리은행 011-058791-12-001 (예금주: 김향래)'
     };
+    var tgCfg = (typeof getTgConfig === 'function') ? getTgConfig() : { token: DEF_TOK, cid: DEF_CID };
+    var gasUrl = (window.db && window.db.gasQuoteUrl) || '';
     var merged = (window.ORAWINCH_WEB_CATALOG || []).slice();
 
     ((window.db && window.db.items) || []).forEach(function(it){
@@ -9185,7 +10729,10 @@ footer { background: #071330; color: #CBD5E1; padding: 52px 24px; font-size: 13.
         </div>
         <input id="inqModel" placeholder="문의 모델명 또는 필요 사양 (예: PCW-5000 2대, YT-300 1대)" style="width:100%;padding:11px;border:1px solid #CBD5E1;border-radius:8px;margin-bottom:10px">
         <textarea id="inqMsg" rows="3" placeholder="납기 일정, 세금계산서/관공서 서류 요청, 로프 길이 변경 등 문의사항을 남겨주세요." style="width:100%;padding:11px;border:1px solid #CBD5E1;border-radius:8px;margin-bottom:12px"></textarea>
-        <button type="button" class="btn btn-blue" style="width:100%;padding:13px;font-size:15px" onclick="submitQuickInquiry()">📋 문의내용 복사 및 이메일/카톡 발송</button>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn btn-white" style="flex:1;padding:12px;font-size:14px" onclick="copyQuickInquiry()">📋 내용 복사</button>
+          <button type="button" class="btn btn-blue" id="btnQuickSubmit" style="flex:2;padding:12px;font-size:14px;font-weight:900" onclick="submitQuickInquiry()">🚀 견적·상담 접수 (ERP+텔레그램)</button>
+        </div>
       </div>
     </div>
   </div>
@@ -9236,14 +10783,20 @@ footer { background: #071330; color: #CBD5E1; padding: 52px 24px; font-size: 13.
       <button type="button" class="btn btn-white" style="padding:5px 12px;font-size:12px" onclick="document.getElementById('cartModal').style.display='none'">✕ 닫기</button>
     </div>
     <div class="m-body" id="cartBody"></div>
-    <div class="m-ft">
+    <div class="m-ft" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
       <button type="button" class="btn btn-white" onclick="cart=[];updateCartBadge();openCartModal()">목록 비우기</button>
-      <button type="button" class="btn btn-blue" onclick="copyCartInquiry()">📋 견적요청서 내용 복사 (메일/카톡 전송용)</button>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="btn btn-white" onclick="copyCartInquiry()">📋 내용 복사</button>
+        <button type="button" class="btn btn-blue" id="btnSubmitCartQuote" style="background:#1D4ED8;color:#fff;font-weight:900;padding:10px 18px" onclick="submitCartQuote()">🚀 공식 견적서 발송 요청 (ERP+텔레그램 접수)</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+var TG_BOT_TOKEN = ${JSON.stringify(tgCfg.token || '')};
+var TG_CHAT_ID = ${JSON.stringify(tgCfg.cid || '')};
+var GAS_QUOTE_URL = ${JSON.stringify(gasUrl)};
 var ITEMS = ${catalogJson};
 var curCat = "ALL", curCap = "ALL", viewMode = "card", isAdmin = false, cart = [];
 
@@ -9481,9 +11034,16 @@ function openCartModal(){
             + '<td><button type="button" class="btn btn-white" style="padding:4px 8px;font-size:11px" onclick="cart.splice(' + i + ',1);updateCartBadge();openCartModal()">✕</button></td></tr>';
         }).join("")
       + '</tbody></table>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-      + '  <input id="reqClientName" placeholder="업체명 / 기관명 (예: 강릉산림조합)" style="padding:10px;border:1px solid var(--bdr);border-radius:8px">'
-      + '  <input id="reqClientTel" placeholder="회신받으실 연락처 (예: 010-0000-0000)" style="padding:10px;border:1px solid var(--bdr);border-radius:8px">'
+      + '<div style="background:#F8FAFC;border:1.5px solid var(--bdr);padding:14px;border-radius:10px;margin-bottom:12px">'
+      + '  <div style="font-weight:800;color:var(--ora-navy);font-size:13px;margin-bottom:8px">📝 견적서 수신처 및 요청사항 입력 (ERP & 텔레그램 실시간 접수)</div>'
+      + '  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">'
+      + '    <input id="reqClientName" placeholder="업체명 / 기관명 / 성함 (필수)*" style="padding:10px;border:1px solid var(--bdr);border-radius:8px;font-weight:700">'
+      + '    <input id="reqClientTel" placeholder="회신받으실 연락처 (예: 010-0000-0000) (필수)*" style="padding:10px;border:1px solid var(--bdr);border-radius:8px;font-weight:700">'
+      + '  </div>'
+      + '  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + '    <input id="reqClientEmail" placeholder="견적서 수신 이메일 (선택)" style="padding:10px;border:1px solid var(--bdr);border-radius:8px">'
+      + '    <input id="reqClientMemo" placeholder="요청사항 (용도, 현장전원, 희망납기 등)" style="padding:10px;border:1px solid var(--bdr);border-radius:8px">'
+      + '  </div>'
       + '</div>';
   }
   document.getElementById("cartModal").style.display = "flex";
@@ -9491,8 +11051,8 @@ function openCartModal(){
 
 function copyCartInquiry(){
   if(!cart.length){ alert("담긴 모델이 없습니다."); return; }
-  var cName = (document.getElementById("reqClientName") ? document.getElementById("reqClientName").value : "") || "문의고객";
-  var cTel = (document.getElementById("reqClientTel") ? document.getElementById("reqClientTel").value : "") || "연락처미기재";
+  var cName = (document.getElementById("reqClientName") ? document.getElementById("reqClientName").value.trim() : "") || "문의고객";
+  var cTel = (document.getElementById("reqClientTel") ? document.getElementById("reqClientTel").value.trim() : "") || "연락처미기재";
   var lines = cart.map(function(c){ return "- " + c.code + " : " + c.qty + "대(개)"; }).join("\\n");
   var msg = "[오라테크 공식 홈페이지 견적요청]\\n• 업체/기관명: " + cName + "\\n• 연락처: " + cTel + "\\n• 문의모델:\\n" + lines + "\\n\\n위 모델에 대한 견적서 및 납기 안내를 요청합니다.";
   navigator.clipboard.writeText(msg).then(function(){
@@ -9500,7 +11060,126 @@ function copyCartInquiry(){
   });
 }
 
-function submitQuickInquiry(){
+async function submitCartQuote(){
+  if(!cart.length){ alert("견적문의함에 담긴 모델이 없습니다. 제품에서 [+견적문의 담기]를 눌러주세요."); return; }
+  var cName = (document.getElementById("reqClientName") ? document.getElementById("reqClientName").value.trim() : "");
+  var cTel = (document.getElementById("reqClientTel") ? document.getElementById("reqClientTel").value.trim() : "");
+  var cEmail = (document.getElementById("reqClientEmail") ? document.getElementById("reqClientEmail").value.trim() : "");
+  var cMemo = (document.getElementById("reqClientMemo") ? document.getElementById("reqClientMemo").value.trim() : "");
+
+  if(!cName){ alert("업체명 또는 성함을 입력해주세요."); document.getElementById("reqClientName").focus(); return; }
+  if(!cTel){ alert("회신받으실 연락처(전화번호)를 입력해주세요."); document.getElementById("reqClientTel").focus(); return; }
+
+  var btn = document.getElementById("btnSubmitCartQuote");
+  if(btn){ btn.disabled = true; btn.innerText = "⏳ 견적요청 전송 중..."; }
+
+  var now = new Date();
+  var dateStr = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+  var timeStr = String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0") + ":" + String(now.getSeconds()).padStart(2,"0");
+  var fullTime = dateStr + " " + timeStr;
+
+  var lines = cart.map(function(c){
+    var itm = ITEMS.find(function(x){ return x.code === c.code; }) || {};
+    return {
+      code: c.code,
+      name: itm.name || c.code,
+      cap: itm.cap || '',
+      spec: itm.rope || itm.cap || '',
+      qty: Number(c.qty) || 1,
+      price: Number(itm.price) || 0
+    };
+  });
+
+  var quotePayload = {
+    id: Date.now(),
+    date: dateStr,
+    time: fullTime,
+    client: cName,
+    tel: cTel,
+    email: cEmail,
+    memo: cMemo,
+    lines: lines,
+    status: '신규접수',
+    source: '홈페이지 견적문의함'
+  };
+
+  // 1) Broadcast to ERP in real-time
+  try {
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({ type: 'ORA_WEB_QUOTE', data: quotePayload }, '*');
+    }
+  } catch(e){}
+
+  try {
+    if(typeof BroadcastChannel !== 'undefined'){
+      var bc = new BroadcastChannel('ora_erp_channel');
+      bc.postMessage({ type: 'ORA_WEB_QUOTE', data: quotePayload });
+    }
+  } catch(e){}
+
+  try {
+    var stored = [];
+    try { stored = JSON.parse(localStorage.getItem('ora_web_quotes') || '[]'); } catch(e){}
+    stored.unshift(quotePayload);
+    localStorage.setItem('ora_web_quotes', JSON.stringify(stored.slice(0, 50)));
+  } catch(e){}
+
+  // 2) Telegram Notification Alert
+  var tgLinesText = lines.map(function(l, i){
+    return (i+1) + ". " + l.code + (l.name && l.name !== l.code ? " (" + l.name + ")" : "") + " × " + l.qty + "대";
+  }).join("\\n");
+
+  var tgMsg = "🔔 [오라테크 홈페이지 신규 견적요청 도착!]\\n"
+    + "━━━━━━━━━━━━━━━━━━━\\n"
+    + "🏢 업체/기관명: " + cName + "\\n"
+    + "📞 회신연락처: " + cTel + (cEmail ? ("\\n📧 이메일: " + cEmail) : "") + "\\n"
+    + (cMemo ? ("📝 요청메모: " + cMemo + "\\n") : "")
+    + "━━━━━━━━━━━━━━━━━━━\\n"
+    + "📦 견적요청 모델:\\n" + tgLinesText + "\\n"
+    + "━━━━━━━━━━━━━━━━━━━\\n"
+    + "⏰ 접수일시: " + fullTime + "\\n"
+    + "👉 오라테크 ERP [견적서 관리] 탭에서 1클릭으로 공식 견적서를 발행하실 수 있습니다!";
+
+  var tgSent = false;
+  if(typeof GAS_QUOTE_URL !== 'undefined' && GAS_QUOTE_URL){
+    try {
+      await fetch(GAS_QUOTE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'new_quote', quote: quotePayload, tgMsg: tgMsg })
+      });
+      tgSent = true;
+    } catch(err){
+      console.warn("GAS send failed:", err);
+    }
+  }
+
+  if(!tgSent && typeof TG_BOT_TOKEN !== 'undefined' && TG_BOT_TOKEN && typeof TG_CHAT_ID !== 'undefined' && TG_CHAT_ID){
+    try {
+      await fetch("https://api.telegram.org/bot" + TG_BOT_TOKEN + "/sendMessage", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TG_CHAT_ID, text: tgMsg })
+      });
+      tgSent = true;
+    } catch(err){
+      console.warn("Direct Telegram send failed:", err);
+    }
+  }
+
+  if(btn){ btn.disabled = false; btn.innerText = "🚀 공식 견적서 발송 요청 (ERP+텔레그램 접수)"; }
+
+  cart = [];
+  updateCartBadge();
+  document.getElementById("cartModal").style.display = "none";
+
+  alert("🎉 [견적요청 접수 완료!]\\n\\n"
+    + "• 업체명: " + cName + "\\n"
+    + "• 품목: " + lines.length + "종 (" + lines.map(function(l){ return l.code; }).join(", ") + ")\\n\\n"
+    + "오라테크 ERP 시스템 및 텔레그램으로 접수되었습니다.\\n담당자가 확인 후 신속히 연락 및 견적서를 송부해 드리겠습니다!\\n(직통 문의: 1600-5157)");
+}
+
+function copyQuickInquiry(){
   var compName = document.getElementById("inqComp").value.trim() || "문의업체";
   var tel = document.getElementById("inqTel").value.trim() || "연락처미기재";
   var model = document.getElementById("inqModel").value.trim() || "일반문의";
@@ -9509,6 +11188,97 @@ function submitQuickInquiry(){
   navigator.clipboard.writeText(msg).then(function(){
     alert("📋 문의 내용이 클립보드에 복사되었습니다!\\n카카오톡이나 문자, 이메일(orawinch@naver.com)에 붙여넣기(Ctrl+V)로 바로 보내실 수 있습니다.");
   });
+}
+
+async function submitQuickInquiry(){
+  var compName = document.getElementById("inqComp").value.trim();
+  var tel = document.getElementById("inqTel").value.trim();
+  var model = document.getElementById("inqModel").value.trim() || "일반 제품문의";
+  var memo = document.getElementById("inqMsg").value.trim() || "-";
+
+  if(!compName){ alert("업체명 또는 성함을 입력해주세요."); document.getElementById("inqComp").focus(); return; }
+  if(!tel){ alert("연락처를 입력해주세요."); document.getElementById("inqTel").focus(); return; }
+
+  var btn = document.getElementById("btnQuickSubmit");
+  if(btn){ btn.disabled = true; btn.innerText = "⏳ 전송 중..."; }
+
+  var now = new Date();
+  var dateStr = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0") + "-" + String(now.getDate()).padStart(2,"0");
+  var fullTime = dateStr + " " + String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0") + ":" + String(now.getSeconds()).padStart(2,"0");
+
+  var quotePayload = {
+    id: Date.now(),
+    date: dateStr,
+    time: fullTime,
+    client: compName,
+    tel: tel,
+    email: '',
+    memo: '[빠른문의] ' + memo,
+    lines: [{ code: model, name: model, qty: 1, price: 0 }],
+    status: '신규접수',
+    source: '홈페이지 빠른문의'
+  };
+
+  try {
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({ type: 'ORA_WEB_QUOTE', data: quotePayload }, '*');
+    }
+  } catch(e){}
+
+  try {
+    if(typeof BroadcastChannel !== 'undefined'){
+      var bc = new BroadcastChannel('ora_erp_channel');
+      bc.postMessage({ type: 'ORA_WEB_QUOTE', data: quotePayload });
+    }
+  } catch(e){}
+
+  try {
+    var stored = [];
+    try { stored = JSON.parse(localStorage.getItem('ora_web_quotes') || '[]'); } catch(e){}
+    stored.unshift(quotePayload);
+    localStorage.setItem('ora_web_quotes', JSON.stringify(stored.slice(0, 50)));
+  } catch(e){}
+
+  var tgMsg = "🔔 [오라테크 홈페이지 빠른 온라인 문의 접수!]\\n"
+    + "━━━━━━━━━━━━━━━━━━━\\n"
+    + "🏢 업체명: " + compName + "\\n"
+    + "📞 연락처: " + tel + "\\n"
+    + "📦 문의모델: " + model + "\\n"
+    + "💬 상세내용: " + memo + "\\n"
+    + "━━━━━━━━━━━━━━━━━━━\\n"
+    + "⏰ 접수시간: " + fullTime;
+
+  var tgSent = false;
+  if(typeof GAS_QUOTE_URL !== 'undefined' && GAS_QUOTE_URL){
+    try {
+      await fetch(GAS_QUOTE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'new_quote', quote: quotePayload, tgMsg: tgMsg })
+      });
+      tgSent = true;
+    } catch(e){}
+  }
+
+  if(!tgSent && typeof TG_BOT_TOKEN !== 'undefined' && TG_BOT_TOKEN && typeof TG_CHAT_ID !== 'undefined' && TG_CHAT_ID){
+    try {
+      await fetch("https://api.telegram.org/bot" + TG_BOT_TOKEN + "/sendMessage", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TG_CHAT_ID, text: tgMsg })
+      });
+      tgSent = true;
+    } catch(e){}
+  }
+
+  if(btn){ btn.disabled = false; btn.innerText = "🚀 견적·상담 접수 (ERP+텔레그램)"; }
+
+  document.getElementById("inqComp").value = "";
+  document.getElementById("inqTel").value = "";
+  document.getElementById("inqModel").value = "";
+  document.getElementById("inqMsg").value = "";
+
+  alert("🎉 [온라인 문의 접수 완료!]\\n\\n오라테크 ERP 시스템 및 텔레그램으로 즉시 접수되었습니다.\\n담당자가 확인 후 신속히 연락드리겠습니다! (직통: 1600-5157)");
 }
 
 function toggleAdminMode(){
