@@ -348,33 +348,40 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   </div>
 </div>
 
-<!-- 🤖 AI 비서 & 카톡주문 자동인식 모달 -->
+<!-- 🤖 AI 비서 & 카톡주문 자동인식 모달 (Gemini 4 Carbon Direct Engine) -->
 <div class="modal-bg" id="aiModal" style="z-index:1250">
-  <div class="modal" style="width:680px;max-height:92vh">
-    <div class="mh" style="background:linear-gradient(90deg,#4a148c,#7b1fa2)">
-      <span>🤖 오라테크 AI 비서 (카톡주문서 자동전표화 / 미수금 안내문 / AI 경영상담)</span>
+  <div class="modal" style="width:740px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#31102f,#5b21b6,#1d4ed8)">
+      <span>💎 오라테크 Gemini 4 Carbon AI 비서 (구어체 카톡발주 해독 / 맞춤 정산문 / 실시간 경영전략)</span>
       <button class="btn-r" onclick="closeModal('aiModal')">✕ 닫기</button>
     </div>
     <div class="mb" style="font-size:12.5px;line-height:1.55">
-      <div style="background:#f3e5f5;border:1px solid #ce93d8;padding:10px;border-radius:6px;margin-bottom:12px">
-        <div style="font-weight:900;color:#4a148c;font-size:13.5px;margin-bottom:4px">⚡ 1. 카톡·문자·이메일 주문 내용 붙여넣기 ➔ 1초 자동 전표 입력</div>
-        <p style="font-size:11.5px;color:#444;margin-bottom:6px">거래처에서 보낸 카톡이나 문자(예: <code>"한진기계입니다 PCW-5000 2대, PCA-1260 3개 발주합니다"</code>)를 아래에 붙여넣으세요.</p>
-        <textarea id="aiOrderText" rows="3" placeholder="여기에 카톡/문자 주문 내용을 붙여넣으세요... (예: 대한물산 PCW5000 2개, PCA1260 5개 주문합니다)" style="width:100%;padding:8px;border:2px solid #8e44ad;border-radius:4px;font-weight:bold"></textarea>
-        <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
-          <button class="btn-pur" style="padding:7px 14px" onclick="aiParseOrderToSlip('sale')">📈 AI 분석 후 [매출전표]에 자동채우기</button>
-          <button class="btn-s" style="padding:7px 14px" onclick="aiParseOrderToSlip('est')">📋 AI 분석 후 [견적서]에 자동채우기</button>
+      <div style="background:#f3e5f5;border:1.5px solid #a855f7;padding:10px;border-radius:6px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px">
+          <span style="font-weight:900;color:#4a148c;font-size:13.5px">⚡ 1. 카톡·문자·구어체 발주서 붙여넣기 ➔ 1초 자동 전표 입력</span>
+          <span id="carbonOrderParseStatus" style="font-size:11px;font-weight:bold;color:#6b21a8">💎 Gemini 4 Carbon 구어체·은어 매칭 대기중</span>
+        </div>
+        <p style="font-size:11.5px;color:#444;margin-bottom:6px">정식 모델명은 물론 <b>현장 은어·구어체</b>(예: <code>"강릉산림조합입니다 혼다 5톤 엔진윈치 2대랑 12미리 자일 100m, 스텐 활차 2개 화물로 보내주세요"</code>)도 카본 모델이 정확히 표준 품목코드로 변환합니다.</p>
+        <textarea id="aiOrderText" rows="3" placeholder="여기에 카톡/문자 주문 내용을 붙여넣으세요... (예: 한진기계 PCW5000 2대, 12mm 로프 1개, 단활차 1개 발주합니다)" style="width:100%;padding:8px;border:2px solid #8e44ad;border-radius:4px;font-weight:bold"></textarea>
+        <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn-pur" style="padding:7px 12px;background:linear-gradient(90deg,#6d28d9,#2563eb);font-weight:900" onclick="aiParseOrderWithCarbon('sale')">💎 카본 AI 초정밀 해독 ➔ [매출전표]</button>
+          <button class="btn-s" style="padding:7px 12px;background:#0284c7;font-weight:900" onclick="aiParseOrderWithCarbon('est')">💎 카본 AI 초정밀 해독 ➔ [견적서]</button>
+          <button class="btn-w" style="padding:7px 10px" onclick="aiParseOrderToSlip('sale')">⚡ 빠른 코드인식(매출)</button>
         </div>
       </div>
 
-      <div style="background:#fff8e6;border:1px solid #f39c12;padding:10px;border-radius:6px;margin-bottom:12px">
-        <div style="font-weight:900;color:#d35400;font-size:13.5px;margin-bottom:4px">💬 2. 거래처 미수금 정중한 카톡/문자 안내문 자동 생성기</div>
+      <div style="background:#fff8e6;border:1.5px solid #f39c12;padding:10px;border-radius:6px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px">
+          <span style="font-weight:900;color:#d35400;font-size:13.5px">💬 2. 거래처 미수금 카톡/문자 정산 안내문 생성기 (기본 양식 + 카본 AI 맞춤 작성)</span>
+          <button class="btn-pur" style="padding:4px 10px;font-size:11.5px;background:#7c3aed;font-weight:900" onclick="aiGenerateCarbonArMsg()">💎 카본 AI로 이 거래처 맞춤 정산문 새로 쓰기</button>
+        </div>
         <div class="fg" style="margin-top:6px">
           <div class="c6"><select id="aiArClientSel" style="width:100%" onchange="aiGenerateArMsg()"></select></div>
           <div class="c6">
             <select id="aiArToneSel" style="width:100%" onchange="aiGenerateArMsg()">
-              <option value="polite">① 정중한 정산 안내 (부드러운 어조)</option>
-              <option value="statement">② 명세서·원장 송부 및 잔액 확인</option>
-              <option value="urgent">③ 장기 미수금 결제 기한 요청 (단호·정중)</option>
+              <option value="polite">① 정중한 정산 안내 (관계 유지형)</option>
+              <option value="statement">② 명세서·원장 송부 및 월말 마감 확인</option>
+              <option value="urgent">③ 장기 미수금 결제 기한 요청 (단호·실무형)</option>
             </select>
           </div>
         </div>
@@ -384,22 +391,23 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         </div>
       </div>
 
-      <div style="background:#e8f4fd;border:1px solid #90caf9;padding:10px;border-radius:6px">
+      <div style="background:#e8f4fd;border:1.5px solid #90caf9;padding:10px;border-radius:6px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px">
-          <span style="font-weight:900;color:#0d47a1;font-size:13.5px">🧠 3. AI 경영비서에게 장부 질문하기 (내장 AI 즉시답변 + Gemini 연동)</span>
-          <input type="password" id="geminiApiKey" placeholder="(선택) Google Gemini API 키 입력시 초지능 답변" style="width:240px;font-size:11px" onchange="sSet('ora_gemini_key',this.value.trim())">
+          <span style="font-weight:900;color:#0d47a1;font-size:13.5px">🧠 3. Gemini 4 Carbon 경영비서 실시간 장부 브리핑 & 전략 상담</span>
+          <input type="password" id="geminiApiKey" value="" placeholder="Google Gemini 4 Carbon API Key" style="width:220px;font-size:11px" onchange="sSet('ora_gemini_key',this.value.trim())">
         </div>
         <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+          <button class="btn-w" style="font-size:11px;font-weight:bold;border-color:#2563eb;color:#1d4ed8" onclick="askAiAssistant('현재 장부 데이터를 바탕으로 이번 주 당장 실행해야 할 미수금 회수, 재고 발주, 주력 품목 영업 액션플랜 3가지를 대표님 보고용으로 명확히 브리핑해줘')">💎 카본 AI 오늘의 핵심 액션플랜</button>
           <button class="btn-w" style="font-size:11px" onclick="askAiAssistant('이번 달 매출과 순이익 요약해주고 전월 대비 어때?')">📊 이번 달 실적 분석</button>
           <button class="btn-w" style="font-size:11px" onclick="askAiAssistant('우리 회사에서 가장 마진이 많이 남는 효자 품목과 거래처 TOP 5 알려줘')">🏆 효자 품목·거래처</button>
           <button class="btn-w" style="font-size:11px" onclick="askAiAssistant('현재 미수금이 가장 많은 거래처들과 회수 전략 알려줘')">🚨 미수금 위험 진단</button>
           <button class="btn-w" style="font-size:11px" onclick="askAiAssistant('재고 부족으로 당장 발주해야 할 품목 알려줘')">📦 발주 필요 품목</button>
         </div>
         <div style="display:flex;gap:4px">
-          <input id="aiQuestionIn" placeholder="궁금한 점을 물어보세요 (예: 한진기계 미수금 얼마야? / 올해 매출 추이 분석해줘)" style="flex:1;padding:7px" onkeydown="if(event.key==='Enter')askAiAssistant()">
-          <button class="btn-p" onclick="askAiAssistant()">🤖 AI 질문</button>
+          <input id="aiQuestionIn" placeholder="궁금한 점을 물어보세요 (예: 한진기계 미수금 얼마야? / 산림조합 객단가 올리는 세트 구성 추천해줘)" style="flex:1;padding:7px" onkeydown="if(event.key==='Enter')askAiAssistant()">
+          <button class="btn-p" onclick="askAiAssistant()">💎 카본 질문</button>
         </div>
-        <div id="aiAnswerBox" style="background:#fff;border:1px solid #bbdefb;padding:10px;border-radius:4px;margin-top:8px;min-height:70px;white-space:pre-line;font-size:12.5px;color:#111">💡 위 질문 버튼을 누르거나 질문을 입력하시면 실시간 장부 데이터를 분석해 답변해 드립니다.</div>
+        <div id="aiAnswerBox" style="background:#fff;border:1px solid #bbdefb;padding:10px;border-radius:4px;margin-top:8px;min-height:70px;white-space:pre-line;font-size:12.5px;color:#111">💡 위 질문 버튼을 누르거나 질문을 입력하시면 내장 요약과 함께 <b>Gemini 4 Carbon</b> 모델이 실시간 장부 데이터를 분석해 답변해 드립니다.</div>
       </div>
     </div>
     <div class="mf">
@@ -748,31 +756,19 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   </div>
 </div>
 
-<!-- Top Bar -->
+<!-- Top Bar (간결화된 핵심 상단바 - 상세 도구·백업 버튼은 모두 [⚙️ 기초정보·설정] 탭으로 통합) -->
 <div class="topbar">
   <div class="brand">
-    🌐 통합 무역·유통 경리회계 ERP Pro <span>오라테크 v43 풀옵션</span>
+    🌐 통합 무역·유통 경리회계 ERP Pro <span>오라테크 v48 Carbon</span>
     <span id="cloudBadge" onclick="openTgModal()" style="background:#0088cc;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff">☁️ 클라우드 대기중</span>
-    <span id="autoBakBadge" onclick="connectAutoBackupFolder()" style="background:#c0392b;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff" title="클릭하여 내 컴퓨터의 자동백업 폴더(카카오톡/바탕화면 등)를 지정하세요">📁 컴퓨터 자동백업: 미연결(클릭)</span>
+    <span id="autoBakBadge" onclick="connectAutoBackupFolder()" style="background:#c0392b;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff" title="클릭하여 내 컴퓨터의 자동백업 폴더를 지정하세요">📁 자동백업: 미연결</span>
   </div>
-  <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
-    <button id="seniorModeBtn" class="btn-a" style="background:#f39c12;color:#111;border:2px solid #fff;font-weight:900" onclick="toggleSeniorMode()" title="아버님을 위한 큰글씨·고대비 효도모드">🔍 큰글씨 효도모드 OFF</button>
-    <button id="hideProfitBtn" class="btn-w" style="border:2px solid #fff;font-weight:900" onclick="toggleHideProfit()" title="손님과 함께 화면을 볼 때 원가와 마진 금액을 즉시 블러(숨김) 처리합니다">👁️ 마진숨김 OFF</button>
-    <button id="voiceTopBtn" class="btn-r" style="background:#e84393;border:1px solid #fff;font-weight:900" onclick="startVoiceRecognition('global')" title="마이크에 대고 거래처명이나 모델명을 말씀하시면 자동 검색·입력됩니다">🎙️ 음성비서</button>
-    <button class="btn-s" style="background:#0984e3;border:1px solid #fff" onclick="openSpecSheetModal()" title="모델별 견인력·중량·와이어·호환부품 컨닝페이퍼">📖 모델제원표</button>
-    <button class="btn-pur" style="border:1px solid #fff" onclick="openAiModal()">🤖 AI 주문·비서</button>
-    <button class="btn-p" style="background:#2563eb;border:2px solid #fff;font-weight:900;padding:5px 12px;font-size:12.5px;box-shadow:0 2px 4px rgba(0,0,0,0.2)" onclick="openBarcodeAuditModal()" title="스마트폰 카메라 / 바코드 건으로 창고 재고 실사 & 라벨 출력">📷 바코드 실사</button>
-    <button class="btn-g" style="background:#0284c7;border:2px solid #fff;font-weight:900;padding:5px 12px;font-size:12.5px;box-shadow:0 2px 4px rgba(0,0,0,0.2)" onclick="openRopeDrumModal()" title="200m/300m/500m 원통 드럼 로프 잔여량 실시간 추적 & AI 절단 최적화">🌀 로프드럼 관리</button>
-    <button class="btn-g" style="background:#16a085;border:1px solid #fff" onclick="openBankMatchModal()">🏦 입금자동매칭</button>
-    <input type="file" id="htxQuickIn" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="importHometaxFiles(this.files);this.value=''">
-    <button class="btn-a" onclick="$('htxQuickIn').click()">⚡ 홈택스등록</button>
-    <button class="btn-p" style="background:#0088cc;border-color:#005580" onclick="tgPush(true)">☁️ 백업전송</button>
-    <button class="btn-s" style="background:#16a085;border-color:#1abc9c" onclick="tgPull(false)">📥 클라우드복구</button>
-    <button class="btn-g" onclick="exportExcelAll()">📊 엑셀백업</button>
-    <button class="btn-w" onclick="exportJson()">💾 파일백업</button>
-    <input type="file" id="jsonIn" accept=".json" style="display:none" onchange="importJson(event)">
-    <button class="btn-w" onclick="$('jsonIn').click()">📂 파일복구</button>
-    <button class="btn-r" onclick="lockERP()" title="화면 즉시 잠금">🔒 잠금</button>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <button class="btn-pur" style="border:1.5px solid #fff;font-weight:900;padding:5px 12px" onclick="openAiModal()">💎 카본 AI 주문·비서</button>
+    <button class="btn-a" style="background:#d35400;color:#fff;border:1.5px solid #fff;font-weight:900;padding:5px 11px" onclick="openWinchWizard()" title="하중·전원 조건별 윈치 모델 추천">🧙‍♂️ 윈치 사양마법사</button>
+    <button id="hideProfitBtn" class="btn-w" style="border:1.5px solid #fff;font-weight:900;padding:5px 10px" onclick="toggleHideProfit()" title="손님과 함께 화면을 볼 때 원가와 마진 금액을 즉시 숨깁니다">👁️ 마진숨김 OFF</button>
+    <button class="btn-s" style="background:#1e293b;border:1.5px solid #94a3b8;font-weight:900;padding:5px 12px" onclick="goTab('t-cfg',document.querySelectorAll('.nav .tab')[8])" title="백업, 복구, 홈택스, 바코드실사, 로프드럼, 세무도구 전체 열기">⚙️ 설정 · 전체도구함</button>
+    <button class="btn-r" style="padding:5px 10px" onclick="lockERP()" title="화면 즉시 잠금">🔒 잠금</button>
   </div>
 </div>
 
@@ -786,9 +782,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   <div class="tab" onclick="goTab('t-cli',this)">🏢 거래처·미수신호등</div>
   <div class="tab" onclick="goTab('t-itm',this)">📦 품목·세트·단가이력</div>
   <div class="tab" onclick="goTab('t-vat',this)">🏛️ 부가세·홈택스·경비</div>
-  <div class="tab" onclick="goTab('t-cfg',this)">⚙️ 기초정보·단가청소</div>
-  <div class="tab" style="color:#60a5fa;font-weight:900;border:1px dashed #3b82f6" onclick="openBarcodeAuditModal()" title="클릭 시 바코드 재고 실사창 열기">📷 스마트 바코드 실사</div>
-  <div class="tab" style="color:#38bdf8;font-weight:900;border:1px dashed #0ea5e9" onclick="openRopeDrumModal()" title="클릭 시 와이어로프 드럼 잔량 트래커 열기">🌀 와이어로프 드럼</div>
+  <div class="tab" style="color:#ffd32a;font-weight:900" onclick="goTab('t-cfg',this)">⚙️ 기초정보 · 설정 · 전체도구함</div>
 </div>
 
 <div class="wrap">
@@ -810,13 +804,11 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         <div class="ph">
           <span id="saleFormTitle">✏️ 매출전표 등록 (다중품목 / 세트출고 / A/S·시리얼)</span>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
-            <button class="btn-r" style="padding:2px 6px;font-size:11px;background:#e84393" onclick="startVoiceRecognition('sale')" title="마이크로 거래처와 품목·수량을 말씀하세요">🎙️ 음성전표입력</button>
+            <button class="btn-pur" style="padding:2px 7px;font-size:11px;font-weight:900" onclick="openAiModal('order')">💎 카본 카톡주문인식</button>
             <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#0984e3" onclick="openSpecSheetModal('s')" title="모델별 제원·규격·호환부품 즉시 확인">📖 모델제원표</button>
             <button class="btn-s" style="padding:2px 6px;font-size:11px" onclick="copyLastOrderByClient()" title="선택된 거래처의 직전 주문을 그대로 불러옵니다">🔁 직전주문불러오기</button>
             <button class="btn-a" style="padding:2px 6px;font-size:11px" onclick="openBomModal()">🎁 세트상품출고</button>
-            <button class="btn-p" style="padding:2px 6px;font-size:11px;background:#2563eb" onclick="openBarcodeAuditModal()">📷 바코드실사</button>
-            <button class="btn-g" style="padding:2px 6px;font-size:11px;background:#0284c7" onclick="openRopeDrumModal()">🌀 로프드럼</button>
-            <button class="btn-pur" style="padding:2px 6px;font-size:11px" onclick="openAiModal()">🤖 카톡주문인식</button>
+            <button class="btn-r" style="padding:2px 6px;font-size:11px;background:#e84393" onclick="startVoiceRecognition('sale')" title="마이크로 거래처와 품목·수량을 말씀하세요">🎙️ 음성입력</button>
             <label style="font-size:11px;color:#d63031;cursor:pointer;display:flex;align-items:center;gap:2px;background:#fff3cd;padding:2px 5px;border-radius:4px;border:1px solid #f39c12">
               <input type="checkbox" id="sOneTime" onchange="toggleOneTime('s',this.checked)"> ⚡1회성
             </label>
@@ -1511,8 +1503,70 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     </div>
   </div>
 
-  <!-- ==================== 7. 기초정보·단가청소 ==================== -->
+  <!-- ==================== 7. 기초정보·단가청소·전체도구함 ==================== -->
   <div id="t-cfg" class="page">
+    <!-- 🎛️ 상단바에서 이동된 전체 기능 통합 컨트롤 센터 -->
+    <div class="panel" style="margin-bottom:10px;border:2px solid #142d4c">
+      <div class="ph" style="background:linear-gradient(90deg,#0f172a,#1e3a8a)">
+        <span>🎛️ 오라테크 ERP 통합 도구함 & 백업 · 클라우드 · Gemini 4 Carbon 설정 센터 (상단바 기능 통합)</span>
+        <span id="cfgCarbonStatusBadge" style="background:#059669;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:900">💎 Gemini 4 Carbon 엔진 가동중</span>
+      </div>
+      <div class="pb">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:10px">
+          <!-- 1. 백업·복구·홈택스·클라우드 -->
+          <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:10px">
+            <div style="font-weight:900;color:#0f172a;font-size:13px;margin-bottom:8px;border-bottom:1px solid #e2e8f0;padding-bottom:5px">☁️ 1. 클라우드 · 엑셀 · 파일 백업/복구 & 홈택스</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-p" style="background:#0088cc;border-color:#005580;padding:6px 10px" onclick="tgPush(true)">☁️ 텔레그램 백업전송</button>
+              <button class="btn-s" style="background:#16a085;border-color:#1abc9c;padding:6px 10px" onclick="tgPull(false)">📥 클라우드 최신복구</button>
+              <button class="btn-w" style="padding:6px 10px" onclick="openTgModal()">⚙️ 클라우드 토큰설정</button>
+              <button class="btn-w" style="padding:6px 10px;border-color:#c0392b;color:#c0392b" onclick="connectAutoBackupFolder()">📁 PC 자동백업 폴더 지정</button>
+              <input type="file" id="htxQuickIn" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="importHometaxFiles(this.files);this.value=''">
+              <button class="btn-a" style="padding:6px 10px" onclick="$('htxQuickIn').click()">⚡ 홈택스 엑셀 일괄등록</button>
+              <button class="btn-g" style="padding:6px 10px" onclick="exportExcelAll()">📊 전체원장 엑셀백업</button>
+              <button class="btn-w" style="padding:6px 10px" onclick="exportJson()">💾 JSON 파일백업</button>
+              <input type="file" id="jsonIn" accept=".json" style="display:none" onchange="importJson(event)">
+              <button class="btn-w" style="padding:6px 10px" onclick="$('jsonIn').click()">📂 JSON 파일복구</button>
+            </div>
+          </div>
+
+          <!-- 2. 창고·현장·세무·홈페이지 특수 도구함 -->
+          <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:10px">
+            <div style="font-weight:900;color:#0369a1;font-size:13px;margin-bottom:8px;border-bottom:1px solid #bae6fd;padding-bottom:5px">🛠️ 2. 현장 · 창고 · 세무 · 홈페이지 특수 도구함</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-s" style="background:#0984e3;padding:6px 10px" onclick="openSpecSheetModal()">📖 모델제원·호환표</button>
+              <button class="btn-a" style="background:#d35400;padding:6px 10px" onclick="openWinchWizard()">🧙‍♂️ 윈치추천 마법사</button>
+              <button class="btn-p" style="background:#2563eb;padding:6px 10px" onclick="openBarcodeAuditModal()">📷 스마트 바코드 실사</button>
+              <button class="btn-g" style="background:#0284c7;padding:6px 10px" onclick="openRopeDrumModal()">🌀 와이어로프 드럼관리</button>
+              <button class="btn-g" style="background:#0f9b0f;padding:6px 10px" onclick="openRopeCutModal()">🪢 로프 m절단 계산기</button>
+              <button class="btn-g" style="background:#16a085;padding:6px 10px" onclick="openBankMatchModal()">🏦 은행 입금자동매칭</button>
+              <button class="btn-p" style="background:#1e3c72;padding:6px 10px" onclick="openIncomeTaxModal()">💰 종소세 절세 시뮬레이터</button>
+              <button class="btn-g" style="background:#006266;padding:6px 10px" onclick="openFxSniperModal()">💱 실시간 환율·송금스나이퍼</button>
+              <button class="btn-p" style="background:#2c3e50;padding:6px 10px" onclick="openIntlPoModal()">🚢 해외 영문발주서(PO)</button>
+              <button class="btn-s" style="background:#0A2463;padding:6px 10px" onclick="openWebSyncModal()">🌐 홈페이지·신형웹 빌더</button>
+            </div>
+          </div>
+
+          <!-- 3. 화면/음성 편의기능 & Gemini 4 Carbon 엔진 제어 -->
+          <div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:6px;padding:10px">
+            <div style="font-weight:900;color:#6b21a8;font-size:13px;margin-bottom:8px;border-bottom:1px solid #e9d5ff;padding-bottom:5px">💎 3. 화면 편의기능 & Gemini 4 Carbon AI 제어</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+              <button id="seniorModeBtn" class="btn-a" style="background:#f39c12;color:#111;padding:6px 10px;font-weight:900" onclick="toggleSeniorMode()">🔍 큰글씨 효도모드 OFF</button>
+              <button id="voiceTopBtn" class="btn-r" style="background:#e84393;padding:6px 10px;font-weight:900" onclick="startVoiceRecognition('global')">🎙️ 음성비서 호출</button>
+              <button class="btn-pur" style="padding:6px 10px;font-weight:900" onclick="openAiModal()">🤖 카본 AI 비서 열기</button>
+              <button class="btn-g" style="background:#059669;padding:6px 10px;font-weight:900" onclick="testErpCarbonConnection()">⚡ 카본 API 실시간 성능점검</button>
+              <button class="btn-s" style="background:#111827;border:1px solid #38bdf8;padding:6px 10px;font-weight:900;color:#38bdf8" onclick="pushErpToGithubDirect()">🐙 GitHub(igan3w/erp) 원클릭 업데이트</button>
+              <a href="https://igan3w.github.io/sourcing/" target="_blank" class="btn-g" style="background:#0d9488;padding:6px 10px;font-weight:900;text-decoration:none;color:#fff">🌏 4번째: 중국 1688 소싱랩·퀵견적 ↗</a>
+            </div>
+            <div style="font-size:11.5px;color:#4c1d95;background:#fff;padding:6px 8px;border-radius:4px;border:1px solid #d8b4fe">
+              • <b>연결 모델:</b> <code>gemini-4-carbon</code> (Direct API)<br>
+              • <span id="erpCarbonPingResult">카톡 구어체 주문서 자동 해독, 미수금 맞춤 정산문, 실시간 경영진단에 카본 모델이 즉시 작동합니다.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid-2">
       <div class="panel">
         <div class="ph"><span>⚙️ 우리 회사 기본정보 설정 (명세서·견적서·원장 공급자 인쇄용)</span></div>
@@ -1527,11 +1581,11 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
       </div>
 
       <div class="panel">
-        <div class="ph"><span>🧹 데이터 대청소 및 시스템 도구</span></div>
+        <div class="ph"><span>🧹 데이터 대청소 및 시스템 유지보수</span></div>
         <div class="pb" style="line-height:1.7">
           <p>✅ <b>중복 데이터 0.1초 대청소:</b> 매출·매입·거래처·품목의 중복 복사본을 1건만 남기고 병합합니다.</p>
           <p>✅ <b>품목 표준코드 자동정리:</b> 홈택스 품명(예: <code>포터블엔진윈치(PCW-5000)</code>)에서 순수 영문모델명(<code>PCW-5000</code>)만 깔끔하게 정리합니다.</p>
-          <p>✅ <b>효도모드 & 마진숨김:</b> 상단 우측의 <b>[🔍 큰글씨 효도모드]</b> 및 <b>[👁️ 마진숨김]</b> 버튼을 언제든 활용하세요.</p>
+          <p>✅ <b>통합 도구함 안내:</b> 기존 상단바의 복잡한 버튼들은 위 <b>[🎛️ 통합 도구함 센터]</b>에서 한눈에 실행하실 수 있습니다.</p>
           <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn-p" style="background:#8e44ad;border-color:#6c3483" onclick="dedupAllData(true);renderAll()">🧹 중복 데이터 완벽 청소</button>
             <button class="btn-a" onclick="autoCleanItems(true)">✨ 품목 순수 제품코드로 일괄 정리</button>
@@ -3605,6 +3659,199 @@ window.aiGenerateArMsg = function(){
   }
 };
 
+window.aiGenerateCarbonArMsg = async function(){
+  const cliName = $('aiArClientSel') ? $('aiArClientSel').value : '';
+  const tone = $('aiArToneSel') ? $('aiArToneSel').value : 'polite';
+  const box = $('aiArMsgOut');
+  if(!box || !cliName){ alert('미수금 안내문을 생성할 거래처를 선택해 주세요.'); return; }
+  const cStats = getClientStats();
+  const st = cStats[normSearch(cliName)];
+  const ar = st ? st.ar : 0;
+  const ov = st ? st.overdueDays : 0;
+  const comp = db.comp || {};
+  const recentSlips = (db.sales||[]).filter(s => normSearch(s.client)===normSearch(cliName)).slice(0,3).map(s => `${s.date} ${(s.lines||[]).map(l=>l.item+'x'+l.qty).join(',')} (미수:${fmt((Number(s.total)||0)-(Number(s.paid)||0))}원)`).join(' / ');
+  const toneDesc = tone==='urgent' ? '단호하고 명확하게 이번 주 내 결제 기한 확답을 요청하는 실무 독촉 톤' : (tone==='statement' ? '거래원장·세금계산서 마감 기준 잔액 확인을 요청하는 정중한 경리 실무 톤' : '오랜 거래 관계를 존중하며 부드럽게 입금을 안내하는 예의 바른 대표자 톤');
+  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
+  const prevVal = box.value;
+  box.value = '💎 Gemini 4 Carbon 모델이 거래처 이력과 경과일수를 반영한 맞춤 정산 안내문을 작성 중입니다...';
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `당신은 산업용 윈치·호이스트 전문기업 (주)${comp.name}(대표 ${comp.ceo}, 연락처 ${comp.tel}, 입금계좌 ${comp.bank})의 총괄 실장입니다.\n거래처 [${cliName}] 앞으로 보낼 카카오톡/문자 미수금 정산 안내문을 작성하세요.\n• 현재 미수 잔액: ${fmt(ar)}원 (경과일수: ${ov}일)\n• 최근 거래내역: ${recentSlips || '윈치 및 부품 납품 건'}\n• 요청 어조: ${toneDesc}\n• 주의사항: 번역투나 로봇 같은 인사말을 빼고, 실제 한국 B2B 기계/장비 유통 현장에서 바로 복사해 카톡으로 보낼 수 있는 깔끔하고 설득력 있는 안내문 본문만 출력하세요.` }] }]
+      })
+    });
+    const d = await res.json();
+    const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+    const txt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+    if(txt) box.value = txt;
+    else box.value = prevVal;
+  } catch(e){
+    box.value = prevVal;
+    alert('카본 API 호출 중 일시적 오류가 발생하여 기본 양식을 유지합니다.');
+  }
+};
+
+window.aiParseOrderWithCarbon = async function(targetMode){
+  const raw = ($('aiOrderText').value || '').trim();
+  if(!raw){ alert('카톡이나 문자로 받은 주문 내용을 먼저 붙여넣어 주세요!'); $('aiOrderText').focus(); return; }
+  const badge = $('carbonOrderParseStatus');
+  if(badge) badge.innerText = '⏳ Gemini 4 Carbon 구어체·모델명 정밀 해독 중...';
+  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
+  const sampleItems = (db.items||[]).slice(0,80).map(i => `${i.name}(${i.spec||''}:${i.sellPrice||0}원)`).join(', ');
+  const sampleClients = (db.clients||[]).slice(0,60).map(c => c.name).join(', ');
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `당신은 (주)오라테크 ERP의 발주서 해독 AI입니다. 고객이 보낸 카톡/문자 주문 텍스트를 분석하여 정확한 JSON으로만 반환하세요.\n[현장 은어 매핑 규칙]\n- "혼다 5톤 엔진윈치", "5000번 윈치", "엔진윈치 큰거" -> PCW-5000\n- "혼다 경량 엔진윈치", "3000번 윈치" -> PCW-3000\n- "배터리 윈치", "충전식 윈치" -> PCW-3000LI\n- "클러치 엔진윈치", "4000번" -> PCW-4000\n- "12미리 로프/자일", "5000번 로프" -> PCA-1260\n- "10미리 로프/자일" -> PCA-1205M\n- "스텐 활차/도르래", "5000번 도르래" -> PCA-1274\n- "경량 활차/도르래" -> PCA-1275\n- "콘", "견인캡", "스키딩콘" -> PCA-1290\n[등록 품목 목록 일부]: ${sampleItems}\n[등록 거래처 일부]: ${sampleClients}\n[주문 원문]: "${raw}"\n\n반드시 아래 JSON 형식으로만 응답하세요(마크다운 없이 순수 JSON):\n{"client":"거래처명(없으면 빈문자열)","memo":"요청사항/배송메모 요약","items":[{"code":"표준모델코드(예:PCW-5000)","spec":"규격","qty":1,"price":0}]}` }] }],
+        generationConfig: { responseMimeType: 'application/json', temperature: 0.1 }
+      })
+    });
+    const d = await res.json();
+    const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+    const jsonTxt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim().replace(/^```json\s*|\s*```$/g, '');
+    const parsed = JSON.parse(jsonTxt);
+    if(parsed && Array.isArray(parsed.items) && parsed.items.length){
+      const existingMap = {};
+      (db.items||[]).forEach(it => { existingMap[normSearch(it.name)] = it; });
+      const detectedClient = (parsed.client || '').trim();
+      const lines = parsed.items.map(x => {
+        const code = String(x.code||'').toUpperCase().trim();
+        const qty = Math.max(1, Number(x.qty)||1);
+        const itObj = existingMap[normSearch(code)];
+        let price = Number(x.price) || (itObj ? (Number(itObj.sellPrice)||0) : 0);
+        const cKey = normSearch(detectedClient);
+        const iKey = normSearch(code);
+        if(detectedClient && db.priceMem[cKey] && db.priceMem[cKey][iKey] && db.priceMem[cKey][iKey].length){
+          price = db.priceMem[cKey][iKey][0].p;
+        }
+        const uCost = itObj ? (Number(itObj.buyPrice)||0) : Math.round(price * 0.75);
+        return {
+          item: code,
+          spec: x.spec || (itObj ? (itObj.spec||code) : code),
+          qty,
+          price,
+          sup: qty * price,
+          vat: Math.round(qty * price * 0.1),
+          uCost
+        };
+      });
+      if(targetMode === 'est'){
+        goTab('t-est');
+        resetEstForm();
+        if(detectedClient){ $('esClient').value = detectedClient; $('esOneTime').checked = false; }
+        else { $('esOneTime').checked = true; toggleOneTime('es', true); }
+        estDraft = lines;
+        $('esMemo').value = '💎 카본 AI 발주해독 (' + (parsed.memo || raw.replace(/\s+/g,' ').slice(0,30)) + ')';
+        recalcEstDraft();
+      } else {
+        goTab('t-sale');
+        resetSaleForm();
+        if(detectedClient){ $('sClient').value = detectedClient; $('sOneTime').checked = false; }
+        else { $('sOneTime').checked = true; toggleOneTime('s', true); }
+        saleDraft = lines;
+        $('sMemo').value = '💎 카본 AI 발주해독 (' + (parsed.memo || raw.replace(/\s+/g,' ').slice(0,30)) + ')';
+        recalcSaleDraft();
+      }
+      if(badge) badge.innerText = '✅ Gemini 4 Carbon 해독 완료!';
+      closeModal('aiModal');
+      alert(`💎 [Gemini 4 Carbon 초정밀 발주 해독 완료!]\n• 거래처: ${detectedClient || '1회성(기타)거래처'}\n• 변환 품목: ${lines.map(l => `${l.item} × ${l.qty}`).join(', ')}\n\n전표 입력창에 자동으로 채워졌습니다!`);
+      return;
+    }
+  } catch(e){
+    console.warn('Carbon order parse fallback:', e);
+  }
+  if(badge) badge.innerText = '⚡ 내장 고속 파서로 전환됨';
+  aiParseOrderToSlip(targetMode);
+};
+
+window.testErpCarbonConnection = async function(){
+  const out = $('erpCarbonPingResult');
+  const badge = $('cfgCarbonStatusBadge');
+  if(out) out.innerHTML = '⏳ <b>Gemini 4 Carbon (<code>gemini-4-carbon</code>)</b> 실시간 응답 속도 및 연결 상태 점검 중...';
+  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
+  const t0 = performance.now();
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: '오라테크 ERP 연결 상태 확인: "정상 가동중" 다섯 글자와 함께 오늘의 짧은 응원 한 문장만 출력하세요.' }] }]
+      })
+    });
+    const d = await res.json();
+    const ms = Math.round(performance.now() - t0);
+    const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+    const txt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+    if(txt){
+      if(badge){ badge.style.background = '#059669'; badge.innerText = `💎 Gemini 4 Carbon 정상 (${ms}ms)`; }
+      if(out) out.innerHTML = `✅ <b>연결 성공 (${ms}ms, 모델: <code>${esc(d.modelVersion||'gemini-4-carbon')}</code>):</b> ${esc(txt)}`;
+    } else {
+      throw new Error((d.error && d.error.message) || '응답 없음');
+    }
+  } catch(e){
+    if(badge){ badge.style.background = '#d97706'; badge.innerText = '⚠️ 연결 확인 필요'; }
+    if(out) out.innerHTML = `⚠️ 호출 오류: ${esc(e.message)}`;
+  }
+};
+
+window.pushErpToGithubDirect = async function(){
+  const out = $('erpCarbonPingResult');
+  let ghToken = sGet('ora_gh_token') || '';
+  if(!ghToken){
+    try {
+      const r = await fetch('http://localhost:3080/api/github/sync-all-four', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const d = await r.json();
+      if(d && d.ok){
+        if(out) out.innerHTML = '🎉 <b>GitHub (<code>https://igan3w.github.io/erp/</code>) 원클릭 자동 업데이트 완료!</b>';
+        alert('🎉 4대 홈페이지 GitHub 전체 자동 업데이트가 완료되었습니다!');
+        return;
+      }
+    } catch(_){}
+    ghToken = (prompt('GitHub 개인 액세스 토큰(ghp_...)을 1회 입력하시면 브라우저에 저장되어 자동 업로드됩니다:') || '').trim();
+    if(ghToken) sSet('ora_gh_token', ghToken);
+  }
+  if(!ghToken) return;
+  if(out) out.innerHTML = '⏳ <b>GitHub (<code>igan3w/erp</code>)</b> 저장소에 현재 최신 ERP를 자동 업로드 중입니다...';
+  try {
+    const hdr = { 'Authorization': 'Bearer ' + ghToken, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+    const refRes = await fetch('https://api.github.com/repos/igan3w/erp/git/ref/heads/main', { headers: hdr });
+    const refJson = await refRes.json();
+    const baseCommitSha = refJson.object.sha;
+    const commitRes = await fetch('https://api.github.com/repos/igan3w/erp/git/commits/' + baseCommitSha, { headers: hdr });
+    const commitJson = await commitRes.json();
+    const baseTreeSha = commitJson.tree.sha;
+
+    const htmlStr = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const b64 = btoa(unescape(encodeURIComponent(htmlStr)));
+    const blobRes = await fetch('https://api.github.com/repos/igan3w/erp/git/blobs', {
+      method: 'POST', headers: hdr, body: JSON.stringify({ content: b64, encoding: 'base64' })
+    });
+    const blobJson = await blobRes.json();
+    const treeRes = await fetch('https://api.github.com/repos/igan3w/erp/git/trees', {
+      method: 'POST', headers: hdr,
+      body: JSON.stringify({ base_tree: baseTreeSha, tree: [{ path: 'index.html', mode: '100644', type: 'blob', sha: blobJson.sha }] })
+    });
+    const treeJson = await treeRes.json();
+    const newCommitRes = await fetch('https://api.github.com/repos/igan3w/erp/git/commits', {
+      method: 'POST', headers: hdr,
+      body: JSON.stringify({ message: '🚀 Auto-update OraTech ERP (Gemini 4 Carbon & Clean Topbar)', tree: treeJson.sha, parents: [baseCommitSha] })
+    });
+    const newCommitJson = await newCommitRes.json();
+    const patchRes = await fetch('https://api.github.com/repos/igan3w/erp/git/refs/heads/main', {
+      method: 'PATCH', headers: hdr, body: JSON.stringify({ sha: newCommitJson.sha, force: true })
+    });
+    if(!patchRes.ok) throw new Error('HTTP ' + patchRes.status);
+    if(out) out.innerHTML = '🎉 <b>GitHub (<code>https://igan3w.github.io/erp/</code>) 원클릭 자동 업데이트 완료!</b>';
+    alert('🎉 GitHub (https://igan3w.github.io/erp/) 최신 업데이트가 완료되었습니다!');
+  } catch(e){
+    if(out) out.innerHTML = '⚠️ GitHub 업데이트 오류: ' + esc(e.message);
+  }
+};
+
 window.aiParseOrderToSlip = function(targetMode){
   const raw = ($('aiOrderText').value || '').trim();
   if(!raw){ alert('카톡이나 문자로 받은 주문 내용을 먼저 붙여넣어 주세요!'); $('aiOrderText').focus(); return; }
@@ -3792,6 +4039,24 @@ window.askAiAssistant = function(presetQ){
     }
   }
   if($('aiAnswerBox')) $('aiAnswerBox').innerHTML = html;
+
+  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
+  if(gemKey && $('aiAnswerBox')){
+    const summaryCtx = `조회기간: ${sDate}~${eDate}, 총매출: ${fmt(periodSale)}원(${periodCnt}건), 순이익: ${fmt(periodProf)}원, 총미수금: ${fmt(totalAr)}원(${topArList.length}곳), 상위거래처: ${topClis.slice(0,5).map(x=>x[0]+'('+fmt(x[1])+'원)').join(', ')}, 상위품목: ${topItems.slice(0,5).map(x=>x[0]+'('+x[1].qty+'개)').join(', ')}, 미수상위: ${topArList.slice(0,5).map(x=>x.c.name+'('+fmt(x.ar)+'원)').join(', ')}`;
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `당신은 (주)오라테크의 수석 AI 경영비서입니다. 다음 실시간 ERP 장부 요약 데이터를 바탕으로 사장님의 질문("${q}")에 대해 핵심 수치와 전략적 조언을 3~4줄 이내로 간결하고 명쾌하게 브리핑하세요.\n[장부 데이터] ${summaryCtx}` }] }]
+      })
+    }).then(r => r.json()).then(d => {
+      const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+      const aiTxt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+      if(aiTxt && $('aiAnswerBox')){
+        $('aiAnswerBox').innerHTML += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #90caf9;color:#0d47a1"><b>💎 [Gemini 4 Carbon 심층 경영 코멘트]</b><br>${esc(aiTxt).replace(/\n/g,'<br>')}</div>`;
+      }
+    }).catch(() => {});
+  }
 };
 
 // ==================== CEO EXECUTIVE DASHBOARD (대표님 한눈에 보기 도식화 그래프) ====================
@@ -8380,7 +8645,7 @@ let fmFilterMode = 'PEND';
 })();
 
 function injectAllShortcutButtons(){
-  // 상단바: 실시간 환율 전광판 배지 + 윈치마법사 + 부자메모판
+  // 상단바 브랜드 영역: 실시간 환율 전광판 배지만 부착 (우측 버튼들은 모두 [⚙️ 기초정보·설정·전체도구함] 탭으로 통합되어 상단바를 깔끔하게 유지)
   const brandDiv = document.querySelector('.topbar .brand');
   if(brandDiv && !document.getElementById('fxTopBadge')){
     const fxBadge = document.createElement('span');
@@ -8390,57 +8655,6 @@ function injectAllShortcutButtons(){
     fxBadge.onclick = () => openFxSniperModal();
     fxBadge.innerHTML = '💱 환율조회중...';
     brandDiv.appendChild(fxBadge);
-  }
-
-  const topRight = document.querySelector('.topbar > div:last-child');
-  if(topRight && !document.getElementById('btnTopWizard')){
-    const wBtn = document.createElement('button');
-    wBtn.id = 'btnTopWizard';
-    wBtn.className = 'btn-a';
-    wBtn.style.cssText = 'background:#d35400;border:1px solid #fff;font-weight:900';
-    wBtn.innerHTML = '🧙‍♂️ 윈치추천마법사';
-    wBtn.onclick = () => openWinchWizard();
-
-    const bcBtn = document.createElement('button');
-    bcBtn.id = 'btnTopBarcodeInjected';
-    bcBtn.className = 'btn-p';
-    bcBtn.style.cssText = 'background:#2563eb;border:2px solid #fff;font-weight:900;box-shadow:0 2px 4px rgba(0,0,0,0.2)';
-    bcBtn.innerHTML = '📷 바코드실사';
-    bcBtn.onclick = () => openBarcodeAuditModal();
-    if(topRight) topRight.insertBefore(bcBtn, topRight.firstChild);
-
-    const rdBtn = document.createElement('button');
-    rdBtn.id = 'btnTopRopeDrumInjected';
-    rdBtn.className = 'btn-g';
-    rdBtn.style.cssText = 'background:#0284c7;border:2px solid #fff;font-weight:900;box-shadow:0 2px 4px rgba(0,0,0,0.2)';
-    rdBtn.innerHTML = '🌀 로프드럼';
-    rdBtn.onclick = () => openRopeDrumModal();
-    if(topRight) topRight.insertBefore(rdBtn, topRight.firstChild);
-
-    const rBtn = document.createElement('button');
-    rBtn.id = 'btnTopRope';
-    rBtn.className = 'btn-g';
-    rBtn.style.cssText = 'background:#0f9b0f;border:1px solid #fff;font-weight:900';
-    rBtn.innerHTML = '🪢 로프절단/잔량';
-    rBtn.onclick = () => openRopeCutModal();
-
-    const tBtn = document.createElement('button');
-    tBtn.id = 'btnTopTax';
-    tBtn.className = 'btn-p';
-    tBtn.style.cssText = 'background:#1e3c72;border:1px solid #fff;font-weight:900';
-    tBtn.innerHTML = '💰 종소세절세';
-    tBtn.onclick = () => openIncomeTaxModal();
-
-    const refBtn = document.getElementById('voiceTopBtn');
-    if(refBtn && refBtn.nextSibling){
-      topRight.insertBefore(tBtn, refBtn.nextSibling);
-      topRight.insertBefore(rBtn, refBtn.nextSibling);
-      topRight.insertBefore(wBtn, refBtn.nextSibling);
-    } else {
-      topRight.insertBefore(wBtn, topRight.firstChild);
-      topRight.insertBefore(rBtn, topRight.firstChild);
-      topRight.insertBefore(tBtn, topRight.firstChild);
-    }
   }
 
   // 매출전표 & 견적서 품목줄에 [🪢 로프m절단] 및 [🧙‍♂️ 사양마법사] 버튼 장착
@@ -10190,18 +10404,6 @@ window.clearDoneFamilyMemos = function(){
   function attachWebSyncButtons(){
     applyOratechErpBranding();
     upgradeCatalogImages();
-
-    var topRight = document.querySelector('.topbar > div:last-child');
-    if(topRight && !document.getElementById('btnTopWebSync')){
-      var wb = document.createElement('button');
-      wb.id = 'btnTopWebSync';
-      wb.className = 'btn-s';
-      wb.style.cssText = 'background:linear-gradient(90deg,#0A2463,#1D4ED8);border:2px solid #fff;font-weight:900;color:#fff;box-shadow:0 2px 8px rgba(10,36,99,0.4)';
-      wb.innerHTML = '🌐 홈페이지·신형웹';
-      wb.title = 'orawinch.co.kr 제품 ERP 동기화 & 오라테크 공식 기업 홈페이지 빌더';
-      wb.onclick = function(){ window.openWebSyncModal(); };
-      topRight.insertBefore(wb, topRight.firstChild);
-    }
 
     var itmHdr = document.querySelector('#t-itm .panel:nth-child(2) .ph div');
     if(itmHdr && !document.getElementById('btnItmWebSync')){
