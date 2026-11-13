@@ -768,7 +768,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     --acc: #0284C7;
     --bg: #F1F5FB;
     --txt: #0F172A;
-    --bdr: #CBD5E1;
+    --bdr: #94A3B8;
     --th: #EFF6FF;
     --blu: #1D4ED8;
     --grn: #059669;
@@ -779,6 +779,9 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
     background: var(--bg);
     color: var(--txt);
+    font-size: 13.5px;
+    line-height: 1.5;
+    letter-spacing: -0.015em;
     font-variant-numeric: tabular-nums;
   }
   .ora-erp-ecosys {
@@ -789,7 +792,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    font-size: 11.5px;
+    font-size: 12px;
     border-bottom: 1px solid rgba(56, 189, 248, 0.25);
     white-space: nowrap;
     overflow-x: auto;
@@ -819,84 +822,111 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     border-bottom: 2px solid #38BDF8 !important;
     box-shadow: 0 4px 16px rgba(7, 34, 90, 0.16);
   }
-  .topbar .brand { font-size: 15.5px; font-weight: 900; letter-spacing: -0.02em; gap: 8px; display: flex; align-items: center; flex-wrap: wrap; }
-  .topbar button { border-radius: 6px !important; white-space: nowrap; transition: transform 0.12s, filter 0.12s; }
+  .topbar .brand { font-size: 16px; font-weight: 900; letter-spacing: -0.02em; gap: 8px; display: flex; align-items: center; flex-wrap: wrap; }
+  .topbar button { border-radius: 6px !important; white-space: nowrap; font-size: 12.5px !important; transition: transform 0.12s, filter 0.12s; }
   .topbar button:hover { filter: brightness(1.08); }
 
+  /* 정통 폴더·브라우저형 상단 탭바 */
   .nav {
-    background: #FFFFFF !important;
-    border-bottom: 2px solid #DBEAFE !important;
-    padding: 6px 14px !important;
-    gap: 6px !important;
-    box-shadow: 0 2px 8px rgba(10, 46, 122, 0.05);
+    background: linear-gradient(180deg, #D8E4F5 0%, #E5EEF9 100%) !important;
+    border-bottom: 2.5px solid #1D4ED8 !important;
+    padding: 9px 14px 0 14px !important;
+    gap: 4px !important;
+    align-items: flex-end !important;
+    box-shadow: inset 0 -1px 0 rgba(29, 78, 216, 0.12);
   }
   .nav .tab {
-    background: #F8FAFC !important;
-    color: #334155 !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 7px !important;
-    padding: 6px 9px !important;
-    font-size: 11.8px !important;
+    background: #F4F7FC !important;
+    color: #1E3A5F !important;
+    border: 1.5px solid #B6CAE6 !important;
+    border-bottom: none !important;
+    border-radius: 9px 9px 0 0 !important;
+    padding: 8px 11px !important;
+    margin-bottom: 0 !important;
+    font-size: 12.8px !important;
     font-weight: 800 !important;
+    letter-spacing: -0.02em;
     white-space: nowrap !important;
     flex: 1 1 auto;
     text-align: center;
-    transition: all 0.15s;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s, color 0.15s, transform 0.12s;
   }
-  .nav .tab:hover { background: #EFF6FF !important; border-color: #93C5FD !important; color: #0F3D99 !important; }
+  .nav .tab:hover {
+    background: #FFFFFF !important;
+    border-color: #60A5FA !important;
+    color: #07225A !important;
+  }
   .nav .tab.active {
-    background: linear-gradient(135deg, #0A2E7A, #1D4ED8) !important;
-    color: #FFFFFF !important;
-    border-color: #0A2E7A !important;
-    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+    background: #F1F5FB !important;
+    color: #07225A !important;
+    border: 2px solid #1D4ED8 !important;
+    border-top: 4px solid #1D4ED8 !important;
+    border-bottom: 3px solid #F1F5FB !important;
+    margin-bottom: -2.5px !important;
+    padding: 9px 12px 10px 12px !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 -4px 12px rgba(7, 34, 90, 0.10);
+    z-index: 3;
   }
 
-  .kpi-row { gap: 10px !important; padding: 10px 14px 4px !important; }
+  .wrap { padding-top: 6px !important; }
+  .kpi-row { gap: 10px !important; padding: 10px 14px 6px !important; }
   .kpi-row .kpi {
     background: #FFFFFF !important;
-    border: 1px solid #CBD5E1 !important;
-    border-top: 3px solid #1D4ED8 !important;
+    border: 1.5px solid #BFDBFE !important;
+    border-top: 3.5px solid #1D4ED8 !important;
     border-radius: 10px !important;
-    padding: 10px 12px !important;
-    box-shadow: 0 2px 10px rgba(10, 46, 122, 0.05) !important;
+    padding: 11px 13px !important;
+    box-shadow: 0 2px 10px rgba(10, 46, 122, 0.06) !important;
     transition: transform 0.14s, box-shadow 0.14s;
   }
-  .kpi-row .kpi:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(10, 46, 122, 0.09) !important; }
-  .kpi .v, .val { font-family: 'JetBrains Mono', 'Pretendard', monospace; font-variant-numeric: tabular-nums; }
+  .kpi-row .kpi:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(10, 46, 122, 0.10) !important; }
+  .kpi-t { font-size: 12px !important; font-weight: 800 !important; color: #334155 !important; }
+  .kpi-v, .kpi .v, .val { font-family: 'JetBrains Mono', 'Pretendard', monospace; font-size: 19px !important; font-weight: 900 !important; color: #07225A !important; font-variant-numeric: tabular-nums; margin-top: 3px !important; }
+  .kpi-s { font-size: 11.5px !important; font-weight: 600 !important; color: #475569 !important; margin-top: 2px !important; }
 
   .panel {
     background: #FFFFFF !important;
-    border: 1px solid #CBD5E1 !important;
+    border: 1.5px solid #C2D4EB !important;
     border-radius: 10px !important;
     box-shadow: 0 3px 12px rgba(10, 46, 122, 0.05) !important;
     overflow: hidden;
   }
   .panel .ph {
-    background: linear-gradient(90deg, #F8FAFC 0%, #EFF6FF 100%) !important;
+    background: linear-gradient(90deg, #F8FAFF 0%, #E8F1FE 100%) !important;
     color: #07225A !important;
-    border-bottom: 1.5px solid #DBEAFE !important;
-    padding: 9px 12px !important;
+    border-bottom: 1.5px solid #BFDBFE !important;
+    padding: 10px 14px !important;
     font-weight: 900 !important;
-    font-size: 13px !important;
+    font-size: 14px !important;
     gap: 8px;
     flex-wrap: wrap;
   }
-  .panel .pb { padding: 10px 12px !important; }
+  .panel .pb { padding: 12px 14px !important; }
+  .fg label { font-size: 12.5px !important; font-weight: 800 !important; color: #1E293B !important; margin-bottom: 4px !important; }
 
   input:not([type="checkbox"]):not([type="radio"]), select, textarea {
-    border: 1px solid #CBD5E1 !important;
+    border: 1.5px solid #94A3B8 !important;
     border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    background: #FFFFFF !important;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
     outline: none !important;
-    border-color: #2563EB !important;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+    border-color: #1D4ED8 !important;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.16) !important;
   }
 
   button[class^="btn-"], button[class*=" btn-"] {
     border-radius: 6px !important;
     font-weight: 800 !important;
+    font-size: 12.5px !important;
     transition: filter 0.12s, transform 0.1s;
     white-space: nowrap;
   }
@@ -906,16 +936,23 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   .btn-g { background: #059669 !important; border-color: #047857 !important; }
   .btn-pur { background: #4338CA !important; border-color: #3730A3 !important; }
 
-  .tw { border: 1px solid #CBD5E1 !important; border-radius: 8px !important; overflow: auto; }
+  .tw { border: 1.5px solid #B8CBE3 !important; border-radius: 8px !important; overflow: auto; background: #FFFFFF; }
   .tw th {
-    background: #EFF6FF !important;
+    background: #E2EDFC !important;
     color: #07225A !important;
-    border-bottom: 1.5px solid #BFDBFE !important;
-    padding: 7px 6px !important;
-    font-size: 11.5px !important;
+    border-bottom: 1.5px solid #93C5FD !important;
+    padding: 9px 7px !important;
+    font-size: 12.5px !important;
+    font-weight: 900 !important;
   }
-  .tw td { border-bottom: 1px solid #F1F5F9 !important; padding: 6px !important; }
-  .tw tr:hover td { background: #F8FAFC; }
+  .tw td { border-bottom: 1px solid #E2E8F0 !important; padding: 8px 6px !important; font-size: 12.8px !important; font-weight: 600 !important; color: #0F172A !important; }
+  .tw tr:hover td { background: #F1F6FF; }
+
+  @media (max-width: 1360px) {
+    .nav { padding: 8px 10px 0 10px !important; gap: 3px !important; }
+    .nav .tab { padding: 7px 8px !important; font-size: 12px !important; }
+    .nav .tab.active { padding: 8px 9px 9px 9px !important; font-size: 12.2px !important; }
+  }
 
   @media print {
     .ora-erp-ecosys { display: none !important; }
@@ -956,14 +993,14 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
 <!-- Navigation Tabs -->
 <div class="nav">
   <div class="tab active" onclick="goTab('t-sale',this)">📈 매출·수금·A/S전표</div>
-  <div class="tab tab-dash" onclick="goTab('t-dash',this);renderDashboard()">📊 대표님 경영현황 (그래프)</div>
-  <div class="tab tab-dash" onclick="goTab('t-cal',this);renderCalendar()">🗓️ 월간 자금·일정 달력</div>
+  <div class="tab tab-dash" onclick="goTab('t-dash',this);renderDashboard()">📊 대표님 경영현황</div>
+  <div class="tab tab-dash" onclick="goTab('t-cal',this);renderCalendar()">🗓️ 월간 자금·일정</div>
   <div class="tab" onclick="goTab('t-est',this)">📋 견적서·주문관리</div>
-  <div class="tab" onclick="goTab('t-pur',this)">🚢 수입·매입·원가시뮬</div>
-  <div class="tab" onclick="goTab('t-cli',this)">🏢 거래처·미수신호등</div>
-  <div class="tab" onclick="goTab('t-itm',this)">📦 품목·세트·단가이력</div>
-  <div class="tab" onclick="goTab('t-vat',this)">🏛️ 부가세·홈택스·경비</div>
-  <div class="tab" style="color:#ffd32a;font-weight:900" onclick="goTab('t-cfg',this)">⚙️ 기초정보 · 설정 · 전체도구함</div>
+  <div class="tab" onclick="goTab('t-pur',this)">🚢 수입·매입·원가</div>
+  <div class="tab" onclick="goTab('t-cli',this)">🏢 거래처·미수관리</div>
+  <div class="tab" onclick="goTab('t-itm',this)">📦 품목·세트·재고</div>
+  <div class="tab" onclick="goTab('t-vat',this)">🏛️ 부가세·홈택스</div>
+  <div class="tab" style="font-weight:900" onclick="goTab('t-cfg',this)">⚙️ 기초·설정·도구함</div>
 </div>
 
 <div class="wrap">
