@@ -201,14 +201,15 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
 <body>
 
 <!-- 보안 잠금화면 모달 -->
-<div id="lockScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff">
-  <div style="background:#fff;color:#111;padding:28px 24px;border-radius:10px;width:350px;max-width:92vw;box-shadow:0 15px 35px rgba(0,0,0,0.5);text-align:center;border:3px solid var(--acc)">
+<style>#lockPassIn::placeholder{font-size:13px;letter-spacing:0;color:#94a3b8;font-weight:600;}</style>
+<div id="lockScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#07225A 0%,#0F3D99 55%,#1D4ED8 100%);z-index:99999;display:none;flex-direction:column;justify-content:center;align-items:center;color:#fff">
+  <div style="background:#fff;color:#0f172a;padding:32px 28px;border-radius:16px;width:390px;max-width:92vw;box-shadow:0 24px 60px rgba(4,15,45,0.45);text-align:center;border:2px solid #93C5FD">
     <div style="font-size:38px;margin-bottom:6px">🔒</div>
-    <h2 style="color:var(--pri);margin-bottom:4px;font-size:18px;font-weight:900">오라테크 ERP 보안잠금</h2>
-    <p style="font-size:12px;color:#666;margin-bottom:16px">권한이 있는 관리자만 접속할 수 있습니다.</p>
-    <input type="password" id="lockPassIn" placeholder="비밀번호 입력 (초기: 0000)" style="width:100%;padding:12px;font-size:18px;text-align:center;border:2px solid var(--pri);border-radius:6px;margin-bottom:12px;font-weight:900;letter-spacing:4px" onkeydown="if(event.key==='Enter')unlockERP()">
-    <button class="btn-p" style="width:100%;padding:12px;font-size:15px;border-radius:6px" onclick="unlockERP()">🔓 잠금 해제 및 접속</button>
-    <div style="font-size:11px;color:#888;margin-top:12px">※ 비밀번호 변경은 [기초정보] 탭에서 가능합니다.</div>
+    <h2 style="color:var(--pri);margin-bottom:4px;font-size:19px;font-weight:900">오라테크 ERP 보안잠금</h2>
+    <p style="font-size:12.5px;color:#64748b;margin-bottom:16px">권한이 있는 관리자만 접속할 수 있습니다.</p>
+    <input type="password" id="lockPassIn" placeholder="비밀번호 입력 (초기: 0000)" style="width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;text-align:center;border:2px solid #1D4ED8;border-radius:8px;margin-bottom:12px;font-weight:900;letter-spacing:3px;color:#0F172A" onkeydown="if(event.key==='Enter')unlockERP()">
+    <button class="btn-p" style="width:100%;padding:12px;font-size:15px;border-radius:8px;font-weight:800" onclick="unlockERP()">🔓 잠금 해제 및 접속</button>
+    <div style="font-size:11.5px;color:#64748b;margin-top:12px">※ 비밀번호 변경은 [기초정보] 탭에서 가능합니다.</div>
   </div>
 </div>
 
@@ -757,18 +758,198 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
 </div>
 
 <!-- Top Bar (간결화된 핵심 상단바 - 상세 도구·백업 버튼은 모두 [⚙️ 기초정보·설정] 탭으로 통합) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+<style id="oraErp2026Theme">
+  :root {
+    --pri: #0A2E7A;
+    --sec: #1D4ED8;
+    --acc: #0284C7;
+    --bg: #F1F5FB;
+    --txt: #0F172A;
+    --bdr: #CBD5E1;
+    --th: #EFF6FF;
+    --blu: #1D4ED8;
+    --grn: #059669;
+    --red: #DC2626;
+    --pur: #4338CA;
+  }
+  body:not(.print-mode) {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--txt);
+    font-variant-numeric: tabular-nums;
+  }
+  .ora-erp-ecosys {
+    background: #061840;
+    color: #DBEAFE;
+    padding: 5px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 11.5px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .ora-erp-ecolinks { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .ora-erp-epill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #DBEAFE;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(147, 197, 253, 0.25);
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .ora-erp-epill:hover { background: #1D4ED8; border-color: #7DD3FC; color: #fff; }
+  .ora-erp-epill.active { background: #1D4ED8; border-color: #38BDF8; color: #fff; font-weight: 900; }
+
+  .topbar {
+    background: linear-gradient(90deg, #07225A 0%, #0F3D99 58%, #1652C7 100%) !important;
+    padding: 10px 16px !important;
+    border-bottom: 2px solid #38BDF8 !important;
+    box-shadow: 0 4px 16px rgba(7, 34, 90, 0.16);
+  }
+  .topbar .brand { font-size: 15.5px; font-weight: 900; letter-spacing: -0.02em; gap: 8px; display: flex; align-items: center; flex-wrap: wrap; }
+  .topbar button { border-radius: 6px !important; white-space: nowrap; transition: transform 0.12s, filter 0.12s; }
+  .topbar button:hover { filter: brightness(1.08); }
+
+  .nav {
+    background: #FFFFFF !important;
+    border-bottom: 2px solid #DBEAFE !important;
+    padding: 6px 14px !important;
+    gap: 6px !important;
+    box-shadow: 0 2px 8px rgba(10, 46, 122, 0.05);
+  }
+  .nav .tab {
+    background: #F8FAFC !important;
+    color: #334155 !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 7px !important;
+    padding: 6px 9px !important;
+    font-size: 11.8px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    flex: 1 1 auto;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .nav .tab:hover { background: #EFF6FF !important; border-color: #93C5FD !important; color: #0F3D99 !important; }
+  .nav .tab.active {
+    background: linear-gradient(135deg, #0A2E7A, #1D4ED8) !important;
+    color: #FFFFFF !important;
+    border-color: #0A2E7A !important;
+    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+  }
+
+  .kpi-row { gap: 10px !important; padding: 10px 14px 4px !important; }
+  .kpi-row .kpi {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-top: 3px solid #1D4ED8 !important;
+    border-radius: 10px !important;
+    padding: 10px 12px !important;
+    box-shadow: 0 2px 10px rgba(10, 46, 122, 0.05) !important;
+    transition: transform 0.14s, box-shadow 0.14s;
+  }
+  .kpi-row .kpi:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(10, 46, 122, 0.09) !important; }
+  .kpi .v, .val { font-family: 'JetBrains Mono', 'Pretendard', monospace; font-variant-numeric: tabular-nums; }
+
+  .panel {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 3px 12px rgba(10, 46, 122, 0.05) !important;
+    overflow: hidden;
+  }
+  .panel .ph {
+    background: linear-gradient(90deg, #F8FAFC 0%, #EFF6FF 100%) !important;
+    color: #07225A !important;
+    border-bottom: 1.5px solid #DBEAFE !important;
+    padding: 9px 12px !important;
+    font-weight: 900 !important;
+    font-size: 13px !important;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .panel .pb { padding: 10px 12px !important; }
+
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+  }
+
+  button[class^="btn-"], button[class*=" btn-"] {
+    border-radius: 6px !important;
+    font-weight: 800 !important;
+    transition: filter 0.12s, transform 0.1s;
+    white-space: nowrap;
+  }
+  button[class^="btn-"]:hover, button[class*=" btn-"]:hover { filter: brightness(1.06); }
+  .btn-p { background: #1D4ED8 !important; border-color: #1E40AF !important; }
+  .btn-s { background: #0284C7 !important; border-color: #0369A1 !important; }
+  .btn-g { background: #059669 !important; border-color: #047857 !important; }
+  .btn-pur { background: #4338CA !important; border-color: #3730A3 !important; }
+
+  .tw { border: 1px solid #CBD5E1 !important; border-radius: 8px !important; overflow: auto; }
+  .tw th {
+    background: #EFF6FF !important;
+    color: #07225A !important;
+    border-bottom: 1.5px solid #BFDBFE !important;
+    padding: 7px 6px !important;
+    font-size: 11.5px !important;
+  }
+  .tw td { border-bottom: 1px solid #F1F5F9 !important; padding: 6px !important; }
+  .tw tr:hover td { background: #F8FAFC; }
+
+  @media print {
+    .ora-erp-ecosys { display: none !important; }
+    .panel, .tw, .kpi { box-shadow: none !important; border-radius: 0 !important; }
+  }
+</style>
+
+<!-- 5대 오라테크 통합 생태계 바 -->
+<div class="ora-erp-ecosys">
+  <div class="ora-erp-ecolinks">
+    <span style="font-weight:900;color:#7DD3FC;margin-right:4px;">ORATECH SUITE</span>
+    <span class="ora-erp-epill active">🏢 통합 ERP v48</span>
+    <a href="https://igan3w.github.io/orawinch/" target="_blank" class="ora-erp-epill">🌐 공식홈페이지 (orawinch)</a>
+    <a href="https://igan3w.github.io/studio/" target="_blank" class="ora-erp-epill">🛠️ 상세 AI 스튜디오</a>
+    <a href="https://igan3w.github.io/sourcing/" target="_blank" class="ora-erp-epill">🌏 1688 소싱랩·B2B견적</a>
+    <a href="http://localhost:3080/" target="_blank" class="ora-erp-epill">📊 스토어AI 김대리</a>
+  </div>
+  <div class="ora-erp-ecolinks">
+    <button type="button" class="ora-erp-epill" style="background:#059669;border-color:#34D399;color:#fff;" onclick="autoPushErpToGithub(false)">🚀 GitHub 자동배포</button>
+  </div>
+</div>
+
 <div class="topbar">
   <div class="brand">
-    🌐 통합 무역·유통 경리회계 ERP Pro <span>오라테크 v48 Carbon</span>
-    <span id="cloudBadge" onclick="openTgModal()" style="background:#0088cc;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff">☁️ 클라우드 대기중</span>
-    <span id="autoBakBadge" onclick="connectAutoBackupFolder()" style="background:#c0392b;cursor:pointer;font-size:11px;padding:3px 8px;border-radius:12px;border:1px solid #fff" title="클릭하여 내 컴퓨터의 자동백업 폴더를 지정하세요">📁 자동백업: 미연결</span>
+    🌐 통합 무역·유통 경리회계 ERP Pro <span style="background:rgba(255,255,255,0.16);padding:2px 8px;border-radius:6px;font-size:11.5px;border:1px solid rgba(186,230,253,0.4);">오라테크 v48 Carbon</span>
+    <span id="cloudBadge" onclick="openTgModal()" style="background:#0284C7;cursor:pointer;font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid #BAE6FD;white-space:nowrap;">☁️ 클라우드 대기중</span>
+    <span id="autoBakBadge" onclick="connectAutoBackupFolder()" style="background:#DC2626;cursor:pointer;font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid #FCA5A5;white-space:nowrap;" title="클릭하여 내 컴퓨터의 자동백업 폴더를 지정하세요">📁 자동백업: 미연결</span>
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-    <button class="btn-pur" style="border:1.5px solid #fff;font-weight:900;padding:5px 12px" onclick="openAiModal()">💎 카본 AI 주문·비서</button>
-    <button class="btn-a" style="background:#d35400;color:#fff;border:1.5px solid #fff;font-weight:900;padding:5px 11px" onclick="openWinchWizard()" title="하중·전원 조건별 윈치 모델 추천">🧙‍♂️ 윈치 사양마법사</button>
-    <button id="hideProfitBtn" class="btn-w" style="border:1.5px solid #fff;font-weight:900;padding:5px 10px" onclick="toggleHideProfit()" title="손님과 함께 화면을 볼 때 원가와 마진 금액을 즉시 숨깁니다">👁️ 마진숨김 OFF</button>
-    <button class="btn-s" style="background:#1e293b;border:1.5px solid #94a3b8;font-weight:900;padding:5px 12px" onclick="goTab('t-cfg',document.querySelectorAll('.nav .tab')[8])" title="백업, 복구, 홈택스, 바코드실사, 로프드럼, 세무도구 전체 열기">⚙️ 설정 · 전체도구함</button>
-    <button class="btn-r" style="padding:5px 10px" onclick="lockERP()" title="화면 즉시 잠금">🔒 잠금</button>
+    <button class="btn-pur" style="border:1.5px solid #BAE6FD;font-weight:900;padding:6px 12px" onclick="openAiModal()">💎 카본 AI 비서</button>
+    <button class="btn-a" style="background:#0284C7;color:#fff;border:1.5px solid #BAE6FD;font-weight:900;padding:6px 11px" onclick="openWinchWizard()" title="하중·전원 조건별 윈치 모델 추천">🧙‍♂️ 윈치 사양마법사</button>
+    <button id="hideProfitBtn" class="btn-w" style="border:1.5px solid #CBD5E1;font-weight:900;padding:6px 10px" onclick="toggleHideProfit()" title="손님과 함께 화면을 볼 때 원가와 마진 금액을 즉시 숨깁니다">👁️ 마진숨김 OFF</button>
+    <button class="btn-s" style="background:#061D4E;border:1.5px solid #7DD3FC;font-weight:900;padding:6px 12px" onclick="goTab('t-cfg',document.querySelectorAll('.nav .tab')[8])" title="백업, 복구, 홈택스, 바코드실사, 로프드럼, 세무도구 전체 열기">⚙️ 설정 · 도구함</button>
+    <button class="btn-r" style="padding:6px 10px" onclick="lockERP()" title="화면 즉시 잠금">🔒 잠금</button>
   </div>
 </div>
 
@@ -1401,6 +1582,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
             <button class="btn-s" onclick="openSnModal()">🔢 시리얼/보증 추적기</button>
             <button class="btn-p" style="background:#2563eb;font-weight:bold" onclick="openBarcodeAuditModal()">📷 스마트 바코드 실사</button>
             <button class="btn-g" style="background:#0284c7;font-weight:bold" onclick="openRopeDrumModal()">🌀 와이어로프 드럼 트래커</button>
+            <button class="btn-r" style="background:#dc2626;font-weight:bold" onclick="createLowStockPoDraft()">🚨 안전재고 부족 일괄발주</button>
             <button class="btn-a" onclick="autoCleanItems(true)">✨ 순수 제품코드만 깔끔 정리</button>
             <input id="fItmKw" placeholder="초성/품목명/규격 검색" oninput="scheduleRender('itm')">
             <button class="btn-w" style="padding:3px 6px" onclick="startVoiceRecognition('fItmKw')" title="음성으로 품목 검색">🎙️</button>
@@ -6348,6 +6530,33 @@ window.onCurChange = function(){
   }
   recalcPurDraft();
 };
+
+function createLowStockPoDraft(){
+  const stats = typeof getItemStats === 'function' ? Object.values(getItemStats()) : [];
+  const lowItems = stats.filter(st => st && st.low && st.it && st.it.name);
+  if(!lowItems.length){
+    alert('✅ 현재 안전재고 이하로 부족한 품목이 없습니다.');
+    return;
+  }
+  const purTabBtn = document.querySelector(".nav .tab[onclick*=\"'t-pur'\"]");
+  if(typeof goTab === 'function') goTab('t-pur', purTabBtn || undefined);
+  purDraft = lowItems.map(st => {
+    const safe = Number(st.it.safeQty) || 3;
+    const suggestQty = Math.max(1, (safe * 2) - Math.max(0, Number(st.curQty) || 0));
+    return {
+      item: st.it.name,
+      spec: st.it.spec || '1EA',
+      qty: suggestQty,
+      price: Number(st.it.buyPrice) || 0,
+      krwAmt: 0,
+      incAmt: 0,
+      uCost: 0
+    };
+  });
+  if($('pMemo')) $('pMemo').value = `[안전재고 부족 ${lowItems.length}종 자동 발주초안]`;
+  recalcPurDraft();
+  alert(`🚨 안전재고 미달 ${lowItems.length}개 품목을 [수입·매입전표] 입고 작성란에 자동 채워 넣었습니다.\n매입처만 선택하고 저장하세요!`);
+}
 
 function addPurLine(){
   const rawName = ($('pItem').value||'').trim();
