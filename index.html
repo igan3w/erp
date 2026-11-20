@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#122b49">
 <title>통합 무역·유통 경리회계 ERP Pro (오라테크 v42 풀옵션 에디션)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -145,55 +145,20 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
 .stamp-wrap{position:relative;display:inline-block}
 .stamp{position:absolute;right:-8px;top:-10px;width:44px;height:44px;border:2.5px solid #d63031;border-radius:50%;color:#d63031;font-weight:900;font-size:11px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1;transform:rotate(-12deg);background:rgba(255,255,255,0.75);pointer-events:none}
 
-/* 👴 큰글씨 효도모드 (Senior High-Visibility Mode) */
-body.senior-mode{font-size:15.5px !important;background:#e2e8f0}
-body.senior-mode input,body.senior-mode select,body.senior-mode button,body.senior-mode textarea{font-size:15px !important;padding:7px 10px !important;font-weight:bold !important;border-width:1.5px !important}
-body.senior-mode .tab{font-size:15px !important;padding:10px 14px !important}
-body.senior-mode .ph{font-size:16px !important;padding:9px 12px !important}
-body.senior-mode .fg label{font-size:14px !important;color:#000 !important;margin-bottom:4px !important}
-body.senior-mode table{font-size:14.5px !important}
-body.senior-mode th,body.senior-mode td{padding:7px 9px !important}
-body.senior-mode .kpi-t{font-size:14px !important;color:#222 !important}
-body.senior-mode .kpi-v{font-size:21px !important}
-body.senior-mode .kpi-s{font-size:13px !important}
-body.senior-mode .pm-bar{font-size:14px !important;padding:8px 10px !important}
-body.senior-mode .pm-pill{font-size:13.5px !important;padding:4px 10px !important}
-body.senior-mode .ld-item{font-size:15px !important;padding:10px 12px !important}
-body.senior-mode .ld-sub{font-size:13px !important}
-body.senior-mode .bg{font-size:13px !important;padding:3px 7px !important}
-body.senior-mode .bar-row{font-size:14.5px !important}
-body.senior-mode .bar-lbl{width:170px !important}
-body.senior-mode .bar-val{width:140px !important}
-body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important}
-@media(min-width:1151px){body.senior-mode .grid-2{grid-template-columns:540px 1fr}}
-
-/* Mobile Responsive */
-@media(max-width:768px){
-  body{font-size:14px}
-  .topbar{padding:8px;flex-direction:column;align-items:stretch}
-  .brand{justify-content:space-between;margin-bottom:4px}
-  .topbar > div:last-child{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
-  .topbar button{flex:1 1 auto;padding:7px 6px;font-size:11.5px}
-  .nav{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding:0 4px}
-  .tab{flex:0 0 auto;padding:10px 12px;font-size:13px}
-  .fg{display:flex;flex-direction:column;align-items:stretch;gap:6px}
-  .fg > div{width:100% !important}
-  input,select,textarea{font-size:15px !important;padding:8px !important;min-height:38px}
-  button{min-height:36px;font-size:13px;padding:6px 10px}
-  .tw{max-height:65vh;-webkit-overflow-scrolling:touch}
-  th,td{padding:7px 6px;font-size:12.5px}
-  .kpi-row{grid-template-columns:1fr 1fr}
-  .kpi-v{font-size:15px}
-  .modal{width:100vw;max-width:100vw;height:96vh;max-height:96vh;border-radius:0}
-}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.04)}}
+.row-limit-bar{background:#fff8e6;border:1px solid #f59e0b;color:#92400e;padding:5px 10px;border-radius:5px;font-size:11.5px;font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
 
 @media print{
   @page{size:A4 portrait;margin:0mm!important}
-  html,body{height:297mm!important;overflow:hidden!important;margin:0!important;padding:0!important;background:#fff}
+  html,body{height:auto!important;overflow:visible!important;margin:0!important;padding:0!important;background:#fff}
   body *{visibility:hidden}
   .print-Now,.print-Now *{visibility:visible}
-  .print-Now{position:fixed!important;left:0!important;top:0!important;width:100%!important;padding:9mm 10mm!important;margin:0!important;border:none!important;box-shadow:none!important}
+  .print-Now{position:absolute!important;left:0!important;top:0!important;width:100%!important;padding:9mm 10mm!important;margin:0!important;border:none!important;box-shadow:none!important;overflow:visible!important}
   .a4-page{height:274mm!important;min-height:274mm!important;max-height:274mm!important;overflow:hidden!important;page-break-after:avoid!important;page-break-inside:avoid!important}
+  .a4-page.multi-page{height:auto!important;min-height:274mm!important;max-height:none!important;overflow:visible!important;page-break-after:auto!important;page-break-inside:auto!important;display:block!important}
+  .a4-page.multi-page table{page-break-inside:auto!important}
+  .a4-page.multi-page tr{page-break-inside:avoid!important;page-break-after:auto!important}
+  .a4-page.multi-page thead{display:table-header-group!important}
   .no-print{display:none!important}
 }
 </style>
@@ -317,8 +282,45 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
       </div>
       <div id="simResultBox" style="margin-top:10px"></div>
     </div>
-    <div class="mf">
+    <div class="mf" style="justify-content:space-between">
+      <button class="btn-g" style="background:#0d9488;border-color:#0f766e" onclick="openSourcedItemsModal()">🌏 1688 소싱랩 접수함 불러오기</button>
       <button class="btn-w" onclick="closeModal('simModal')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🌏 1688 소싱랩 접수함 (sourcing.html 크로스앱 브릿지) 모달 -->
+<div class="modal-bg" id="sourcedItemsModal" style="z-index:1270">
+  <div class="modal" style="width:760px;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#0f766e,#0d9488)">
+      <span>🌏 1688 소싱랩 접수함 불러오기 (<code>localStorage['ora_sourced_items']</code>)</span>
+      <button class="btn-r" onclick="closeModal('sourcedItemsModal')">✕ 닫기</button>
+    </div>
+    <div class="mb" style="font-size:12.5px">
+      <div style="background:#f0fdfa;border:1px solid #99f6e4;padding:8px 10px;border-radius:5px;margin-bottom:10px;color:#115e59;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <span>💡 <b>1688 소싱랩</b>(<code>sourcing.html</code>)에서 전송한 신상품 후보를 품목장 등록, 매입전표 투입 또는 원가시뮬레이터로 즉시 불러옵니다.</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn-w" style="padding:3px 8px;font-size:11px" onclick="renderSourcedItemsModal()">🔄 새로고침</button>
+          <button class="btn-g" style="padding:3px 8px;font-size:11px" onclick="importAllSourcedItemsToDb()">📦 전체 품목장 일괄등록</button>
+        </div>
+      </div>
+      <div class="tw" style="max-height:360px">
+        <table>
+          <thead>
+            <tr>
+              <th>품목명 / 분류</th>
+              <th style="width:105px">수입 도착원가</th>
+              <th style="width:105px">목표 판매가</th>
+              <th style="width:65px">예정수량</th>
+              <th style="width:240px">ERP 반영 작업</th>
+            </tr>
+          </thead>
+          <tbody id="sourcedItemsTb"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn-w" onclick="closeModal('sourcedItemsModal')">닫기</button>
     </div>
   </div>
 </div>
@@ -395,7 +397,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
       <div style="background:#e8f4fd;border:1.5px solid #90caf9;padding:10px;border-radius:6px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px">
           <span style="font-weight:900;color:#0d47a1;font-size:13.5px">🧠 3. Gemini 4 Carbon 경영비서 실시간 장부 브리핑 & 전략 상담</span>
-          <input type="password" id="geminiApiKey" value="" placeholder="Google Gemini 4 Carbon API Key" style="width:220px;font-size:11px" onchange="sSet('ora_gemini_key',this.value.trim())">
+          <input type="password" id="geminiApiKey" value="" placeholder="Google Gemini 4 Carbon API Key" style="width:220px;font-size:11px" onchange="saveGeminiApiKey(this.value)">
         </div>
         <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
           <button class="btn-w" style="font-size:11px;font-weight:bold;border-color:#2563eb;color:#1d4ed8" onclick="askAiAssistant('현재 장부 데이터를 바탕으로 이번 주 당장 실행해야 할 미수금 회수, 재고 발주, 주력 품목 영업 액션플랜 3가지를 대표님 보고용으로 명확히 브리핑해줘')">💎 카본 AI 오늘의 핵심 액션플랜</button>
@@ -488,7 +490,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
         </div>
         <div class="c12" style="margin-top:8px">
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--pri)">
-            <input type="checkbox" id="tgAuto" checked style="width:16px;height:16px"> <b>스마트 자동 클라우드 백업 (입력 완료 15초 후 조용히 동기화)</b>
+            <input type="checkbox" id="tgAuto" checked style="width:16px;height:16px"> <b>스마트 자동 클라우드 백업 (입력 완료 5초 후 PC·모바일 자동 동기화)</b>
           </label>
         </div>
       </div>
@@ -960,6 +962,71 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
   }
 </style>
 
+<!-- Senior Mode & Mobile Responsive Overrides (placed AFTER oraErp2026Theme so !important rules are never clobbered) -->
+<style id="oraErpOverrides">
+  /* 👴 큰글씨 효도모드 (Senior High-Visibility Mode) */
+  body.senior-mode:not(.print-mode) { font-size: 16px !important; background: #e2e8f0 !important; }
+  body.senior-mode input:not([type="checkbox"]):not([type="radio"]),
+  body.senior-mode select,
+  body.senior-mode textarea,
+  body.senior-mode button,
+  body.senior-mode button[class^="btn-"],
+  body.senior-mode button[class*=" btn-"] {
+    font-size: 15px !important;
+    padding: 7px 10px !important;
+    font-weight: 800 !important;
+    border-width: 1.5px !important;
+  }
+  body.senior-mode .nav .tab,
+  body.senior-mode .nav .tab.active { font-size: 15px !important; padding: 10px 14px !important; }
+  body.senior-mode .panel .ph { font-size: 16px !important; padding: 10px 14px !important; }
+  body.senior-mode .fg label { font-size: 14.5px !important; color: #000 !important; margin-bottom: 4px !important; }
+  body.senior-mode table,
+  body.senior-mode .tw th,
+  body.senior-mode .tw td { font-size: 14.5px !important; padding: 8px 10px !important; }
+  body.senior-mode .kpi-t { font-size: 14px !important; color: #1e293b !important; }
+  body.senior-mode .kpi-v, body.senior-mode .kpi .v { font-size: 22px !important; }
+  body.senior-mode .kpi-s { font-size: 13px !important; }
+  body.senior-mode .pm-bar { font-size: 14px !important; padding: 8px 10px !important; }
+  body.senior-mode .pm-pill { font-size: 13.5px !important; padding: 4px 10px !important; }
+  body.senior-mode .ld-item { font-size: 15px !important; padding: 10px 12px !important; }
+  body.senior-mode .ld-sub { font-size: 13px !important; }
+  body.senior-mode .bg { font-size: 13px !important; padding: 3px 7px !important; }
+  body.senior-mode .bar-row { font-size: 14.5px !important; }
+  body.senior-mode .bar-lbl { width: 170px !important; }
+  body.senior-mode .bar-val { width: 145px !important; }
+  body.senior-mode .cal-tag { font-size: 12.5px !important; padding: 2px 5px !important; }
+  @media (min-width: 1151px) { body.senior-mode .grid-2 { grid-template-columns: 540px 1fr !important; } }
+
+  /* 📱 Mobile Responsive */
+  @media (max-width: 768px) {
+    body:not(.print-mode) { font-size: 14px !important; }
+    .ora-erp-ecosys { padding: 4px 8px !important; font-size: 11px !important; }
+    .topbar { padding: 8px 10px !important; flex-direction: column !important; align-items: stretch !important; }
+    .topbar .brand { justify-content: space-between; margin-bottom: 4px; font-size: 14.5px !important; }
+    .topbar > div:last-child { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+    .topbar button { flex: 1 1 auto; padding: 7px 6px !important; font-size: 11.5px !important; }
+    .nav { overflow-x: auto !important; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; padding: 6px 4px 0 4px !important; }
+    .nav .tab, .nav .tab.active { flex: 0 0 auto !important; padding: 9px 11px !important; font-size: 12.5px !important; }
+    .fg { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 6px !important; }
+    .fg > div { width: 100% !important; }
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 15px !important; padding: 8px !important; min-height: 38px; }
+    button, button[class^="btn-"], button[class*=" btn-"] { min-height: 34px; font-size: 12.5px !important; padding: 6px 9px !important; }
+    .tw { max-height: 65vh !important; -webkit-overflow-scrolling: touch; }
+    .tw th, .tw td { padding: 7px 6px !important; font-size: 12.5px !important; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; padding: 6px 8px !important; }
+    .kpi-v, .kpi .v { font-size: 15.5px !important; }
+    .modal { width: 100vw !important; max-width: 100vw !important; height: 96vh !important; max-height: 96vh !important; border-radius: 0 !important; }
+    #fxBoardCards { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
+    #vatSummaryBox > div, #itxResultBox > div:first-child { grid-template-columns: 1fr !important; gap: 6px !important; }
+    .cal-grid { gap: 2px !important; padding: 2px !important; overflow-x: auto; }
+    .cal-hdr { padding: 4px 2px !important; font-size: 11px !important; }
+    .cal-cell { min-height: 64px !important; padding: 3px !important; font-size: 11px !important; }
+    .cal-day { font-size: 11px !important; }
+    .cal-tag { font-size: 9.5px !important; padding: 1px 2px !important; }
+  }
+</style>
+
 <!-- 5대 오라테크 통합 생태계 바 -->
 <div class="ora-erp-ecosys">
   <div class="ora-erp-ecolinks">
@@ -973,7 +1040,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     <a href="https://igan3w.github.io/notes/" target="_blank" class="ora-erp-epill">📝 노션+ 데일리</a>
   </div>
   <div class="ora-erp-ecolinks">
-    <button type="button" class="ora-erp-epill" style="background:#059669;border-color:#34D399;color:#fff;" onclick="autoPushErpToGithub(false)">🚀 GitHub 자동배포</button>
+    <button type="button" class="ora-erp-epill" style="background:#059669;border-color:#34D399;color:#fff;" onclick="pushErpToGithubDirect(false)">🚀 GitHub 자동배포</button>
   </div>
 </div>
 
@@ -1131,7 +1198,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
               <button class="btn-w" style="padding:2px 8px;font-size:11px" onclick="$('sPhotoIn').click()">📸 수리 전·후 / 납품 실물사진 첨부</button>
               <span id="sPhotoPreview" style="font-size:11px;color:#666">첨부된 사진 없음 (첨부 시 명세서·수리내역서에 함께 인쇄 가능)</span>
             </div>
-            <button class="btn-w" style="padding:1px 5px;font-size:10.5px" onclick="$('sPhotoData').value='';$('sPhotoPreview').innerHTML='첨부된 사진 없음';">지우기</button>
+            <button class="btn-w" style="padding:1px 5px;font-size:10.5px" onclick="clearPhotoInput('sPhotoIn','sPhotoData','sPhotoPreview');if($('sPhotoPreview'))$('sPhotoPreview').innerHTML='첨부된 사진 없음';">지우기</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button class="btn-p" style="flex:2;padding:9px;font-size:13.5px" id="sSaveBtn" onclick="saveSale(false)">💾 매출전표 저장 (F8)</button>
@@ -1401,7 +1468,8 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
       <div class="panel">
         <div class="ph">
           <span id="purFormTitle">🚢 수입(외화)·국내 매입전표 및 부대비용 배부</span>
-          <div style="display:flex;gap:4px">
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn-g" style="background:#0d9488;border-color:#0f766e" onclick="openSourcedItemsModal()">🌏 1688 소싱랩 접수함 불러오기 <span id="sourcedInboxBadge" style="background:#ef4444;color:#fff;padding:0 5px;border-radius:10px;font-size:10px;display:none">0</span></button>
             <button class="btn-a" onclick="openSimModal()">🧮 수입원가·목표마진 시뮬레이터</button>
             <button class="btn-w" onclick="resetPurForm()">🔄 초기화</button>
           </div>
@@ -1605,7 +1673,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
               <button class="btn-w" style="padding:2px 8px;font-size:11px" onclick="$('iPhotoIn').click()">📸 제품 실물사진 등록</button>
               <span id="iPhotoPreview" style="font-size:11px;color:#666">사진 미등록 (등록 시 견적서·단가표에 자동 인쇄)</span>
             </div>
-            <button class="btn-w" style="padding:1px 5px;font-size:10.5px" onclick="$('iPhotoData').value='';$('iPhotoPreview').innerHTML='사진 미등록';">지우기</button>
+            <button class="btn-w" style="padding:1px 5px;font-size:10.5px" onclick="clearPhotoInput('iPhotoIn','iPhotoData','iPhotoPreview');if($('iPhotoPreview'))$('iPhotoPreview').innerHTML='사진 미등록';">지우기</button>
           </div>
           <button class="btn-p" style="width:100%;padding:8px;margin-top:6px" onclick="saveItem()">💾 품목 저장</button>
         </div>
@@ -1730,7 +1798,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
     <div class="panel" style="margin-bottom:10px;border:2px solid #142d4c">
       <div class="ph" style="background:linear-gradient(90deg,#0f172a,#1e3a8a)">
         <span>🎛️ 오라테크 ERP 통합 도구함 & 백업 · 클라우드 · Gemini 4 Carbon 설정 센터 (상단바 기능 통합)</span>
-        <span id="cfgCarbonStatusBadge" style="background:#059669;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:900">💎 Gemini 4 Carbon 엔진 가동중</span>
+        <span id="cfgCarbonStatusBadge" onclick="setupGeminiApiKey()" style="background:#d97706;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:900;cursor:pointer" title="클릭하여 Gemini 4 Carbon API 키 설정">🔑 Carbon API 키 확인중...</span>
       </div>
       <div class="pb">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:10px">
@@ -1775,6 +1843,7 @@ body.senior-mode .cal-tag{font-size:12.5px !important;padding:2px 5px !important
               <button id="seniorModeBtn" class="btn-a" style="background:#f39c12;color:#111;padding:6px 10px;font-weight:900" onclick="toggleSeniorMode()">🔍 큰글씨 효도모드 OFF</button>
               <button id="voiceTopBtn" class="btn-r" style="background:#e84393;padding:6px 10px;font-weight:900" onclick="startVoiceRecognition('global')">🎙️ 음성비서 호출</button>
               <button class="btn-pur" style="padding:6px 10px;font-weight:900" onclick="openAiModal()">🤖 카본 AI 비서 열기</button>
+              <button class="btn-a" style="background:#7c3aed;border-color:#6d28d9;padding:6px 10px;font-weight:900" onclick="setupGeminiApiKey()">🔑 카본 API 키 설정</button>
               <button class="btn-g" style="background:#059669;padding:6px 10px;font-weight:900" onclick="testErpCarbonConnection()">⚡ 카본 API 실시간 성능점검</button>
               <button class="btn-s" style="background:#111827;border:1px solid #38bdf8;padding:6px 10px;font-weight:900;color:#38bdf8" onclick="pushErpToGithubDirect()">🐙 GitHub(igan3w/erp) 원클릭 업데이트</button>
               <a href="https://igan3w.github.io/sourcing/" target="_blank" class="btn-g" style="background:#0d9488;padding:6px 10px;font-weight:900;text-decoration:none;color:#fff">🌏 4번째: 중국 1688 소싱랩·퀵견적 ↗</a>
@@ -1931,6 +2000,15 @@ const formatLocalYMD = d => {
 };
 const todayStr = () => formatLocalYMD(new Date());
 const esc = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const escJs = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r/g,'\\r').replace(/\n/g,'\\n');
+window.getUnitFxRate = function(cur, rawRate){
+  const c = String(cur || 'KRW').toUpperCase();
+  if(c === 'KRW') return 1;
+  const r = Number(rawRate) || 0;
+  if(r <= 0) return 0;
+  if(c === 'JPY') return r >= 50 ? (r / 100) : r;
+  return r;
+};
 
 const ORA_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAL0AAAAyCAMAAAA+7yoPAAAAflBMVEX7+/sLClMMDDJfX5Cal6uWCg+wsM1UVGIOjgygZmbWoJcgcR9goGJAPX2j1qbBv9eAe6PVhndyGxeiRjq6yNw3OoPwExFdThZ6wXOePEjlTDmFx33abWQmT03bxqx1nqUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB3G5qmAAAAIHRSTlP//////////////////////////////////////////3Fe9GAAAAYuSURBVHja7VmJcts4DJUImLQoyZKTOEmTtP3/vywB3odsp2PN7M6U4zqyqOMBeDjbdf/W/35JBFAAKO+8/uW/BB77XoieFuAtOQFmunAGKERdIa61pQek+/Dh4Nc+LNHDVeiX7NIUiqRTrAP7XelhoQ0xP5w2fbbghNP7+/tnfSH05Ur0X2waCSDnF1jrPho9uLf19vH9z3E8mnWqDC+czlP947ZoQmW3u/seTR2vq/DWn8djDR88bOPcuILyV2P6FLDkV+5xKQu97LAL+iiCEMrCn06V3SNVpFe2jE8JpF6crLnwYjf0dq2oKXiuv485/uVS0jxSaXbOIzJdYyqZ8+l+D+JDoHwEh8cxxa9yjgdIInAHy3jFxpKJV4jemkvuhD59+Wly8I/v3iOxHcHtbVCKB+ktaK/D8i0PiZii72utTKNXvxJbwcJ6w+LByhK9jOQUveMaPJw6ooH+NE2fE6EfbfbZThXSO08lWMkivurBZQY69A3torEAo9/QWO8EkyUnlkTNMsQaMoh4dMTHmvfRAooyv1CnTZ+h+ypGp7RXwYHXHYgfonkzHPC7xXj83MzTUFdgmIR/jMSTe0R8Dx82t8YieZUqBspFZSaTCbu6+vjRxU5T+bwxHlulT4wsinxD+l4hqyFYemxmgUcXmi8bG8rCn5qixSomXTKGhEgWEHsQ3wf9i2yiv0i00b9gD28qd/dlFiIUe5BFJeXblnkf9KGGxFY+vcTa4dR0WgYV0l7SYqIvqwU3J1a6HRpLT9dCNejJgVMF37JqcfkOnfNUYT/rWfZpDwPQwqtiOu0s/PGzivbBeftm2He1sQjKhz3QU6SrI1of3+e0/15Vwd4+smhAXCyY57lXvKDfD70rdFux1FKV657jOCUZGru0TigCb80T6xt7TVQWwwatddmQen3iGOBjVGNSJ2QNLTRSa79PxPdreDocDsOv4n0ehCPPdLIcmMtJzZpU07LVS30z4oMqT2An1bpNHkJ/OJxz8grfFnLgH3+mXWFWy9sNWTUo2fAI6hHX3B6ElXZCbnLUFeUz+sOgc+a76dOLrZmzuggSHWNwXHSprJW7W3Mi35ut6bhCMXo/crLopX1xNoeKomsLP6ofwoxsBuDQxz8gdc5LXvChc1nZrpvS06ZppuxGpR06S9Aq0PO5DP0CFMxoqcyaulS/674IdIjb4nemTihqDgkbVSu30fn0oTqyQmXoE+bI6rGQtzzo1D/U00KHfRynpDcTCR4UcdS2OQRIeRPePAu5hX4OQO5AH9Qf6INxWkXNylhmLZniIR+kmTo2Y7JZmF4tG4L4H4p7/oh+Q/d1efbDwn/WyZCf3yxxPG7U+39VHq55gCl4j4sk06NZC9VibfSVf+nhqcAfpyXHdrn/l+k9cippUz16OnDEXYFdxqFHX3Zv9FXo8D9l+NH8GMc7lK+10VeeuDfaOuySmGP8RvJyAYmsTRJw2Z0wJ5taX4v9Wfg3Ig1vNucmys+d3nr+QOZ+fsJkF7G6OMJA5/WQ+u4dXiu3emUd8T9/aa4ffj3Tr7e30SpfKf6IxO2Rj4eDtgpAusCj4aMiRHB0DZ5coL+Da5ft0iPBbyQYzLKHTwY/RU0lOmE+yiBixZovFIr0ffgy8PWHEULZE4rlUDgItUn+Dd3b7aWNHq8VTj76VOtNmT7XYDJ6F1S9C8FGoBPmCA+vH1p/vDJ6cwmdRb5KVOhlht7w3lDOuCO4aCK5NWYDtdDD9fmc3sDPyUwQYMIl6BO+TMHx+vGlTdlB6AcSD2nD/BvEcEX3EJtJj35xv5Vs8h5u9ZrnoYX+2Q7bSJmEHg2HBFGdFN2dD6/nYTB/zt3gHAPZMOYzxOrSBz13hPYch/fAnC7EoKD75P9XTelFQ4urTYNu4deMnvTZlejRMEefvwx6dG6tzIZgAwgsWunN2KcaFTKjr2+8oX+Nw48GfCQqoPVbzxxCb5hDwnn0nlFkqMj7RRaruxN9J2/c2bZAIoAJPwPHR8MTq3uFTA76w7xnk2FnCKQGMhL7OO3fm4kr9KJVKXwntRsbmMXhcRhs7knHx5jUqRxe2xnt3ipI1p3hbkOJzE5nqhVuVgo3pjR3nvu3vrP+AF0GNAn16wtXAAAAAElFTkSuQmCC';
 
@@ -2061,12 +2139,16 @@ function matchKw(target, kw){
 function getSaleFp(s){
   const dt = String(s.date||'').trim();
   const cli = normSearch(stripCorp(s.client||''));
+  const otName = normSearch((s.otInfo && s.otInfo.name) || s.otName || '');
   const sup = Number(s.supply)||0, vat = Number(s.vat)||0;
   const L = s.lines || [];
+  const fItem = L[0] ? normSearch(L[0].item || '') : '';
   const fQty = L[0] ? (Number(L[0].qty)||1) : 1;
   const fPrc = L[0] ? (Number(L[0].price)||sup) : sup;
+  const sn = normSearch(s.serialNo || '');
+  const asTag = normSearch(s.asStatus || '');
   const memoTag = (s.memo && s.memo.indexOf('수정') !== -1) ? 'MOD' : 'NRM';
-  return dt + '|' + cli + '|' + sup + '|' + vat + '|' + L.length + '|' + fQty + '|' + fPrc + '|' + memoTag;
+  return dt + '|' + cli + '|' + otName + '|' + sup + '|' + vat + '|' + L.length + '|' + fItem + '|' + fQty + '|' + fPrc + '|' + sn + '|' + asTag + '|' + memoTag;
 }
 
 function getPurFp(p){
@@ -2074,8 +2156,9 @@ function getPurFp(p){
   const cli = normSearch(stripCorp(p.client||''));
   const sup = Number(p.totalCost)||0, vat = Number(p.vat)||0;
   const L = p.lines || [];
+  const fItem = L[0] ? normSearch(L[0].item || '') : '';
   const fQty = L[0] ? (Number(L[0].qty)||1) : 1;
-  return dt + '|' + cli + '|' + sup + '|' + vat + '|' + L.length + '|' + fQty;
+  return dt + '|' + cli + '|' + sup + '|' + vat + '|' + L.length + '|' + fItem + '|' + fQty;
 }
 
 function scoreSlip(s){
@@ -2098,7 +2181,8 @@ function dedupAllData(showAlert){
 
   const sMap = {};
   (db.sales||[]).forEach(s => {
-    if(!s || (Number(s.supply)===0 && Number(s.vat)===0)) return;
+    if(!s) return;
+    if(Number(s.supply)===0 && Number(s.vat)===0 && !s.asStatus) return;
     const fp = getSaleFp(s);
     if(!sMap[fp]){
       (s.lines||[]).forEach(l => { if(l.spec) l.spec = String(l.spec).toUpperCase(); });
@@ -2257,7 +2341,9 @@ function normDB(){
       l.sup = Number(l.sup) || Number(l.supply) || Math.round(l.qty * l.price);
       l.supply = l.sup;
       if(l.vat === undefined) l.vat = s.vat > 0 ? Math.round(l.sup * 0.1) : 0;
-      l.uCost = Number(l.uCost) || Number(l.cost) || Math.round(l.price * 0.75);
+      l.uCost = (l.uCost !== undefined && l.uCost !== null && l.uCost !== '')
+        ? Number(l.uCost)
+        : ((l.cost !== undefined && l.cost !== null && l.cost !== '') ? Number(l.cost) : Math.round(l.price * 0.75));
     });
     if(s.profit === undefined){
       const cSum = (s.lines||[]).reduce((a,l) => a + (l.uCost * l.qty), 0);
@@ -2287,28 +2373,6 @@ function normDB(){
 
   if(!db.clients.some(c => c && c.name === '1회성(기타)거래처')){
     db.clients.unshift({id:1, name:'1회성(기타)거래처', bizNo:'', ceo:'', type:'겸용', tier:0, tel:'', email:'', addr:'', initAr:0, initAp:0});
-  }
-
-  // 세금계산서 연동분 등 기존 미수금·미지급금 전부 0원(완납) 자동 보정 (최초 1회 자동 실행)
-  if(((db.sales && db.sales.length > 0) || (db.purchases && db.purchases.length > 0)) && sGet('ora_zero_ar_migrated_v43') !== '1'){
-    (db.sales||[]).forEach(s => {
-      if(!s) return;
-      s.total = (Number(s.supply)||0) + (Number(s.vat)||0);
-      s.paid = s.total;
-      s.unpaid = 0;
-    });
-    (db.purchases||[]).forEach(p => {
-      if(!p) return;
-      const pTot = (Number(p.totalCost)||0) + (Number(p.vat)||0);
-      p.paid = pTot;
-      p.payable = 0;
-    });
-    (db.clients||[]).forEach(c => {
-      if(!c) return;
-      c.initAr = 0; c.initUnpaid = 0;
-      c.initAp = 0; c.initPayable = 0;
-    });
-    sSet('ora_zero_ar_migrated_v43', '1');
   }
 
   dedupAllData(false);
@@ -2495,9 +2559,9 @@ async function saveDB(reason, skipTg){
     sSet('ora33_full_cache', await gzPack(buildSlimDB(db), p));
   }catch(e){}
   if(autoBakDirHandle) writeAutoBackupFiles(reason || '자동저장');
-  if(!skipTg && sGet('erp_tg_auto') !== '0' && !isMobileDevice){
+  if(!skipTg && sGet('erp_tg_auto') !== '0'){
     clearTimeout(cloudPushTimer);
-    cloudPushTimer = setTimeout(() => { tgPush(false); }, 3500);
+    cloudPushTimer = setTimeout(() => { tgPush(false); }, 5000);
   }
 }
 
@@ -2665,20 +2729,53 @@ function buildSlimDB(src){
   const slimSales = (src.sales || []).map(s => {
     let m = String(s.memo||'').replace(/우리\s*김향래\s*011-058791-12-001/g,'').replace(/\[홈택스\]/g,'').trim();
     if(m.indexOf('당초 승인번호') !== -1) m = '수정세금계산서';
-    const L = (s.lines || []).map(l => [getIdx(l.item, iMap, iList), getIdx(l.spec, spMap, spList), Number(l.qty)||1, Number(l.price)||0]);
+    const L = (s.lines || []).map(l => {
+      const uc = (l.uCost !== undefined && l.uCost !== null && l.uCost !== '')
+        ? Number(l.uCost)
+        : ((l.cost !== undefined && l.cost !== null && l.cost !== '') ? Number(l.cost) : null);
+      const ln = [getIdx(l.item, iMap, iList), getIdx(l.spec, spMap, spList), Number(l.qty)||1, Number(l.price)||0];
+      if(uc !== null && !isNaN(uc)) ln.push(uc);
+      return ln;
+    });
     const row = [String(s.date||'').replace(/-/g,'').slice(2), getIdx(s.client, cMap, cList), Number(s.supply)||0, Number(s.vat)||0, Number(s.paid)||0, m, L];
     const ot = s.otInfo || {};
-    if(s.otName || ot.name || s.asStatus || s.serialNo){
-      row.push([ot.name||s.otName||'', ot.ceo||s.otCeo||'', ot.tel||s.otTel||'', '', ot.addr||s.otAddr||'', s.asStatus||'', s.serialNo||'']);
+    const exObj = {};
+    if(s.profit !== undefined && s.profit !== null && !isNaN(Number(s.profit))) exObj.pf = Number(s.profit);
+    if(s.payMethod) exObj.pm = s.payMethod;
+    if(Array.isArray(s.payLog) && s.payLog.length) exObj.pl = s.payLog;
+    if(s.htxKey) exObj.hk = s.htxKey;
+    if(s.vatType) exObj.vt = s.vatType;
+    const hasOt = Boolean(s.otName || ot.name || ot.bizNo || s.asStatus || s.serialNo);
+    const hasEx = Object.keys(exObj).length > 0;
+    if(hasOt || hasEx){
+      row.push(hasOt ? [ot.name||s.otName||'', ot.ceo||s.otCeo||'', ot.tel||s.otTel||'', ot.bizNo||'', ot.addr||s.otAddr||'', s.asStatus||'', s.serialNo||''] : null);
     }
+    if(hasEx) row.push(exObj);
     return row;
   });
   const slimPur = (src.purchases || []).map(p => {
-    const L = (p.lines || []).map(l => [getIdx(l.item, iMap, iList), getIdx(l.spec, spMap, spList), Number(l.qty)||1, Number(l.uCost||l.unitCost||l.price||l.unitForeign)||0]);
-    return [String(p.date||'').replace(/-/g,'').slice(2), getIdx(p.client, cMap, cList), Number(p.totalCost)||0, Number(p.vat)||0, Number(p.paid)||0, p.type||'국내매입', L];
+    const L = (p.lines || []).map(l => {
+      const uc = Number(l.uCost||l.unitCost||l.price||l.unitForeign)||0;
+      const prc = Number(l.price||l.unitForeign||uc)||0;
+      const krw = Number(l.krwAmt||l.krwBase)||0;
+      const inc = Number(l.incAmt||l.extraAlloc)||0;
+      return [getIdx(l.item, iMap, iList), getIdx(l.spec, spMap, spList), Number(l.qty)||1, uc, prc, krw, inc];
+    });
+    const pRow = [String(p.date||'').replace(/-/g,'').slice(2), getIdx(p.client, cMap, cList), Number(p.totalCost)||0, Number(p.vat)||0, Number(p.paid)||0, p.type||'국내매입', L];
+    const pEx = {};
+    const cur = p.currency || p.cur || 'KRW';
+    if(cur && cur !== 'KRW') pEx.cur = cur;
+    if(p.rate !== undefined && p.rate !== null && Number(p.rate) !== 1) pEx.rt = Number(p.rate);
+    if(Number(p.custom)) pEx.cs = Number(p.custom);
+    if(Number(p.freight)) pEx.fr = Number(p.freight);
+    if(p.memo) pEx.mm = p.memo;
+    if(p.htxKey) pEx.hk = p.htxKey;
+    if(p.goodsKrw !== undefined && p.goodsKrw !== null) pEx.gk = Number(p.goodsKrw);
+    if(Object.keys(pEx).length) pRow.push(pEx);
+    return pRow;
   });
   const slimCli = (src.clients || []).map(c => [
-    c.code||'', c.type||'매출처', c.name||'', c.bizNo||'', c.ceo||'', c.bizType||'', c.bizItem||'', c.tel||'', c.email||'', c.addr||'', Number(c.initAr||c.initUnpaid)||0, Number(c.initAp||c.initPayable)||0, c.memo||''
+    c.code||'', c.type||'매출처', c.name||'', c.bizNo||'', c.ceo||'', c.bizType||'', c.bizItem||'', c.tel||'', c.email||'', c.addr||'', Number(c.initAr||c.initUnpaid)||0, Number(c.initAp||c.initPayable)||0, c.memo||'', Number(c.tier)||0
   ]);
   const slimItm = (src.items || []).map(it => [
     it.code||'', it.cat||'일반', it.name||'', it.spec||'', it.taxType||'과세', Number(it.buyPrice)||0, Number(it.sellPrice)||0, Number(it.initQty)||0, Number(it.safeQty)||5, it.loc||'창고', it.specNote||''
@@ -2690,6 +2787,7 @@ function buildSlimDB(src){
     csp: src.customSpecs || [],
     wq: (src.webQuotes || []).slice(0, 30),
     gUrl: src.gasQuoteUrl || "",
+    dfp: (src.deletedFp || []).slice(-500),
     sd: { cl:cList, il:iList, spl:spList, r:slimSales, pr:slimPur }
   };
 }
@@ -2706,15 +2804,16 @@ function restoreSlimDB(slim){
     webQuotes: slim.wq || slim.webQuotes || [],
     gasQuoteUrl: slim.gUrl || slim.gasQuoteUrl || "",
     bomSets: slim.bomSets || db.bomSets || [],
-    ropeDrums: slim.rd || slim.ropeDrums || []
+    ropeDrums: slim.rd || slim.ropeDrums || [],
+    deletedFp: Array.isArray(slim.dfp) ? slim.dfp : (Array.isArray(slim.deletedFp) ? slim.deletedFp : [])
   };
   const rawClients = slim.c || slim.clients || [];
   out.clients = rawClients.map((a, i) => {
     if(!Array.isArray(a)) return a;
     if(a.length >= 12){
-      return {id:1000+i, code:a[0], type:a[1], name:a[2], bizNo:a[3], ceo:a[4], bizType:a[5], bizItem:a[6], tel:a[7], email:a[8], addr:a[9], initAr:Number(a[10])||0, initAp:Number(a[11])||0, initUnpaid:Number(a[10])||0, initPayable:Number(a[11])||0, memo:a[12]||''};
+      return {id:1000+i, code:a[0], type:a[1], name:a[2], bizNo:a[3], ceo:a[4], bizType:a[5], bizItem:a[6], tel:a[7], email:a[8], addr:a[9], initAr:Number(a[10])||0, initAp:Number(a[11])||0, initUnpaid:Number(a[10])||0, initPayable:Number(a[11])||0, memo:a[12]||'', tier:Number(a[13])||0};
     }
-    return {id:a[0]||(1000+i), name:a[1], bizNo:a[2], ceo:a[3], type:a[4], tier:a[5]||0, tel:a[6], email:a[7], addr:a[8], initAr:Number(a[9])||0, initAp:Number(a[10])||0};
+    return {id:a[0]||(1000+i), name:a[1], bizNo:a[2], ceo:a[3], type:a[4], tier:Number(a[5])||0, tel:a[6], email:a[7], addr:a[8], initAr:Number(a[9])||0, initAp:Number(a[10])||0};
   });
   const rawItems = slim.i || slim.items || [];
   out.items = rawItems.map((a, i) => {
@@ -2733,16 +2832,23 @@ function restoreSlimDB(slim){
     const sup = Number(a[2])||0, vat = Number(a[3])||0, tot = sup + vat, paid = Number(a[4])||0;
     const L = (a[6]||[]).map(x => {
       const itm = iList[x[0]] || '품목', sp = spList[x[1]] || '', q = Number(x[2])||1, p = Number(x[3])||0;
-      const ls = q * p, lv = vat > 0 ? Math.round(ls * 0.1) : 0, uc = Number(x[4]) || Math.round(p * 0.75);
+      const ls = q * p, lv = vat > 0 ? Math.round(ls * 0.1) : 0;
+      const uc = (x.length >= 5 && x[4] !== null && x[4] !== undefined && !isNaN(Number(x[4]))) ? Number(x[4]) : Math.round(p * 0.75);
       return { item:itm, spec:sp, qty:q, price:p, sup:ls, supply:ls, vat:lv, total:ls+lv, uCost:uc, profit:ls-uc*q };
     });
     const ot = Array.isArray(a[7]) ? a[7] : [];
     const exObj = (a[8] && typeof a[8] === 'object') ? a[8] : {};
-    const otInfo = ot[0] ? { name:ot[0], ceo:ot[1]||'', tel:ot[2]||'', addr:ot[4]||'', bizNo:'' } : (a[7] && typeof a[7]==='object' ? a[7] : null);
+    const otInfo = (ot[0] || ot[3]) ? { name:ot[0]||'', ceo:ot[1]||'', tel:ot[2]||'', bizNo:ot[3]||'', addr:ot[4]||'' } : (a[7] && typeof a[7]==='object' && !Array.isArray(a[7]) ? a[7] : null);
+    const calcProf = (exObj.pf !== undefined && exObj.pf !== null && !isNaN(Number(exObj.pf)))
+      ? Number(exObj.pf)
+      : (L.length ? (sup - L.reduce((acc, l) => acc + (l.uCost * l.qty), 0)) : Math.round(sup * 0.25));
     return {
-      id: 100000 + idx, date: dt, client: cList[a[1]] || '', vatType: vat===0?'zero':'tax',
-      payMethod: (tot - paid) > 0 ? '외상(미수)' : '계좌이체', memo: a[5]||'',
-      supply: sup, vat: vat, total: tot, paid: paid, unpaid: tot - paid, profit: Math.round(sup * 0.25),
+      id: 100000 + idx, date: dt, client: cList[a[1]] || '', vatType: exObj.vt || (vat===0?'zero':'tax'),
+      payMethod: exObj.pm || ((tot - paid) > 0 ? '외상(미수)' : '계좌이체'),
+      payLog: Array.isArray(exObj.pl) ? exObj.pl : [],
+      htxKey: exObj.hk || '',
+      memo: a[5]||'',
+      supply: sup, vat: vat, total: tot, paid: paid, unpaid: tot - paid, profit: calcProf,
       lines: L, otInfo, asStatus: ot[5]||exObj.as||'', serialNo: ot[6]||exObj.sn||''
     };
   });
@@ -2754,15 +2860,22 @@ function restoreSlimDB(slim){
                : (rawDt.length === 8 ? (rawDt.slice(0,4) + '-' + rawDt.slice(4,6) + '-' + rawDt.slice(6,8)) : rawDt);
       const sup = Number(a[2])||0, vat = Number(a[3])||0, tot = sup + vat, paid = Number(a[4])||0;
       const rawLines = Array.isArray(a[6]) ? a[6] : (Array.isArray(a[5]) ? a[5] : []);
+      const pEx = (a[7] && typeof a[7] === 'object') ? a[7] : {};
       const L = rawLines.map(x => {
-        const itm = iList[x[0]] || '품목', sp = spList[x[1]] || '', q = Number(x[2])||1, p = Number(x[3])||0;
-        const ls = q * p;
-        return { item:itm, spec:sp, qty:q, price:p, unitForeign:p, krwAmt:ls, krwBase:ls, incAmt:0, totalCost:ls, uCost:p, unitCost:p };
+        const itm = iList[x[0]] || '품목', sp = spList[x[1]] || '', q = Number(x[2])||1, uc = Number(x[3])||0;
+        const prc = (x.length >= 5 && x[4] !== null && x[4] !== undefined) ? Number(x[4]) : uc;
+        const krw = (x.length >= 6 && x[5] !== null && x[5] !== undefined) ? Number(x[5]) : Math.round(q * uc);
+        const inc = (x.length >= 7 && x[6] !== null && x[6] !== undefined) ? Number(x[6]) : 0;
+        return { item:itm, spec:sp, qty:q, price:prc, unitForeign:prc, krwAmt:krw, krwBase:krw, incAmt:inc, extraAlloc:inc, totalCost:krw+inc, uCost:uc, unitCost:uc };
       });
+      const custom = Number(pEx.cs) || 0;
+      const freight = Number(pEx.fr) || 0;
+      const goodsKrw = (pEx.gk !== undefined && pEx.gk !== null) ? Number(pEx.gk) : Math.max(0, sup - custom - freight);
       return {
         id: 500000 + idx, date: dt, type: typeof a[5]==='string' ? a[5] : '국내매입', client: cList[a[1]] || '',
-        currency: 'KRW', rate: 1, custom: 0, freight: 0,
-        goodsKrw: sup, totalCost: sup, vat: vat, total: tot, paid: paid, payable: tot - paid, lines: L
+        currency: pEx.cur || 'KRW', rate: pEx.rt !== undefined ? Number(pEx.rt) : 1, custom: custom, freight: freight,
+        memo: pEx.mm || '', htxKey: pEx.hk || '',
+        goodsKrw: goodsKrw, totalCost: sup, vat: vat, total: tot, paid: paid, payable: tot - paid, lines: L
       };
     });
   } else {
@@ -3046,10 +3159,6 @@ window.tgPull = async function(silent){
 
     db = Object.assign(db, restored);
     if(db.comp) db.comp.pass = pass;
-    if(sGet('ora_zero_ar_cloud_v43') !== '1'){
-      sRem('ora_zero_ar_migrated_v43');
-      sSet('ora_zero_ar_cloud_v43', '1');
-    }
     normDB();
 
     try{ sSet('ora33_full_cache', await gzPack(buildSlimDB(db), pass)); }catch(e){ sSet('ora33_full_cache', fullEnc); }
@@ -3653,12 +3762,18 @@ window.renderCalendar = function(){
       const cn = s.otInfo ? s.otInfo.name : s.client;
       if(cn && !dayMap[s.date].clients.includes(cn)) dayMap[s.date].clients.push(cn);
     }
-    (s.payLog||[]).forEach(pl => {
-      if(pl.date && pl.date.startsWith(ym) && dayMap[pl.date]){
-        dayMap[pl.date].collect += (Number(pl.amt)||0);
-        mCollect += (Number(pl.amt)||0);
-      }
-    });
+    const logs = Array.isArray(s.payLog) ? s.payLog : [];
+    if(logs.length > 0){
+      logs.forEach(pl => {
+        if(pl.date && pl.date.startsWith(ym) && dayMap[pl.date]){
+          dayMap[pl.date].collect += (Number(pl.amt)||0);
+          mCollect += (Number(pl.amt)||0);
+        }
+      });
+    } else if((Number(s.paid)||0) > 0 && s.date && s.date.startsWith(ym) && dayMap[s.date]){
+      dayMap[s.date].collect += (Number(s.paid)||0);
+      mCollect += (Number(s.paid)||0);
+    }
   });
 
   db.purchases.forEach(p => {
@@ -3765,14 +3880,17 @@ window.openSimModal = function(){
 };
 window.onSimCurChange = function(){
   const c = $('simCur').value;
-  const rates = { USD:1380, CNY:192, EUR:1490, JPY:9.1, KRW:1 };
+  const fx = (typeof liveFxRates !== 'undefined' && liveFxRates) ? liveFxRates : {};
+  const rates = { USD: fx.USD || 1385, CNY: fx.CNY || 192.5, EUR: fx.EUR || 1495, JPY: fx.JPY || 915, KRW: 1 };
   $('simRate').value = rates[c] || 1;
   runCostSim();
 };
 window.runCostSim = function(){
+  const cur = $('simCur') ? $('simCur').value : 'USD';
   const fob = num($('simFob').value);
   const qty = Math.max(1, num($('simQty').value));
-  const rate = num($('simRate').value) || 1;
+  const rawRate = parseFloat($('simRate').value) || 1;
+  const rate = getUnitFxRate(cur, rawRate) || 1;
   const dutyPct = num($('simDutyPct').value);
   const freight = num($('simFreight').value);
 
@@ -3828,7 +3946,209 @@ window.applySimToItem = function(buyP, sellP){
 };
 
 
-// ==================== AI ASSISTANT & ORDER PARSER ====================
+// ==================== AI ASSISTANT & ORDER PARSER (GEMINI 4 CARBON) ====================
+const CARBON_MODEL = 'gemini-4-carbon';
+window.getGeminiApiKey = function(){
+  const inp = $('geminiApiKey');
+  const fromInp = inp ? String(inp.value || '').trim() : '';
+  return fromInp || String(sGet('ora_gemini_key') || sGet('ora_gemini_api_key') || '').trim();
+};
+window.saveGeminiApiKey = function(val){
+  const clean = String(val || '').trim();
+  if(clean){
+    sSet('ora_gemini_key', clean);
+    sSet('ora_gemini_api_key', clean);
+  } else {
+    sRem('ora_gemini_key');
+    sRem('ora_gemini_api_key');
+  }
+  if($('geminiApiKey')) $('geminiApiKey').value = clean;
+  updateCarbonStatusBadge();
+  return clean;
+};
+window.updateCarbonStatusBadge = function(state, detail){
+  const badge = $('cfgCarbonStatusBadge');
+  if(!badge) return;
+  const hasKey = Boolean(getGeminiApiKey());
+  if(state === 'ok'){
+    badge.style.background = '#059669';
+    badge.innerText = detail || '💎 Gemini 4 Carbon 연결 정상';
+  } else if(state === 'err'){
+    badge.style.background = '#dc2626';
+    badge.innerText = detail || '⚠️ Carbon 연결 오류 (키 확인)';
+  } else if(hasKey){
+    badge.style.background = '#0284c7';
+    badge.innerText = detail || '💎 Gemini 4 Carbon 키 설정됨';
+  } else {
+    badge.style.background = '#d97706';
+    badge.innerText = '🔑 Carbon API 키 미설정 (클릭하여 설정)';
+  }
+};
+window.setupGeminiApiKey = function(){
+  const cur = getGeminiApiKey();
+  const masked = cur ? (cur.slice(0, 6) + '••••' + cur.slice(-4)) : '(미설정)';
+  const ans = prompt(`💎 [Gemini 4 Carbon API 키 설정]\n현재 저장 상태: ${masked}\n\n새 Google Gemini API 키를 입력하세요 (비워두고 확인 시 키 삭제):`, cur);
+  if(ans === null) return;
+  const saved = saveGeminiApiKey(ans);
+  if($('erpCarbonPingResult')){
+    $('erpCarbonPingResult').innerHTML = saved
+      ? '✅ Gemini 4 Carbon API 키가 안전하게 저장되었습니다. [⚡ 카본 API 실시간 성능점검]으로 연결을 확인해 보세요!'
+      : 'ℹ️ 저장된 Gemini API 키가 삭제되었습니다.';
+  }
+};
+function extractCarbonText(d){
+  const parts = (d && d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
+  return parts.filter(p => p && !p.thought && typeof p.text === 'string').map(p => p.text).join('').trim();
+}
+function parseCarbonJson(d){
+  let txt = extractCarbonText(d);
+  txt = txt.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  const start = txt.search(/[\[{]/);
+  if(start > 0) txt = txt.slice(start);
+  return JSON.parse(txt);
+}
+
+// ==================== 🌏 1688 소싱랩 접수함 (sourcing.html 브릿지) ====================
+window.getSourcedItemsList = function(){
+  try{
+    const raw = sGet('ora_sourced_items');
+    const arr = JSON.parse(raw || '[]');
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+};
+window.updateSourcedInboxBadge = function(){
+  const cnt = getSourcedItemsList().length;
+  const b = $('sourcedInboxBadge');
+  if(b){
+    b.innerText = String(cnt);
+    b.style.display = cnt > 0 ? 'inline-block' : 'none';
+  }
+};
+window.openSourcedItemsModal = function(){
+  renderSourcedItemsModal();
+  if($('sourcedItemsModal')) $('sourcedItemsModal').style.display = 'flex';
+};
+window.renderSourcedItemsModal = function(){
+  const list = getSourcedItemsList();
+  updateSourcedInboxBadge();
+  const tb = $('sourcedItemsTb');
+  if(!tb) return;
+  if(!list.length){
+    tb.innerHTML = '<tr><td colspan="5" class="c" style="padding:24px;color:#64748b">🌏 1688 소싱랩 접수함이 비어 있습니다.<br><small>상단 <b>[🌏 1688 소싱랩]</b>에서 신상품 원가 분석 후 <b>[ERP 신규품목 등록]</b>을 누르면 이곳에 자동 도착합니다.</small></td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map((it, idx) => {
+    const name = it.name || it.code || '신규 소싱품목';
+    const buy = Number(it.buyPrice || it.cost) || 0;
+    const sell = Number(it.sellPrice || it.price) || 0;
+    const qty = Math.max(1, Number(it.stock || it.qty) || 10);
+    return `<tr>
+      <td class="b">${esc(name)} <div style="font-size:10.5px;color:#0f766e">${esc(it.cat || '글로벌소싱신상품')}${it.spec ? ' · ' + esc(it.spec) : ''}</div></td>
+      <td class="r b">${fmt(buy)}원</td>
+      <td class="r b t-blu">${fmt(sell)}원</td>
+      <td class="r">${fmt(qty)}개</td>
+      <td class="c">
+        <button class="btn-g" style="padding:2px 6px;font-size:11px" onclick="importSourcedItemToDb(${idx})">📦품목등록</button>
+        <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="loadSourcedItemToPur(${idx})">🚢매입투입</button>
+        <button class="btn-a" style="padding:2px 6px;font-size:11px" onclick="loadSourcedItemToSim(${idx})">🧮시뮬</button>
+        <button class="btn-r" style="padding:2px 5px;font-size:11px" onclick="deleteSourcedItem(${idx})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+};
+window.importSourcedItemToDb = function(idx){
+  const list = getSourcedItemsList();
+  const it = list[idx];
+  if(!it) return;
+  const code = String(it.name || it.code || '').trim();
+  if(!code) return;
+  const buy = Number(it.buyPrice || it.cost) || 0;
+  const sell = Number(it.sellPrice || it.price) || 0;
+  const ex = (db.items || []).find(x => normSearch(x.name) === normSearch(code));
+  if(ex){
+    if(buy > 0) ex.buyPrice = buy;
+    if(sell > 0) ex.sellPrice = sell;
+    if(it.cat) ex.cat = it.cat;
+  } else {
+    db.items.push({
+      id: Date.now() + idx,
+      name: code,
+      spec: it.spec || '1EA',
+      buyPrice: buy,
+      sellPrice: sell,
+      initQty: 0,
+      safeQty: 5,
+      cat: it.cat || '글로벌소싱신상품',
+      specNote: it.memo || '1688 소싱랩 연동 신상품'
+    });
+  }
+  saveDB('소싱품목등록');
+  renderAll();
+  alert(`✅ [${code}] 품목이 오라테크 ERP 품목장에 등록/반영되었습니다!`);
+};
+window.importAllSourcedItemsToDb = function(){
+  const list = getSourcedItemsList();
+  if(!list.length){ alert('접수함에 등록할 소싱 품목이 없습니다.'); return; }
+  let added = 0;
+  list.forEach((it, idx) => {
+    const code = String(it.name || it.code || '').trim();
+    if(!code) return;
+    const buy = Number(it.buyPrice || it.cost) || 0;
+    const sell = Number(it.sellPrice || it.price) || 0;
+    const ex = (db.items || []).find(x => normSearch(x.name) === normSearch(code));
+    if(ex){
+      if(buy > 0) ex.buyPrice = buy;
+      if(sell > 0) ex.sellPrice = sell;
+    } else {
+      db.items.push({
+        id: Date.now() + idx, name: code, spec: it.spec || '1EA',
+        buyPrice: buy, sellPrice: sell, initQty: 0, safeQty: 5,
+        cat: it.cat || '글로벌소싱신상품', specNote: it.memo || '1688 소싱랩 연동 신상품'
+      });
+    }
+    added++;
+  });
+  saveDB('소싱품목일괄등록');
+  renderAll();
+  alert(`✅ 1688 소싱랩 접수함 ${added}개 품목을 ERP 품목장에 일괄 반영했습니다!`);
+};
+window.loadSourcedItemToPur = function(idx){
+  const list = getSourcedItemsList();
+  const it = list[idx];
+  if(!it) return;
+  closeModal('sourcedItemsModal');
+  goTab('t-pur');
+  if($('pCur')) $('pCur').value = 'KRW';
+  if($('pRate')) $('pRate').value = 1;
+  if($('pClient') && !$('pClient').value) $('pClient').value = '1688 해외소싱공급처';
+  const qty = Math.max(1, Number(it.stock || it.qty) || 10);
+  const price = Number(it.buyPrice || it.cost) || 0;
+  purDraft.push({ item: String(it.name || it.code || '소싱품목').trim(), spec: it.spec || '1EA', qty, price, krwAmt: 0, incAmt: 0, uCost: 0 });
+  if($('pMemo') && !$('pMemo').value) $('pMemo').value = '[1688 소싱랩 접수함 연동]';
+  recalcPurDraft();
+};
+window.loadSourcedItemToSim = function(idx){
+  const list = getSourcedItemsList();
+  const it = list[idx];
+  if(!it) return;
+  closeModal('sourcedItemsModal');
+  if($('simItem')) $('simItem').value = String(it.name || it.code || '').trim();
+  if($('simCur')) $('simCur').value = 'KRW';
+  if($('simRate')) $('simRate').value = 1;
+  if($('simFob')) $('simFob').value = Number(it.buyPrice || it.cost) || 0;
+  if($('simQty')) $('simQty').value = Math.max(1, Number(it.stock || it.qty) || 10);
+  if($('simDutyPct')) $('simDutyPct').value = 0;
+  if($('simFreight')) $('simFreight').value = 0;
+  openSimModal();
+};
+window.deleteSourcedItem = function(idx){
+  const list = getSourcedItemsList();
+  if(idx < 0 || idx >= list.length) return;
+  list.splice(idx, 1);
+  sSet('ora_sourced_items', JSON.stringify(list));
+  renderSourcedItemsModal();
+};
+
 window.copyTextById = function(id, label){
   const el = $(id);
   if(!el || !el.value){ alert('복사할 내용이 없습니다.'); return; }
@@ -3850,7 +4170,7 @@ window.openAiModal = function(focusMode){
       ? unpaidList.map(x => `<option value="${esc(x.c.name)}">${esc(x.c.name)} (미수: ${fmt(x.ar)}원 / ${x.overdueDays}일 경과)</option>`).join('')
       : '<option value="">현재 미수금 있는 거래처 없음</option>';
   }
-  if($('geminiApiKey')) $('geminiApiKey').value = sGet('ora_gemini_key') || '';
+  if($('geminiApiKey')) $('geminiApiKey').value = getGeminiApiKey();
   aiGenerateArMsg();
   if(focusMode === 'order' && $('aiOrderText')) setTimeout(() => $('aiOrderText').focus(), 80);
   else if(focusMode === 'brief') askAiAssistant('이번 달 매출과 순이익 요약해주고 전월 대비 어때?');
@@ -3892,11 +4212,17 @@ window.aiGenerateCarbonArMsg = async function(){
   const comp = db.comp || {};
   const recentSlips = (db.sales||[]).filter(s => normSearch(s.client)===normSearch(cliName)).slice(0,3).map(s => `${s.date} ${(s.lines||[]).map(l=>l.item+'x'+l.qty).join(',')} (미수:${fmt((Number(s.total)||0)-(Number(s.paid)||0))}원)`).join(' / ');
   const toneDesc = tone==='urgent' ? '단호하고 명확하게 이번 주 내 결제 기한 확답을 요청하는 실무 독촉 톤' : (tone==='statement' ? '거래원장·세금계산서 마감 기준 잔액 확인을 요청하는 정중한 경리 실무 톤' : '오랜 거래 관계를 존중하며 부드럽게 입금을 안내하는 예의 바른 대표자 톤');
-  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
+  const gemKey = getGeminiApiKey();
+  if(!gemKey){
+    if(confirm('🔑 Gemini 4 Carbon API 키가 설정되지 않았습니다.\n지금 API 키를 입력하시겠습니까? (취소 시 기본 정산 안내문을 유지합니다)')){
+      setupGeminiApiKey();
+    }
+    return;
+  }
   const prevVal = box.value;
   box.value = '💎 Gemini 4 Carbon 모델이 거래처 이력과 경과일수를 반영한 맞춤 정산 안내문을 작성 중입니다...';
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CARBON_MODEL}:generateContent?key=${encodeURIComponent(gemKey)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
       body: JSON.stringify({
@@ -3904,8 +4230,7 @@ window.aiGenerateCarbonArMsg = async function(){
       })
     });
     const d = await res.json();
-    const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
-    const txt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+    const txt = extractCarbonText(d);
     if(txt) box.value = txt;
     else box.value = prevVal;
   } catch(e){
@@ -3918,12 +4243,17 @@ window.aiParseOrderWithCarbon = async function(targetMode){
   const raw = ($('aiOrderText').value || '').trim();
   if(!raw){ alert('카톡이나 문자로 받은 주문 내용을 먼저 붙여넣어 주세요!'); $('aiOrderText').focus(); return; }
   const badge = $('carbonOrderParseStatus');
+  const gemKey = getGeminiApiKey();
+  if(!gemKey){
+    if(badge) badge.innerText = '🔑 API 키 미설정 ➔ 내장 고속 파서로 자동 실행';
+    aiParseOrderToSlip(targetMode);
+    return;
+  }
   if(badge) badge.innerText = '⏳ Gemini 4 Carbon 구어체·모델명 정밀 해독 중...';
-  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
   const sampleItems = (db.items||[]).slice(0,80).map(i => `${i.name}(${i.spec||''}:${i.sellPrice||0}원)`).join(', ');
   const sampleClients = (db.clients||[]).slice(0,60).map(c => c.name).join(', ');
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CARBON_MODEL}:generateContent?key=${encodeURIComponent(gemKey)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
       body: JSON.stringify({
@@ -3932,9 +4262,7 @@ window.aiParseOrderWithCarbon = async function(targetMode){
       })
     });
     const d = await res.json();
-    const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
-    const jsonTxt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim().replace(/^```json\s*|\s*```$/g, '');
-    const parsed = JSON.parse(jsonTxt);
+    const parsed = parseCarbonJson(d);
     if(parsed && Array.isArray(parsed.items) && parsed.items.length){
       const existingMap = {};
       (db.items||[]).forEach(it => { existingMap[normSearch(it.name)] = it; });
@@ -3991,12 +4319,16 @@ window.aiParseOrderWithCarbon = async function(targetMode){
 
 window.testErpCarbonConnection = async function(){
   const out = $('erpCarbonPingResult');
-  const badge = $('cfgCarbonStatusBadge');
+  const gemKey = getGeminiApiKey();
+  if(!gemKey){
+    updateCarbonStatusBadge();
+    if(out) out.innerHTML = '🔑 <b>Gemini 4 Carbon API 키가 설정되어 있지 않습니다.</b> 위 <b>[🔑 카본 API 키 설정]</b> 버튼을 눌러 키를 입력해 주세요.';
+    return;
+  }
   if(out) out.innerHTML = '⏳ <b>Gemini 4 Carbon (<code>gemini-4-carbon</code>)</b> 실시간 응답 속도 및 연결 상태 점검 중...';
-  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
   const t0 = performance.now();
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CARBON_MODEL}:generateContent?key=${encodeURIComponent(gemKey)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
       body: JSON.stringify({
@@ -4005,49 +4337,77 @@ window.testErpCarbonConnection = async function(){
     });
     const d = await res.json();
     const ms = Math.round(performance.now() - t0);
-    const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
-    const txt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+    const txt = extractCarbonText(d);
     if(txt){
-      if(badge){ badge.style.background = '#059669'; badge.innerText = `💎 Gemini 4 Carbon 정상 (${ms}ms)`; }
-      if(out) out.innerHTML = `✅ <b>연결 성공 (${ms}ms, 모델: <code>${esc(d.modelVersion||'gemini-4-carbon')}</code>):</b> ${esc(txt)}`;
+      updateCarbonStatusBadge('ok', `💎 Gemini 4 Carbon 정상 (${ms}ms)`);
+      if(out) out.innerHTML = `✅ <b>연결 성공 (${ms}ms, 모델: <code>${esc(d.modelVersion||CARBON_MODEL)}</code>):</b> ${esc(txt)}`;
     } else {
       throw new Error((d.error && d.error.message) || '응답 없음');
     }
   } catch(e){
-    if(badge){ badge.style.background = '#d97706'; badge.innerText = '⚠️ 연결 확인 필요'; }
+    updateCarbonStatusBadge('err', '⚠️ Carbon 연결 확인 필요');
     if(out) out.innerHTML = `⚠️ 호출 오류: ${esc(e.message)}`;
   }
 };
 
 window.pushErpToGithubDirect = async function(){
   const out = $('erpCarbonPingResult');
+  if(out) out.innerHTML = '⏳ 로컬 자동배포 중계 서버(<code>localhost:3080</code>) 연결 확인 중...';
+  try {
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const tid = ctrl ? setTimeout(() => ctrl.abort(), 4500) : null;
+    const r = await fetch('http://localhost:3080/api/github/sync-all-four', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
+      signal: ctrl ? ctrl.signal : undefined
+    });
+    if(tid) clearTimeout(tid);
+    const d = await r.json();
+    if(d && d.ok){
+      if(out) out.innerHTML = '🎉 <b>GitHub (<code>https://igan3w.github.io/erp/</code>) 로컬 중계 안전 자동배포 완료!</b>';
+      alert('🎉 4대 홈페이지 GitHub 전체 안전 자동 업데이트가 완료되었습니다!');
+      return;
+    }
+  } catch(_){}
+
+  // 🔒 보안 보호: 화면에 렌더링된 실제 거래처·미수금·매출 DOM(documentElement.outerHTML)은 절대 공개 GitHub로 업로드하지 않습니다!
+  if(location.protocol !== 'http:' && location.protocol !== 'https:'){
+    const warnMsg = '🔒 [고객 장부 유출 방지 안전차단]\n\n로컬 파일(file://) 상태에서는 화면에 표시된 고객 미수금·매출 내역이 공개 GitHub에 노출될 수 있어 브라우저 직접 업로드를 차단했습니다.\n\n바탕화면의 [오라테크_4대홈페이지_깃허브_자동업로드.bat] 파일을 더블클릭하여 안전하게 배포해 주세요!';
+    if(out) out.innerHTML = '🔒 <b>안전차단:</b> 로컬 파일 배포는 바탕화면의 <code>오라테크_4대홈페이지_깃허브_자동업로드.bat</code>를 실행해 주세요.';
+    alert(warnMsg);
+    return;
+  }
+
+  let cleanHtml = '';
+  try {
+    const srcRes = await fetch(location.href, { cache: 'no-store' });
+    if(srcRes.ok) cleanHtml = await srcRes.text();
+  } catch(_){}
+
+  if(!cleanHtml || cleanHtml.indexOf('<!DOCTYPE html>') === -1){
+    const warnMsg = '🔒 [안전배포 안내]\n\n깨끗한 원본 소스 HTML을 불러오지 못해 업로드를 중단했습니다.\n바탕화면의 [오라테크_4대홈페이지_깃허브_자동업로드.bat] 파일을 실행하여 안전하게 배포해 주세요!';
+    if(out) out.innerHTML = '⚠️ 원본 소스 확인 실패 — <code>오라테크_4대홈페이지_깃허브_자동업로드.bat</code>를 실행해 주세요.';
+    alert(warnMsg);
+    return;
+  }
+
   let ghToken = sGet('ora_gh_token') || '';
   if(!ghToken){
-    try {
-      const r = await fetch('http://localhost:3080/api/github/sync-all-four', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-      const d = await r.json();
-      if(d && d.ok){
-        if(out) out.innerHTML = '🎉 <b>GitHub (<code>https://igan3w.github.io/erp/</code>) 원클릭 자동 업데이트 완료!</b>';
-        alert('🎉 4대 홈페이지 GitHub 전체 자동 업데이트가 완료되었습니다!');
-        return;
-      }
-    } catch(_){}
-    ghToken = (prompt('GitHub 개인 액세스 토큰(ghp_...)을 1회 입력하시면 브라우저에 저장되어 자동 업로드됩니다:') || '').trim();
+    ghToken = (prompt('GitHub 개인 액세스 토큰(ghp_...)을 1회 입력하시면 브라우저에 저장되어 원본 소스만 안전하게 업로드됩니다:') || '').trim();
     if(ghToken) sSet('ora_gh_token', ghToken);
   }
   if(!ghToken) return;
-  if(out) out.innerHTML = '⏳ <b>GitHub (<code>igan3w/erp</code>)</b> 저장소에 현재 최신 ERP를 자동 업로드 중입니다...';
+  if(out) out.innerHTML = '⏳ <b>GitHub (<code>igan3w/erp</code>)</b> 저장소에 깨끗한 원본 ERP 소스를 업로드 중입니다...';
   try {
     const hdr = { 'Authorization': 'Bearer ' + ghToken, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
     const refRes = await fetch('https://api.github.com/repos/igan3w/erp/git/ref/heads/main', { headers: hdr });
+    if(!refRes.ok) throw new Error('GitHub Ref 조회 실패 (HTTP ' + refRes.status + ')');
     const refJson = await refRes.json();
     const baseCommitSha = refJson.object.sha;
     const commitRes = await fetch('https://api.github.com/repos/igan3w/erp/git/commits/' + baseCommitSha, { headers: hdr });
     const commitJson = await commitRes.json();
     const baseTreeSha = commitJson.tree.sha;
 
-    const htmlStr = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-    const b64 = btoa(unescape(encodeURIComponent(htmlStr)));
+    const b64 = btoa(unescape(encodeURIComponent(cleanHtml)));
     const blobRes = await fetch('https://api.github.com/repos/igan3w/erp/git/blobs', {
       method: 'POST', headers: hdr, body: JSON.stringify({ content: b64, encoding: 'base64' })
     });
@@ -4059,19 +4419,20 @@ window.pushErpToGithubDirect = async function(){
     const treeJson = await treeRes.json();
     const newCommitRes = await fetch('https://api.github.com/repos/igan3w/erp/git/commits', {
       method: 'POST', headers: hdr,
-      body: JSON.stringify({ message: '🚀 Auto-update OraTech ERP (Gemini 4 Carbon & Clean Topbar)', tree: treeJson.sha, parents: [baseCommitSha] })
+      body: JSON.stringify({ message: '🚀 Auto-update OraTech ERP (Clean Source Sync)', tree: treeJson.sha, parents: [baseCommitSha] })
     });
     const newCommitJson = await newCommitRes.json();
     const patchRes = await fetch('https://api.github.com/repos/igan3w/erp/git/refs/heads/main', {
       method: 'PATCH', headers: hdr, body: JSON.stringify({ sha: newCommitJson.sha, force: true })
     });
     if(!patchRes.ok) throw new Error('HTTP ' + patchRes.status);
-    if(out) out.innerHTML = '🎉 <b>GitHub (<code>https://igan3w.github.io/erp/</code>) 원클릭 자동 업데이트 완료!</b>';
+    if(out) out.innerHTML = '🎉 <b>GitHub (<code>https://igan3w.github.io/erp/</code>) 원본 소스 안전 업데이트 완료!</b>';
     alert('🎉 GitHub (https://igan3w.github.io/erp/) 최신 업데이트가 완료되었습니다!');
   } catch(e){
     if(out) out.innerHTML = '⚠️ GitHub 업데이트 오류: ' + esc(e.message);
   }
 };
+window.autoPushErpToGithub = window.pushErpToGithubDirect;
 
 window.aiParseOrderToSlip = function(targetMode){
   const raw = ($('aiOrderText').value || '').trim();
@@ -4261,18 +4622,17 @@ window.askAiAssistant = function(presetQ){
   }
   if($('aiAnswerBox')) $('aiAnswerBox').innerHTML = html;
 
-  const gemKey = (($('geminiApiKey') && $('geminiApiKey').value) || sGet('ora_gemini_key') || '').trim();
+  const gemKey = getGeminiApiKey();
   if(gemKey && $('aiAnswerBox')){
     const summaryCtx = `조회기간: ${sDate}~${eDate}, 총매출: ${fmt(periodSale)}원(${periodCnt}건), 순이익: ${fmt(periodProf)}원, 총미수금: ${fmt(totalAr)}원(${topArList.length}곳), 상위거래처: ${topClis.slice(0,5).map(x=>x[0]+'('+fmt(x[1])+'원)').join(', ')}, 상위품목: ${topItems.slice(0,5).map(x=>x[0]+'('+x[1].qty+'개)').join(', ')}, 미수상위: ${topArList.slice(0,5).map(x=>x.c.name+'('+fmt(x.ar)+'원)').join(', ')}`;
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-carbon:generateContent?key=${encodeURIComponent(gemKey)}`, {
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CARBON_MODEL}:generateContent?key=${encodeURIComponent(gemKey)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: `당신은 (주)오라테크의 수석 AI 경영비서입니다. 다음 실시간 ERP 장부 요약 데이터를 바탕으로 사장님의 질문("${q}")에 대해 핵심 수치와 전략적 조언을 3~4줄 이내로 간결하고 명쾌하게 브리핑하세요.\n[장부 데이터] ${summaryCtx}` }] }]
       })
     }).then(r => r.json()).then(d => {
-      const parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || [];
-      const aiTxt = parts.filter(p => !p.thought).map(p => p.text || '').join('').trim();
+      const aiTxt = extractCarbonText(d);
       if(aiTxt && $('aiAnswerBox')){
         $('aiAnswerBox').innerHTML += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #90caf9;color:#0d47a1"><b>💎 [Gemini 4 Carbon 심층 경영 코멘트]</b><br>${esc(aiTxt).replace(/\n/g,'<br>')}</div>`;
       }
@@ -4406,7 +4766,7 @@ window.renderDashboard = function(){
   if($('dashArChart')){
     $('dashArChart').innerHTML = arRank.length ? arRank.slice(0, 10).map((st, idx) => {
       const pct = Math.max(6, Math.round((st.ar / maxAr) * 100));
-      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(st.c.name)}')" title="클릭 시 상세 거래원장 열기">
+      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${escJs(st.c.name)}')" title="클릭 시 상세 거래원장 열기">
         <div class="bar-lbl">${idx+1}. ${esc(st.c.name)}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#d63031,#e17055)">최근: ${st.lastDate||'이월'}</div></div>
         <div class="bar-val t-red" style="width:175px">${fmt(st.ar)}원 ${getOverdueDaysBadge(st.overdueDays, st.ar)}</div>
@@ -4419,7 +4779,7 @@ window.renderDashboard = function(){
     $('dashClientChart').innerHTML = topClis.length ? topClis.map(([name, amt], idx) => {
       const pct = Math.max(5, Math.round((amt / maxCli) * 100));
       const share = yrSaleSum > 0 ? ((amt / yrSaleSum) * 100).toFixed(1) : '0.0';
-      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(name)}')">
+      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${escJs(name)}')">
         <div class="bar-lbl" title="${esc(name)}">${idx+1}. ${esc(name)}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#0984e3,#00cec9)">${share}%</div></div>
         <div class="bar-val t-blu">${fmt(amt)}원</div>
@@ -4447,10 +4807,10 @@ window.renderDashboard = function(){
     const maxDm = dormantList.length ? dormantList[0].sale : 1;
     $('dashDormantChart').innerHTML = dormantList.length ? dormantList.slice(0, 12).map((st, idx) => {
       const pct = Math.max(8, Math.round((st.sale / maxDm) * 100));
-      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${esc(st.c.name)}')" title="클릭 시 [${esc(st.c.name)}] 과거 주문내역/원장 열기">
+      return `<div class="bar-row" style="cursor:pointer" onclick="openLedger('${escJs(st.c.name)}')" title="클릭 시 [${esc(st.c.name)}] 과거 주문내역/원장 열기">
         <div class="bar-lbl">${idx+1}. <b>${esc(st.c.name)}</b> <span class="bg bg-y">${st.saleCnt}회 거래</span></div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,#e67e22,#f39c12)">마지막 출고: ${st.lastDate} (${st.daysSinceLast}일 전) ${st.lastItemName ? '| 주력: '+esc(st.lastItemName) : ''}</div></div>
-        <div class="bar-val" style="width:210px;color:#d35400">누적 ${fmt(st.sale)}원 <button class="btn-s" style="padding:1px 6px;font-size:10.5px;margin-left:4px" onclick="event.stopPropagation();openCatalogDoc('${esc(st.c.name)}')">📊단가표</button></div>
+        <div class="bar-val" style="width:210px;color:#d35400">누적 ${fmt(st.sale)}원 <button class="btn-s" style="padding:1px 6px;font-size:10.5px;margin-left:4px" onclick="event.stopPropagation();openCatalogDoc('${escJs(st.c.name)}')">📊단가표</button></div>
       </div>`;
     }).join('') : '<div style="padding:16px;text-align:center;color:#27ae60;font-weight:bold">🎉 최근 90일 이상 발주가 끊긴 주요 단골 거래처가 없습니다!</div>';
   }
@@ -4567,7 +4927,7 @@ window.importHometaxFiles = async function(fileList){
 
 function parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur){
   var hIdx = -1, sheetIsPur = fileForcePur;
-  var col = {dt:0, apv:1, sBiz:4, sName:6, sCeo:7, sAddr:8, bBiz:9, bName:11, bCeo:12, bAddr:13, tot:14, sup:15, vat:-1, memo:-1, pay:-1, sEm:-1, bEm:-1, itm:-1, spec:-1, qty:-1, prc:-1};
+  var col = {dt:0, apv:1, sBiz:4, sName:6, sCeo:7, sAddr:8, bBiz:9, bName:11, bCeo:12, bAddr:13, tot:14, sup:-1, vat:-1, memo:-1, pay:-1, sEm:-1, bEm:-1, itm:-1, spec:-1, qty:-1, prc:-1};
 
   for(var i=0; i<Math.min(rows.length, 20); i++){
     var rowTxt = (rows[i]||[]).join('|').replace(/\s+/g,'');
@@ -4581,7 +4941,7 @@ function parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur){
         else if(k.indexOf('공급자사업자') !== -1 || k.indexOf('공급자등록번호') !== -1) col.sBiz = c;
         else if(k.indexOf('공급받는자사업자') !== -1 || k.indexOf('공급받는자등록번호') !== -1) col.bBiz = c;
         else if(k === '합계금액') col.tot = c;
-        else if(k === '공급가액' && col.sup === 15) col.sup = c;
+        else if(k === '공급가액' && col.sup === -1) col.sup = c;
         else if((k === '세액' || k === '부가세') && col.vat === -1) col.vat = c;
         else if(k === '비고' && col.memo === -1) col.memo = c;
         else if(k.indexOf('영수/청구') !== -1) col.pay = c;
@@ -4592,6 +4952,7 @@ function parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur){
         else if(k === '품목수량' || k === '수량') col.qty = c;
         else if(k === '품목단가' || k === '단가') col.prc = c;
       });
+      if(col.sup === -1) col.sup = 15;
       col.sName = col.sBiz + 2; col.sCeo = col.sBiz + 3; col.sAddr = col.sBiz + 4;
       col.bName = col.bBiz + 2; col.bCeo = col.bBiz + 3; col.bAddr = col.bBiz + 4;
       break;
@@ -4747,8 +5108,26 @@ function openLiveDrop(inputEl, list, onSelect){
 document.addEventListener('keydown', e => {
   const drop = $('liveDrop');
   if(e.key === 'F8'){
-    e.preventDefault();
-    saveSale(false);
+    const salePage = $('t-sale');
+    const anyModalOpen = Array.from(document.querySelectorAll('.modal-bg')).some(m => m.style.display === 'flex' || m.style.display === 'block');
+    if(salePage && salePage.classList.contains('active') && !anyModalOpen){
+      e.preventDefault();
+      saveSale(false);
+    }
+    return;
+  }
+  if(e.key === 'Escape'){
+    if(drop && drop.style.display !== 'none'){
+      drop.style.display = 'none';
+      return;
+    }
+    const openModals = Array.from(document.querySelectorAll('.modal-bg'))
+      .filter(m => m.id && (m.style.display === 'flex' || m.style.display === 'block'))
+      .sort((a, b) => (parseInt(getComputedStyle(b).zIndex, 10) || 0) - (parseInt(getComputedStyle(a).zIndex, 10) || 0));
+    if(openModals.length){
+      e.preventDefault();
+      closeModal(openModals[0].id);
+    }
     return;
   }
   if(!drop || drop.style.display === 'none' || !dropItems.length) return;
@@ -4766,8 +5145,6 @@ document.addEventListener('keydown', e => {
       activeDropInput._onDropSelect(dropItems[dropIdx].raw);
       drop.style.display = 'none';
     }
-  } else if(e.key === 'Escape'){
-    drop.style.display = 'none';
   }
 });
 
@@ -4783,6 +5160,9 @@ document.addEventListener('click', e => {
   const drop = $('liveDrop');
   if(drop && e.target !== activeDropInput && !drop.contains(e.target)){
     drop.style.display = 'none';
+  }
+  if(e.target && e.target.classList && e.target.classList.contains('modal-bg') && e.target.id){
+    closeModal(e.target.id);
   }
 });
 
@@ -4995,10 +5375,10 @@ function onManualVatChange(){
   }
 }
 
-function recalcSaleDraft(keepVat){
+function recalcSaleDraft(keepVat, skipRebuild){
   const mode = $('sVatType') ? $('sVatType').value : 'tax';
   let sumSup = 0, sumVat = 0;
-  saleDraft.forEach(l => {
+  saleDraft.forEach((l, idx) => {
     const raw = Math.round(l.qty * l.price);
     if(mode === 'inc'){
       const sp = Math.round(raw / 1.1);
@@ -5016,6 +5396,12 @@ function recalcSaleDraft(keepVat){
       sumSup += raw;
       sumVat += l.vat;
     }
+    if(skipRebuild){
+      const supCell = $('sDraftSup_' + idx);
+      const vatCell = $('sDraftVat_' + idx);
+      if(supCell) supCell.innerText = fmt(l.sup);
+      if(vatCell) vatCell.innerText = fmt(l.vat);
+    }
   });
   $('sSumSup').value = sumSup;
   if(!keepVat) $('sSumVat').value = sumVat;
@@ -5025,14 +5411,16 @@ function recalcSaleDraft(keepVat){
     $('sPaid').value = sumSup + finalVat;
   }
 
+  if(skipRebuild) return;
+
   $('sDraftTb').innerHTML = saleDraft.map((l, idx) => `
     <tr>
       <td class="b">${esc(l.item)}</td>
       <td class="c">${esc(l.spec)}</td>
-      <td class="r"><input type="number" value="${l.qty}" style="width:50px;text-align:right" oninput="saleDraft[${idx}].qty=num(this.value);recalcSaleDraft()"></td>
-      <td class="r"><input type="number" value="${l.price}" style="width:75px;text-align:right" oninput="saleDraft[${idx}].price=num(this.value);recalcSaleDraft()"></td>
-      <td class="r b">${fmt(l.sup)}</td>
-      <td class="r">${fmt(l.vat)}</td>
+      <td class="r"><input type="number" value="${l.qty}" style="width:50px;text-align:right" oninput="saleDraft[${idx}].qty=num(this.value);recalcSaleDraft(false,true)"></td>
+      <td class="r"><input type="number" value="${l.price}" style="width:75px;text-align:right" oninput="saleDraft[${idx}].price=num(this.value);recalcSaleDraft(false,true)"></td>
+      <td class="r b" id="sDraftSup_${idx}">${fmt(l.sup)}</td>
+      <td class="r" id="sDraftVat_${idx}">${fmt(l.vat)}</td>
       <td class="c"><button class="btn-r" style="padding:1px 5px" onclick="saleDraft.splice(${idx},1);recalcSaleDraft()">✕</button></td>
     </tr>
   `).join('') || '<tr><td colspan="7" class="c" style="color:#888;padding:12px">출고할 품목을 추가하거나 우측 상단 [🎁 세트상품출고]를 선택하세요.</td></tr>';
@@ -5081,7 +5469,7 @@ function saveSale(printAfter){
         date, client, vatType: $('sVatType').value,
         lines: JSON.parse(JSON.stringify(saleDraft)),
         supply, vat, total, profit, paid, payMethod, asStatus, serialNo, memo, otInfo,
-        photo: photo || prev.photo || ''
+        photo: photo
       });
     }
   } else {
@@ -5756,16 +6144,29 @@ function openBarcodeAuditModal() {
   }, 120);
 }
 
+let lastBarcodeScanCode = '';
+let lastBarcodeScanAt = 0;
+
+function calcItemCurQty(nameOrCode) {
+  cachedItmStats = null;
+  const iStats = typeof getItemStats === 'function' ? getItemStats() : {};
+  const k = normSearch(nameOrCode);
+  if (iStats[k]) return Number(iStats[k].curQty) || 0;
+  const byCode = Object.values(iStats).find(st => st && st.it && normSearch(st.it.code) === k);
+  if (byCode) return Number(byCode.curQty) || 0;
+  const it = (db.items || []).find(i => normSearch(i.name) === k || normSearch(i.code) === k);
+  return it ? (Number(it.initQty) || 0) : 0;
+}
+window.calcItemCurQty = calcItemCurQty;
+
 function initStockAuditData(resetAll) {
   if (auditInventoryList.length > 0 && !resetAll) return;
   const items = db.items || [];
+  cachedItmStats = null;
+  const iStats = typeof getItemStats === 'function' ? getItemStats() : {};
   auditInventoryList = items.map((it, idx) => {
-    let curStock = 0;
-    if (typeof calcItemCurQty === 'function') {
-      curStock = calcItemCurQty(it.name);
-    } else {
-      curStock = Number(it.initQty || 0);
-    }
+    const st = iStats[normSearch(it.name)];
+    const curStock = st ? Number(st.curQty) : Number(it.initQty || 0);
     return {
       id: it.id || (10000 + idx),
       code: it.code || it.name,
@@ -5842,7 +6243,7 @@ function renderStockAuditTable() {
       </td>
       <td class="c">${diffBadge}</td>
       <td class="c">
-        <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="printSingleLabel('${esc(x.name)}')">🏷️</button>
+        <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="printSingleLabel('${escJs(x.name)}')">🏷️</button>
       </td>
     </tr>`;
   }).join('');
@@ -5909,6 +6310,27 @@ function handleBarcodeInput(inputVal) {
   }
 }
 
+function stopBarcodeCamera() {
+  const video = $('barcodeVideo');
+  const btn = $('btnToggleCamera');
+  const wrap = $('barcodeVideoWrap');
+  if (barcodeCameraStream) {
+    try { barcodeCameraStream.getTracks().forEach(t => t.stop()); } catch(e) {}
+    barcodeCameraStream = null;
+  }
+  if (barcodeScanTimer) {
+    clearInterval(barcodeScanTimer);
+    barcodeScanTimer = null;
+  }
+  if (video) {
+    try { video.srcObject = null; } catch(e) {}
+    video.style.display = 'none';
+  }
+  if (wrap) wrap.style.display = 'none';
+  if (btn) btn.innerHTML = '📷 스마트폰 카메라 스캐너 켜기';
+}
+window.stopBarcodeCamera = stopBarcodeCamera;
+
 async function toggleBarcodeCamera() {
   const video = $('barcodeVideo');
   const btn = $('btnToggleCamera');
@@ -5916,12 +6338,7 @@ async function toggleBarcodeCamera() {
   if (!video) return;
 
   if (barcodeCameraStream) {
-    barcodeCameraStream.getTracks().forEach(t => t.stop());
-    barcodeCameraStream = null;
-    if (barcodeScanTimer) clearInterval(barcodeScanTimer);
-    video.style.display = 'none';
-    if (wrap) wrap.style.display = 'none';
-    if (btn) btn.innerHTML = '📷 스마트폰 카메라 스캐너 켜기';
+    stopBarcodeCamera();
     return;
   }
 
@@ -5944,7 +6361,13 @@ async function toggleBarcodeCamera() {
         try {
           const codes = await barcodeDetectorInstance.detect(video);
           if (codes && codes.length > 0) {
-            handleBarcodeInput(codes[0].rawValue);
+            const rawCode = codes[0].rawValue;
+            const nowTs = Date.now();
+            if (rawCode && !(rawCode === lastBarcodeScanCode && (nowTs - lastBarcodeScanAt) < 1500)) {
+              lastBarcodeScanCode = rawCode;
+              lastBarcodeScanAt = nowTs;
+              handleBarcodeInput(rawCode);
+            }
           }
         } catch(e) {}
       }, 350);
@@ -5968,12 +6391,14 @@ function applyStockAudit() {
 
   if (!confirm(msg)) return;
 
+  cachedItmStats = null;
+  const iStats = typeof getItemStats === 'function' ? getItemStats() : {};
   diffItems.forEach(d => {
-    const it = (db.items || []).find(i => (i.code && i.code === d.code) || i.name === d.name);
+    const it = (db.items || []).find(i => (i.code && i.code === d.code) || normSearch(i.name) === normSearch(d.name));
     if (it) {
-      const curStock = typeof calcItemCurQty === 'function' ? calcItemCurQty(it.name) : Number(it.initQty||0);
-      const diff = d.scannedQty - curStock;
-      it.initQty = (Number(it.initQty) || 0) + diff;
+      const st = iStats[normSearch(it.name)];
+      const netFlow = st ? ((Number(st.inQty) || 0) - (Number(st.outQty) || 0)) : 0;
+      it.initQty = d.scannedQty - netFlow;
     }
   });
 
@@ -6202,10 +6627,10 @@ function renderRopeDrums() {
         </div>
 
         <div style="display:flex;gap:4px;flex-wrap:wrap;border-top:1px dashed #cbd5e1;padding-top:8px">
-          <button class="btn-p" style="flex:1;padding:5px;font-size:12px" onclick="quickCutRope('${d.id}')">✂️ 절단 출고</button>
-          <button class="btn-w" style="padding:5px 8px;font-size:12px" onclick="printDrumQr('${d.id}')">🏷️ QR라벨</button>
-          <button class="btn-s" style="padding:5px 8px;font-size:12px" onclick="showDrumCutsHistory('${d.id}')">📜 이력 (${(d.cuts||[]).length})</button>
-          <button class="btn-r" style="padding:5px 7px;font-size:12px" onclick="deleteRopeDrum('${d.id}')">✕</button>
+          <button class="btn-p" style="flex:1;padding:5px;font-size:12px" onclick="quickCutRope('${escJs(d.id)}')">✂️ 절단 출고</button>
+          <button class="btn-w" style="padding:5px 8px;font-size:12px" onclick="printDrumQr('${escJs(d.id)}')">🏷️ QR라벨</button>
+          <button class="btn-s" style="padding:5px 8px;font-size:12px" onclick="showDrumCutsHistory('${escJs(d.id)}')">📜 이력 (${(d.cuts||[]).length})</button>
+          <button class="btn-r" style="padding:5px 7px;font-size:12px" onclick="deleteRopeDrum('${escJs(d.id)}')">✕</button>
         </div>
       </div>
     `;
@@ -6213,15 +6638,14 @@ function renderRopeDrums() {
 }
 
 function populateRopeDrumSelects() {
-  const drums = db.ropeDrums || [];
+  const drums = (db.ropeDrums || []).filter(Boolean);
   const sel = $('cutSelectDrum');
-  if (sel) {
-    sel.innerHTML = drums.map(d => `<option value="${d.id}">[${d.id}] ${d.name} (잔여: ${d.remLen}m)</option>`).join('');
-  }
+  if (!sel) return;
+  sel.innerHTML = drums.map(d => `<option value="${esc(d.id)}">[${esc(d.id)}] ${esc(d.name)} (잔여: ${d.remLen}m)</option>`).join('');
 }
 
 function quickCutRope(drumId) {
-  const d = (db.ropeDrums || []).find(x => x.id === drumId);
+  const d = (db.ropeDrums || []).find(x => x && x.id === drumId);
   if (!d) return;
   const cutLenStr = prompt(`✂️ [${d.id} - ${d.name}]\n현재 잔여 길이: ${d.remLen}m\n\n출고할 절단 길이(미터: m)를 입력하세요:`, '50');
   if (!cutLenStr) return;
@@ -6236,12 +6660,12 @@ function quickCutRope(drumId) {
 }
 
 function executeDrumCut(drumId, len, client, memo) {
-  const d = (db.ropeDrums || []).find(x => x.id === drumId);
+  const d = (db.ropeDrums || []).find(x => x && x.id === drumId);
   if (!d) return;
 
   d.remLen = Math.max(0, Math.round((d.remLen - len) * 10) / 10);
   if (!Array.isArray(d.cuts)) d.cuts = [];
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayStr();
   d.cuts.push({
     date: today,
     client: client,
@@ -6266,8 +6690,15 @@ function saveNewRopeDrum() {
   const loc = ($('newDrumLoc').value || '').trim() || '창고 드럼보관대';
   const itemCode = ($('newDrumItemCode').value || '').trim();
 
-  const nextSeq = (db.ropeDrums || []).length + 1;
-  const newId = `DRUM-${new Date().getFullYear().toString().slice(2)}${String(nextSeq).padStart(2, '0')}`;
+  if (!Array.isArray(db.ropeDrums)) db.ropeDrums = [];
+  const yr2 = new Date().getFullYear().toString().slice(2);
+  const usedIds = new Set(db.ropeDrums.map(d => d && d.id));
+  let seq = db.ropeDrums.length + 1;
+  let newId = `DRUM-${yr2}${String(seq).padStart(2, '0')}`;
+  while (usedIds.has(newId)) {
+    seq++;
+    newId = `DRUM-${yr2}${String(seq).padStart(2, '0')}`;
+  }
 
   db.ropeDrums.push({
     id: newId,
@@ -6334,8 +6765,8 @@ function optimizeRopeCut() {
     return;
   }
 
-  drums.forEach(d => {
-    const leftover = d.remLen - reqLen;
+  const scored = drums.map(d => {
+    const leftover = Math.round((d.remLen - reqLen) * 10) / 10;
     let score = 50;
     let reason = '';
     if (leftover === 0) {
@@ -6351,26 +6782,25 @@ function optimizeRopeCut() {
       score = 30;
       reason = `⚠️ 주의! 절단 후 ${leftover}m의 자투리 로스(Dead Scrap) 발생 위험`;
     }
-    d._tempScore = score;
-    d._leftover = leftover;
-    d._reason = reason;
+    return { d, score, leftover, reason };
   });
 
-  drums.sort((a, b) => b._tempScore - a._tempScore);
+  scored.sort((a, b) => b.score - a.score);
 
-  const best = drums[0];
+  const bestWrap = scored[0];
+  const best = bestWrap.d;
   resBox.innerHTML = `
     <div style="background:#f0fdf4;border:2px solid #86efac;padding:12px;border-radius:8px;margin-top:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:14px;font-weight:900;color:#166534">🥇 AI 최적 드럼 추천: [${best.id}] ${best.name}</span>
-        <span class="bg bg-g" style="font-size:12px">적합도 점수: ${Math.round(best._tempScore)}점</span>
+        <span style="font-size:14px;font-weight:900;color:#166534">🥇 AI 최적 드럼 추천: [${esc(best.id)}] ${esc(best.name)}</span>
+        <span class="bg bg-g" style="font-size:12px">적합도 점수: ${Math.round(bestWrap.score)}점</span>
       </div>
       <div style="font-size:12.5px;color:#1e293b;line-height:1.6;margin-bottom:8px">
-        • 현재 잔여: <b>${best.remLen}m</b> ➔ <b>${reqLen}m</b> 절단 후 잔여: <b style="color:#0284c7">${best._leftover}m</b><br>
-        • 분석 결과: <b>${best._reason}</b> (위치: ${esc(best.loc||'창고')})
+        • 현재 잔여: <b>${best.remLen}m</b> ➔ <b>${reqLen}m</b> 절단 후 잔여: <b style="color:#0284c7">${bestWrap.leftover}m</b><br>
+        • 분석 결과: <b>${bestWrap.reason}</b> (위치: ${esc(best.loc||'창고')})
       </div>
-      <button class="btn-p" style="padding:6px 14px;font-size:13px;background:#15803d;border-color:#166534" onclick="executeDrumCut('${best.id}', ${reqLen}, '주문고객', 'AI 최적절단 추천 출고')">
-        ✂️ [${best.id}] 드럼에서 ${reqLen}m 즉시 절단 출고 실행
+      <button class="btn-p" style="padding:6px 14px;font-size:13px;background:#15803d;border-color:#166534" onclick="executeDrumCut('${escJs(best.id)}', ${reqLen}, '주문고객', 'AI 최적절단 추천 출고')">
+        ✂️ [${esc(best.id)}] 드럼에서 ${reqLen}m 즉시 절단 출고 실행
       </button>
     </div>
   `;
@@ -6526,9 +6956,38 @@ function resetEstForm(){
   $('esEditId').value = ''; $('esDate').value = todayStr(); $('esClient').value = '';
   $('esOneTime').checked = false; toggleOneTime('es', false);
   ['esOtName','esOtBiz','esOtCeo','esOtAddr','esOtTel'].forEach(k => { if($(k)) $(k).value = ''; });
+  if($('esValid')) $('esValid').value = '견적일로부터 15일';
   $('esMemo').value = '';
+  if($('estFormTitle')) $('estFormTitle').innerText = '📋 견적서 작성 (원클릭 매출전표 전환 지원)';
+  if($('esSaveBtn')) $('esSaveBtn').innerText = '💾 견적서 저장';
   estDraft = []; recalcEstDraft();
 }
+
+function editEstimate(id){
+  const e = (db.estimates||[]).find(x => Number(x.id) === Number(id));
+  if(!e) return;
+  if($('esEditId')) $('esEditId').value = e.id;
+  if($('esDate')) $('esDate').value = e.date || todayStr();
+  if($('esClient')) $('esClient').value = e.client || '';
+  const isOt = (e.client === '1회성(기타)거래처' || Boolean(e.otInfo));
+  if($('esOneTime')) $('esOneTime').checked = isOt;
+  toggleOneTime('es', isOt);
+  if(e.otInfo){
+    if($('esOtName')) $('esOtName').value = e.otInfo.name || '';
+    if($('esOtBiz')) $('esOtBiz').value = e.otInfo.bizNo || '';
+    if($('esOtCeo')) $('esOtCeo').value = e.otInfo.ceo || '';
+    if($('esOtAddr')) $('esOtAddr').value = e.otInfo.addr || '';
+    if($('esOtTel')) $('esOtTel').value = e.otInfo.tel || '';
+  }
+  if($('esValid')) $('esValid').value = e.valid || '견적일로부터 15일';
+  if($('esMemo')) $('esMemo').value = e.memo || '';
+  estDraft = JSON.parse(JSON.stringify(e.lines || []));
+  recalcEstDraft();
+  if($('estFormTitle')) $('estFormTitle').innerText = `✏️ 견적서 수정 중 (#${e.date} ${e.otInfo ? e.otInfo.name : e.client})`;
+  if($('esSaveBtn')) $('esSaveBtn').innerText = '💾 견적 수정사항 저장';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+window.editEstimate = editEstimate;
 
 function convertEstToSale(id){
   const e = (db.estimates||[]).find(x => Number(x.id) === Number(id));
@@ -6563,9 +7022,10 @@ window.onCurChange = function(){
   const cur = $('pCur').value;
   if(cur === 'KRW'){ $('pRate').value = 1; $('pPriceLbl').innerText = '매입단가(원화)'; }
   else {
-    const defRates = {USD:1380, CNY:192, JPY:9.2, EUR:1490};
-    if(num($('pRate').value) <= 1) $('pRate').value = defRates[cur] || 1000;
-    $('pPriceLbl').innerText = `외화단가(${cur})`;
+    const fx = (typeof liveFxRates !== 'undefined' && liveFxRates) ? liveFxRates : {};
+    const defRates = {USD: fx.USD || 1385, CNY: fx.CNY || 192.5, JPY: fx.JPY || 915, EUR: fx.EUR || 1495};
+    $('pRate').value = defRates[cur] || 1000;
+    $('pPriceLbl').innerText = cur === 'JPY' ? '외화단가(JPY·¥1)' : `외화단가(${cur})`;
   }
   recalcPurDraft();
 };
@@ -6611,7 +7071,9 @@ function addPurLine(){
 }
 
 function recalcPurDraft(){
-  const rate = num($('pRate').value) || 1;
+  const cur = $('pCur') ? $('pCur').value : 'KRW';
+  const rawRate = parseFloat($('pRate').value) || 1;
+  const rate = getUnitFxRate(cur, rawRate) || 1;
   const custom = num($('pCustom').value);
   const freight = num($('pFreight').value);
   const totalInc = custom + freight;
@@ -6683,6 +7145,8 @@ function resetPurForm(){
   $('pEditId').value = ''; $('pDate').value = todayStr(); $('pClient').value = '';
   $('pCur').value = 'KRW'; $('pRate').value = 1; $('pCustom').value = 0; $('pFreight').value = 0;
   $('pPaid').value = 0; $('pMemo').value = '';
+  if($('purFormTitle')) $('purFormTitle').innerText = '🚢 수입(외화)·국내 매입전표 및 부대비용 배부';
+  if($('pSaveBtn')) $('pSaveBtn').innerText = '🚢 매입·입고전표 저장 (재고 및 이동평균원가 즉시 반영)';
   purDraft = []; recalcPurDraft();
 }
 
@@ -6697,6 +7161,8 @@ function editPurchase(id){
   $('pSumVat').value = p.vat || 0;
   $('pPaid').value = p.paid || 0;
   $('pMemo').value = p.memo || '';
+  if($('purFormTitle')) $('purFormTitle').innerText = `✏️ 매입전표 수정 중 (#${p.date} ${p.client})`;
+  if($('pSaveBtn')) $('pSaveBtn').innerText = '💾 매입전표 수정내용 저장';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -6805,10 +7271,14 @@ function saveItem(){
     initQty: num($('iInitQty').value), safeQty: num($('iSafeQty').value), cat: ($('iCat').value||'').trim(),
     specNote, photo
   };
+  const isEdit = Boolean(num($('iId').value));
   const idx = db.items.findIndex(i => Number(i.id) === obj.id || normSearch(i.name) === normSearch(name));
   if(idx > -1){
     const prev = db.items[idx];
-    db.items[idx] = Object.assign({}, prev, obj, { photo: photo || prev.photo || '', specNote: specNote || prev.specNote || '' });
+    db.items[idx] = Object.assign({}, prev, obj, {
+      photo: isEdit ? photo : (photo || prev.photo || ''),
+      specNote: isEdit ? specNote : (specNote || prev.specNote || '')
+    });
   } else {
     db.items.push(obj);
   }
@@ -7003,6 +7473,16 @@ function getItemStats(){
   return map;
 }
 
+let _renderIdleToken = 0;
+function getActiveTabId(){
+  const act = document.querySelector && document.querySelector('.page.active');
+  return act ? act.id : 't-sale';
+}
+function renderRowLimitNoticeRow(totalCnt, limit, colSpan, label){
+  if(totalCnt <= limit) return '';
+  return `<tr class="row-limit-notice"><td colspan="${colSpan}" style="background:#fff8e6;color:#92400e;font-weight:800;font-size:11.5px;padding:7px 10px;text-align:center;border-bottom:1.5px solid #f59e0b">⚠️ 조회된 ${esc(label||'항목')} 총 <b>${fmt(totalCnt)}건</b> 중 상위 <b>${fmt(limit)}건</b>만 표시 중입니다. 이전 내역은 상단 검색어 또는 기간 필터로 조회하세요.</td></tr>`;
+}
+
 function renderAll(){
   cachedCliStats = null;
   cachedItmStats = null;
@@ -7010,20 +7490,33 @@ function renderAll(){
   const eDate = ($('fEnd') && $('fEnd').value) || '2099-12-31';
 
   if(typeof renderKPI === 'function') renderKPI(sDate, eDate);
-  if(typeof renderSales === 'function') renderSales(sDate, eDate);
-  if(typeof renderEstimates === 'function') renderEstimates(sDate, eDate);
-  if(typeof renderPurchases === 'function') renderPurchases(sDate, eDate);
-  if(typeof renderClients === 'function') renderClients();
-  if(typeof renderItems === 'function') renderItems();
-  if(typeof renderVatAndExp === 'function') renderVatAndExp(sDate, eDate);
-  if(typeof renderDashboard === 'function') renderDashboard();
-  else if(typeof window.renderDashboard === 'function') window.renderDashboard();
-  if(typeof renderWebQuotes === 'function') renderWebQuotes();
-  else if(typeof window.renderWebQuotes === 'function') window.renderWebQuotes();
-  if(typeof renderCalendar === 'function') renderCalendar();
-  else if(typeof window.renderCalendar === 'function') window.renderCalendar();
-  if(typeof renderBomSelects === 'function') renderBomSelects();
-  else if(typeof window.renderBomSelects === 'function') window.renderBomSelects();
+
+  const tasks = {
+    't-sale': () => { if(typeof renderSales === 'function') renderSales(sDate, eDate); },
+    't-dash': () => { if(typeof renderDashboard === 'function') renderDashboard(); else if(typeof window.renderDashboard === 'function') window.renderDashboard(); },
+    't-cal':  () => { if(typeof renderCalendar === 'function') renderCalendar(); else if(typeof window.renderCalendar === 'function') window.renderCalendar(); },
+    't-est':  () => { if(typeof renderEstimates === 'function') renderEstimates(sDate, eDate); if(typeof renderWebQuotes === 'function') renderWebQuotes(); else if(typeof window.renderWebQuotes === 'function') window.renderWebQuotes(); },
+    't-pur':  () => { if(typeof renderPurchases === 'function') renderPurchases(sDate, eDate); },
+    't-cli':  () => { if(typeof renderClients === 'function') renderClients(); },
+    't-itm':  () => { if(typeof renderItems === 'function') renderItems(); },
+    't-vat':  () => { if(typeof renderVatAndExp === 'function') renderVatAndExp(sDate, eDate); },
+    '_aux':   () => { if(typeof renderBomSelects === 'function') renderBomSelects(); else if(typeof window.renderBomSelects === 'function') window.renderBomSelects(); }
+  };
+
+  const activeTab = getActiveTabId();
+  if(tasks[activeTab]) tasks[activeTab]();
+
+  const remaining = Object.keys(tasks).filter(k => k !== activeTab);
+  const token = ++_renderIdleToken;
+  const runRemaining = () => {
+    if(token !== _renderIdleToken) return;
+    remaining.forEach(k => { try{ tasks[k](); }catch(e){} });
+  };
+  if(typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function'){
+    window.requestAnimationFrame(() => setTimeout(runRemaining, 0));
+  } else {
+    runRemaining();
+  }
 }
 
 function renderKPI(sDate, eDate){
@@ -7117,7 +7610,8 @@ function renderSales(sDate, eDate){
   });
 
   const shown = filtered.slice(0, 400);
-  $('saleTb').innerHTML = shown.map(s => {
+  const saleLimitNotice = renderRowLimitNoticeRow(filtered.length, 400, 12, '매출전표');
+  $('saleTb').innerHTML = (saleLimitNotice + shown.map(s => {
     const L = s.lines || [];
     const itemTitle = L.length ? (`<b>${esc(L[0].item)}</b>` + (L[0].spec?` <small>(${esc(L[0].spec)})</small>`:'') + (L.length>1 ? ` 외 ${L.length-1}건` : ` (${fmt(L[0].qty)}개)`)) : '-';
     const tot = (Number(s.supply)||0) + (Number(s.vat)||0);
@@ -7134,7 +7628,7 @@ function renderSales(sDate, eDate){
     return `<tr>
       <td class="c"><input type="checkbox" class="sChk" value="${s.id}"></td>
       <td class="c">${esc(s.date)}</td>
-      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(s.client)}')">${esc(dispCli)}</td>
+      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${escJs(s.client)}')">${esc(dispCli)}</td>
       <td>${itemTitle}${asBadge}${snBadge}${phBadge} ${s.memo?`<div style="font-size:10.5px;color:#666">${esc(s.memo)}</div>`:''}</td>
       <td class="r">${fmt(s.supply)}</td>
       <td class="r">${fmt(s.vat)}</td>
@@ -7151,7 +7645,7 @@ function renderSales(sDate, eDate){
         <button class="btn-r" style="padding:2px 5px;font-size:11px" onclick="delSale(${s.id})">✕</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="12" class="c" style="padding:20px;color:#888">조회된 매출전표가 없습니다. 상단 [전체] 버튼을 눌러보세요.</td></tr>';
+  }).join('')) || '<tr><td colspan="12" class="c" style="padding:20px;color:#888">조회된 매출전표가 없습니다. 상단 [전체] 버튼을 눌러보세요.</td></tr>';
 }
 
 function renderEstimates(sDate, eDate){
@@ -7192,6 +7686,7 @@ function renderEstimates(sDate, eDate){
       <td class="c">
         <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openEstInvoice(${e.id})">🖨️견적서</button>
         <button class="btn-g" style="padding:2px 6px;font-size:11px" onclick="convertEstToSale(${e.id})">🚀매출전환</button>
+        <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editEstimate(${e.id})" title="견적서 수정">✏️</button>
         <button class="btn-r" style="padding:2px 5px;font-size:11px" onclick="delEstimate(${e.id})">✕</button>
       </td>
     </tr>`;
@@ -7224,7 +7719,8 @@ function renderPurchases(sDate, eDate){
     return compareValues(mapVal[0], mapVal[1], st.dir, a.date, b.date);
   });
 
-  $('purTb').innerHTML = filtered.slice(0, 400).map(p => {
+  const purLimitNotice = renderRowLimitNoticeRow(filtered.length, 400, 11, '매입전표');
+  $('purTb').innerHTML = (purLimitNotice + filtered.slice(0, 400).map(p => {
     const L = p.lines || [];
     const itemTitle = L.length ? (`<b>${esc(L[0].item)}</b>` + (L.length>1 ? ` 외 ${L.length-1}건` : ` (${fmt(L[0].qty)}개)`)) : '-';
     const inc = (Number(p.custom)||0) + (Number(p.freight)||0);
@@ -7234,7 +7730,7 @@ function renderPurchases(sDate, eDate){
     return `<tr>
       <td class="c"><input type="checkbox" class="pChk" value="${p.id}"></td>
       <td class="c">${esc(p.date)}</td>
-      <td class="b" style="cursor:pointer;color:var(--pur)" onclick="openLedger('${esc(p.client)}')">${esc(p.client)}</td>
+      <td class="b" style="cursor:pointer;color:var(--pur)" onclick="openLedger('${escJs(p.client)}')">${esc(p.client)}</td>
       <td class="c">${esc(cur)} ${cur!=='KRW'?`(${fmt(p.rate)})`:''}</td>
       <td>${itemTitle} ${p.memo?`<div style="font-size:10.5px;color:#666">${esc(p.memo)}</div>`:''}</td>
       <td class="r">${fmt(p.goodsKrw)}</td>
@@ -7248,7 +7744,7 @@ function renderPurchases(sDate, eDate){
         <button class="btn-r" style="padding:2px 5px;font-size:11px" onclick="delPurchase(${p.id})">✕</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="11" class="c" style="padding:18px;color:#888">조회된 매입전표가 없습니다.</td></tr>';
+  }).join('')) || '<tr><td colspan="11" class="c" style="padding:18px;color:#888">조회된 매입전표가 없습니다.</td></tr>';
 }
 
 function renderClients(){
@@ -7279,13 +7775,14 @@ function renderClients(){
     return compareValues(mapVal[0], mapVal[1], sState.dir, a.c.name, b.c.name);
   });
 
-  $('cliTb').innerHTML = rows.slice(0, 400).map(st => {
+  const cliLimitNotice = renderRowLimitNoticeRow(rows.length, 400, 12, '거래처');
+  $('cliTb').innerHTML = (cliLimitNotice + rows.slice(0, 400).map(st => {
     const c = st.c;
     const dmBadge = st.isDormant ? ` <span class="bg bg-y" title="최근 ${st.daysSinceLast}일 동안 주문 없음 (${st.saleCnt}회 단골)">💤휴면(${st.daysSinceLast}일)</span>` : '';
     return `<tr>
       <td class="c"><input type="checkbox" class="cChk" value="${c.id}"></td>
       <td class="c">${esc(st.lastDate||'-')}</td>
-      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${esc(c.name)}')">${esc(c.name)}${dmBadge}</td>
+      <td class="b" style="cursor:pointer;color:var(--pri)" onclick="openLedger('${escJs(c.name)}')">${esc(c.name)}${dmBadge}</td>
       <td class="c"><span class="bg ${c.type==='매출처'?'bg-b':(c.type==='매입처'?'bg-p':'bg-g')}">${esc(c.type||'매출처')}</span></td>
       <td class="c">${esc(c.bizNo||'')}</td>
       <td class="c">${esc(c.ceo||'')}</td>
@@ -7295,12 +7792,12 @@ function renderClients(){
       <td class="c">${getOverdueDaysBadge(st.overdueDays, st.ar)}</td>
       <td class="r b ${st.ap>0?'t-pur':''}">${fmt(st.ap)}</td>
       <td class="c">
-        <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openLedger('${esc(c.name)}')">📊원장</button>
-        <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#27ae60" onclick="openCatalogDoc('${esc(c.name)}')" title="이 거래처 맞춤 단가표 발행">📋단가표</button>
+        <button class="btn-p" style="padding:2px 6px;font-size:11px" onclick="openLedger('${escJs(c.name)}')">📊원장</button>
+        <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#27ae60" onclick="openCatalogDoc('${escJs(c.name)}')" title="이 거래처 맞춤 단가표 발행">📋단가표</button>
         <button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editClient(${c.id})">✏️</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="12" class="c" style="padding:18px;color:#888">조회된 거래처가 없습니다.</td></tr>';
+  }).join('')) || '<tr><td colspan="12" class="c" style="padding:18px;color:#888">조회된 거래처가 없습니다.</td></tr>';
 }
 
 function renderItems(){
@@ -7326,7 +7823,8 @@ function renderItems(){
     return compareValues(mapVal[0], mapVal[1], sState.dir, a.it.name, b.it.name);
   });
 
-  $('itmTb').innerHTML = rows.slice(0, 400).map(st => {
+  const itmLimitNotice = renderRowLimitNoticeRow(rows.length, 400, 13, '품목');
+  $('itmTb').innerHTML = (itmLimitNotice + rows.slice(0, 400).map(st => {
     const it = st.it;
     const spObj = window.getModelSpec ? window.getModelSpec(it.name) : null;
     const noteText = it.specNote || (spObj ? `견인:${spObj.pull} / 로프:${spObj.rope} / 호환:${spObj.compat}` : '');
@@ -7346,7 +7844,7 @@ function renderItems(){
       <td class="c"><span class="bg ${st.low?'bg-r':'bg-g'}">${st.low?'발주필요':'정상'}</span></td>
       <td class="c"><button class="btn-w" style="padding:2px 5px;font-size:11px" onclick="editItem(${it.id})">✏️</button></td>
     </tr>`;
-  }).join('') || '<tr><td colspan="13" class="c" style="padding:18px;color:#888">등록된 품목이 없습니다.</td></tr>';
+  }).join('')) || '<tr><td colspan="13" class="c" style="padding:18px;color:#888">등록된 품목이 없습니다.</td></tr>';
 }
 
 function renderVatAndExp(sDate, eDate){
@@ -7394,10 +7892,17 @@ function renderVatAndExp(sDate, eDate){
       <td class="r">${fmt(ex.sup)}</td>
       <td class="r">${fmt(ex.vat)}</td>
       <td class="r b">${fmt(num(ex.sup)+num(ex.vat))}</td>
-      <td class="c"><button class="btn-r" style="padding:1px 5px" onclick="db.expenses=db.expenses.filter(x=>x.id!==${ex.id});saveDB('경비삭제');renderAll()">✕</button></td>
+      <td class="c"><button class="btn-r" style="padding:1px 5px" onclick="delExpense(${ex.id})">✕</button></td>
     </tr>
   `).join('') || '<tr><td colspan="8" class="c" style="padding:14px;color:#888">해당 기간 지출 경비 내역이 없습니다.</td></tr>';
 }
+
+window.delExpense = function(id){
+  if(!confirm('이 지출 경비 내역을 삭제하시겠습니까?')) return;
+  db.expenses = (db.expenses||[]).filter(x => Number(x.id) !== Number(id));
+  saveDB('경비삭제');
+  renderAll();
+};
 
 // ==================== A4 DOCUMENT & FEATURE #6, #7, #8, #3 BUILDER ====================
 function buildPhotoBoxHtml(slip){
@@ -7481,7 +7986,7 @@ function buildDocHtml(title, slip, isEst, docSubMode){
   }
 
   return `
-    <div class="a4-page">
+    <div class="a4-page${lines.length > maxDefaultRows ? ' multi-page' : ''}">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
           <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
@@ -7567,7 +8072,7 @@ function buildAsDocHtml(slip){
   }
 
   return `
-    <div class="a4-page">
+    <div class="a4-page${lines.length > (hasPhoto ? 6 : 10) ? ' multi-page' : ''}">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
           <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
@@ -7721,7 +8226,7 @@ window.openCatalogDoc = function(defaultCli, skipPrompt){
   }).join('') || `<tr><td colspan="7" class="c" style="padding:20px">등록된 품목이 없습니다.</td></tr>`;
 
   $('invArea').innerHTML = `
-    <div class="a4-page">
+    <div class="a4-page multi-page">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:3px double #142d4c;padding-bottom:8px">
           <img src="${ORA_LOGO}" alt="오라테크" style="height:36px;object-fit:contain">
@@ -7803,7 +8308,7 @@ function openLedger(cliName){
 
   $('ledTitle').innerText = `📊 [${cli.name}] 거래처 상세원장`;
   $('ledArea').innerHTML = `
-    <div class="a4-page" style="min-height:auto">
+    <div class="a4-page multi-page" style="min-height:auto">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:2px solid #142d4c;padding-bottom:8px">
           <img src="${ORA_LOGO}" alt="오라테크" style="height:32px;object-fit:contain">
@@ -7830,22 +8335,38 @@ function openLedger(cliName){
 async function copyDocAsImage(areaId, label){
   const el = $(areaId);
   if(!el){ alert('영역을 찾을 수 없습니다.'); return; }
-  if(typeof html2pdf !== 'undefined' && window.html2canvas){
+  if(typeof window.html2canvas === 'function' || typeof html2pdf !== 'undefined'){
     try{
-      const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff' });
-      canvas.toBlob(async blob => {
-        try{
-          await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
-          alert(`🟡 [${label}] 이미지가 클립보드에 복사되었습니다!\n\n이제 카카오톡 대화창을 열고 [Ctrl + V] (붙여넣기)만 누르면 사진으로 깔끔하게 전송됩니다!`);
-        }catch(err){
-          const a = document.createElement('a');
-          a.href = canvas.toDataURL('image/png');
-          a.download = `오라테크_${label}_${todayStr()}.png`;
-          a.click();
-          alert(`📸 [${label}] 이미지 파일이 다운로드되었습니다! 카카오톡에 파일을 끌어다 놓으세요.`);
-        }
-      });
-      return;
+      let canvas = null;
+      if(typeof window.html2canvas === 'function'){
+        canvas = await window.html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      } else {
+        const worker = html2pdf().set({
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' }
+        }).from(el).toCanvas();
+        canvas = (typeof worker.get === 'function') ? await worker.get('canvas') : (await worker).prop?.canvas;
+      }
+      if(canvas && typeof canvas.toBlob === 'function'){
+        await new Promise((resolve) => {
+          canvas.toBlob(async blob => {
+            try{
+              if(blob && navigator.clipboard && typeof ClipboardItem !== 'undefined'){
+                await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+                alert(`🟡 [${label}] 이미지가 클립보드에 복사되었습니다!\n\n이제 카카오톡 대화창을 열고 [Ctrl + V] (붙여넣기)만 누르면 사진으로 깔끔하게 전송됩니다!`);
+                resolve();
+                return;
+              }
+            }catch(err){}
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = `오라테크_${label}_${todayStr()}.png`;
+            a.click();
+            alert(`📸 [${label}] 이미지 파일이 다운로드되었습니다! 카카오톡에 파일을 끌어다 놓으세요.`);
+            resolve();
+          }, 'image/png');
+        });
+        return;
+      }
     }catch(e){}
   }
   await downloadDocPdf(areaId, `오라테크_${label}`);
@@ -7914,7 +8435,10 @@ async function execEmailSend(mode){
   closeModal('emailModal');
 }
 
-function closeModal(id){ if($(id)) $(id).style.display = 'none'; }
+function closeModal(id){
+  if(id === 'barcodeAuditModal' && typeof stopBarcodeCamera === 'function') stopBarcodeCamera();
+  if($(id)) $(id).style.display = 'none';
+}
 function printArea(wrapId){
   const el = $(wrapId);
   if(el){
@@ -8038,11 +8562,23 @@ window.goTab = function(target, tabEl){
   const tabs = ['t-sale','t-dash','t-cal','t-est','t-pur','t-cli','t-itm','t-vat','t-cfg'];
   const idx = (typeof target === 'number') ? target : tabs.indexOf(target);
   if(idx < 0) return;
+  if(typeof stopBarcodeCamera === 'function') stopBarcodeCamera();
   document.querySelectorAll('.page').forEach((el, i) => el.classList.toggle('active', i === idx));
   document.querySelectorAll('.nav .tab').forEach((el, i) => el.classList.toggle('active', i === idx));
-  if(tabs[idx] === 't-dash') renderDashboard();
-  if(tabs[idx] === 't-est') renderWebQuotes();
-  if(tabs[idx] === 't-cal') renderCalendar();
+  const sDate = ($('fStart') && $('fStart').value) || '2000-01-01';
+  const eDate = ($('fEnd') && $('fEnd').value) || '2099-12-31';
+  const curTab = tabs[idx];
+  if(curTab === 't-sale' && typeof renderSales === 'function') renderSales(sDate, eDate);
+  if(curTab === 't-dash' && typeof renderDashboard === 'function') renderDashboard();
+  if(curTab === 't-cal' && typeof renderCalendar === 'function') renderCalendar();
+  if(curTab === 't-est'){
+    if(typeof renderEstimates === 'function') renderEstimates(sDate, eDate);
+    if(typeof renderWebQuotes === 'function') renderWebQuotes();
+  }
+  if(curTab === 't-pur' && typeof renderPurchases === 'function') renderPurchases(sDate, eDate);
+  if(curTab === 't-cli' && typeof renderClients === 'function') renderClients();
+  if(curTab === 't-itm' && typeof renderItems === 'function') renderItems();
+  if(curTab === 't-vat' && typeof renderVatAndExp === 'function') renderVatAndExp(sDate, eDate);
 };
 
 window.goUnpaidClients = function(){
@@ -8208,8 +8744,8 @@ window.renderSpecSheetTable = function(){
         <td class="c">${esc(sp.weight)}<div style="font-size:10.5px;color:#666">${esc(sp.engine)}</div></td>
         <td style="font-size:11.5px;color:#142d4c"><b>로프:</b> ${esc(sp.rope)}<br><b>호환:</b> ${esc(sp.compat)}</td>
         <td class="c">
-          <button class="btn-p" style="padding:3px 8px;font-size:11px" onclick="applySpecToForm('${esc(sp.code)}')">⚡전표적용</button>
-          <button class="btn-w" style="padding:3px 6px;font-size:11px" onclick="editSpecRow('${esc(sp.code)}')">✏️</button>
+          <button class="btn-p" style="padding:3px 8px;font-size:11px" onclick="applySpecToForm('${escJs(sp.code)}')">⚡전표적용</button>
+          <button class="btn-w" style="padding:3px 6px;font-size:11px" onclick="editSpecRow('${escJs(sp.code)}')">✏️</button>
         </td>
       </tr>`;
     }).join('') || '<tr><td colspan="6" class="c" style="padding:18px;color:#888">검색된 모델 제원이 없습니다. [➕ 신규 모델제원 추가/수정]으로 등록해보세요!</td></tr>';
@@ -8332,6 +8868,13 @@ window.startVoiceRecognition = function(targetMode){
 function processVoiceCommand(rawText, targetMode){
   const clean = normalizeVoiceModelText(rawText);
   if(!clean) return;
+  const modeAliasMap = {
+    sale: 'saleForm',
+    fSaleKw: 'saleSearch',
+    fCliKw: 'cliSearch',
+    fItmKw: 'itmSearch'
+  };
+  targetMode = modeAliasMap[targetMode] || targetMode || 'global';
 
   if(targetMode === 'saleSearch'){
     goTab('t-sale');
@@ -8395,6 +8938,7 @@ function processVoiceCommand(rawText, targetMode){
     renderSales();
   }
 }
+window.processVoiceCommand = processVoiceCommand;
 
 // ==================== INITIALIZATION ====================
 window.addEventListener('DOMContentLoaded', async () => {
@@ -8419,6 +8963,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('storage', function(ev){
     if(ev.key === 'ora_web_quotes'){
       refreshWebQuotes(false);
+    } else if(ev.key === 'ora_sourced_items'){
+      if(typeof updateSourcedInboxBadge === 'function') updateSourcedInboxBadge();
+    } else if(ev.key === 'ora_gemini_key' || ev.key === 'ora_gemini_api_key'){
+      if(typeof updateCarbonStatusBadge === 'function') updateCarbonStatusBadge();
     }
   });
 
@@ -8443,6 +8991,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   resetSaleForm();
   resetEstForm();
   resetPurForm();
+  if(typeof updateCarbonStatusBadge === 'function') updateCarbonStatusBadge();
+  if(typeof updateSourcedInboxBadge === 'function') updateSourcedInboxBadge();
   checkInitialLock();
 
   if(scoreDB(db) > 0){
@@ -8547,7 +9097,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         <div class="c3"><label>Messers (해외 공급사/제조사)</label><input id="poSupplier" value="PORTABLE WINCH CO." style="width:100%" oninput="renderIntlPoDoc()"></div>
         <div class="c2"><label>통화 (Currency)</label>
           <select id="poCur" style="width:100%" onchange="onPoCurChange()">
-            <option value="USD">USD ($)</option><option value="CNY">CNY (¥)</option><option value="EUR">EUR (€)</option><option value="JPY">JPY (¥)</option>
+            <option value="USD">USD ($)</option><option value="CNY">CNY (¥)</option><option value="EUR">EUR (€)</option><option value="JPY">JPY (¥100)</option>
           </select>
         </div>
         <div class="c2"><label>적용환율(기준)</label><input type="number" id="poRate" value="1380" style="width:100%" oninput="renderIntlPoDoc()"></div>
@@ -8821,7 +9371,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 <script>
 // ==================== 🚀 6대 무기 통합 엔진 스크립트 ====================
 let poLines = [];
-let liveFxRates = { USD: 1385, CNY: 192.5, EUR: 1495, JPY: 9.15, updated: '기본환율' };
+let liveFxRates = { USD: 1385, CNY: 192.5, EUR: 1495, JPY: 915, updated: '기본환율' };
 let fmFilterMode = 'PEND';
 
 (function initPluginV46AllInOne(){
@@ -9133,13 +9683,15 @@ window.openIntlPoModal = function(){
 };
 window.onPoCurChange = function(){
   const cur = $('poCur').value;
-  $('poRate').value = liveFxRates[cur] || { USD:1380, CNY:192, EUR:1490, JPY:9.2 }[cur] || 1380;
-  const rate = num($('poRate').value) || 1380;
-  poLines.forEach(l => { if(l.krwBaseCost > 0) l.fob = Math.round((l.krwBaseCost / rate) * 100) / 100; });
+  $('poRate').value = liveFxRates[cur] || { USD:1380, CNY:192, EUR:1490, JPY:915 }[cur] || 1380;
+  const unitRate = getUnitFxRate(cur, num($('poRate').value) || 1380);
+  poLines.forEach(l => { if(l.krwBaseCost > 0 && unitRate > 0) l.fob = Math.round((l.krwBaseCost / unitRate) * 100) / 100; });
   renderIntlPoDoc();
 };
 window.autoFillLowStockToPo = function(silent){
-  const iStats = getItemStats(), depMap = getItemDepletionStats(), rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+  const iStats = getItemStats(), depMap = getItemDepletionStats();
+  const cur = $('poCur') ? $('poCur').value : 'USD';
+  const unitRate = getUnitFxRate(cur, num($('poRate') ? $('poRate').value : 1380) || 1380);
   let candidates = Object.values(iStats).filter(st => {
     const dep = depMap[normSearch(st.it.name)];
     return st.low || (dep && dep.daysLeft <= 45 && dep.qty180 > 0);
@@ -9148,7 +9700,7 @@ window.autoFillLowStockToPo = function(silent){
   poLines = candidates.slice(0, 12).map(st => {
     const it = st.it, sp = window.getModelSpec ? window.getModelSpec(it.name) : null;
     const krwCost = Number(it.buyPrice) || Math.round((Number(it.sellPrice)||1000000) * 0.65);
-    const fob = Math.max(10, Math.round((krwCost / rate) * 100) / 100);
+    const fob = Math.max(10, Math.round((krwCost / (unitRate || 1)) * 100) / 100);
     const dep = depMap[normSearch(it.name)] || { monthlyAvg: 5 };
     return { model: it.name, desc: sp ? `${sp.cat} (${sp.pull})` : (it.cat || 'Winch & Hoist Equipment'), qty: Math.max(5, Math.ceil((dep.monthlyAvg || 5) * 2)), fob, krwBaseCost: krwCost };
   });
@@ -9159,13 +9711,39 @@ window.addPoLineItem = function(){
   const model = ($('poAddModel').value||'').trim().toUpperCase();
   if(!model){ alert('모델코드를 입력하세요.'); return; }
   const desc = ($('poAddDesc').value||'').trim() || 'Industrial Winch / Hoist';
-  const qty = Math.max(1, num($('poAddQty').value)), fob = Number($('poAddFob').value) || 100, rate = num($('poRate').value) || 1380;
-  poLines.push({ model, desc, qty, fob, krwBaseCost: Math.round(fob * rate) });
+  const cur = $('poCur') ? $('poCur').value : 'USD';
+  const qty = Math.max(1, num($('poAddQty').value)), fob = Number($('poAddFob').value) || 100;
+  const unitRate = getUnitFxRate(cur, num($('poRate').value) || 1380);
+  poLines.push({ model, desc, qty, fob, krwBaseCost: Math.round(fob * unitRate) });
   $('poAddModel').value = ''; $('poAddDesc').value = ''; renderIntlPoDoc();
+};
+window.updatePoLineField = function(idx, field, rawVal){
+  const l = poLines[idx];
+  if(!l) return;
+  if(field === 'qty') l.qty = num(rawVal);
+  else if(field === 'fob') l.fob = Number(rawVal) || 0;
+  const cur = $('poCur') ? $('poCur').value : 'USD';
+  const rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+  const unitRate = getUnitFxRate(cur, rate);
+  const sym = { USD:'$', CNY:'¥', EUR:'€', JPY:'¥' }[cur] || '$';
+  l.krwBaseCost = Math.round((Number(l.fob)||0) * unitRate);
+  const rowAmt = Math.round((Number(l.qty)||0) * (Number(l.fob)||0) * 100) / 100;
+  if($(`poRowQtyPrint_${idx}`)) $(`poRowQtyPrint_${idx}`).innerText = fmt(l.qty);
+  if($(`poRowFobPrint_${idx}`)) $(`poRowFobPrint_${idx}`).innerText = (Number(l.fob)||0).toLocaleString();
+  if($(`poRowAmt_${idx}`)) $(`poRowAmt_${idx}`).innerText = `${sym} ${rowAmt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  let totalForeign = 0, totalQty = 0;
+  poLines.forEach(x => {
+    totalForeign += Math.round((Number(x.qty)||0) * (Number(x.fob)||0) * 100) / 100;
+    totalQty += Number(x.qty) || 0;
+  });
+  if($('poTotalQty')) $('poTotalQty').innerText = `${fmt(totalQty)} EA`;
+  if($('poTotalForeign')) $('poTotalForeign').innerText = `${sym} ${totalForeign.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  if($('poTotalKrw')) $('poTotalKrw').innerText = `※ 원화 환산 예상 물대 (환율 ${fmt(rate)}원${cur==='JPY'&&rate>=50?'/100엔':''} 기준): 약 ₩${fmt(Math.round(totalForeign * unitRate))} 원`;
 };
 window.renderIntlPoDoc = function(){
   const comp = db.comp || {}, supplier = ($('poSupplier') ? $('poSupplier').value : 'PORTABLE WINCH CO.').trim();
   const cur = $('poCur') ? $('poCur').value : 'USD', rate = num($('poRate') ? $('poRate').value : 1380) || 1380;
+  const unitRate = getUnitFxRate(cur, rate);
   const terms = $('poTerms') ? $('poTerms').value : 'FOB', payTerms = $('poPayTerms') ? $('poPayTerms').value : 'T/T';
   const sym = { USD:'$', CNY:'¥', EUR:'€', JPY:'¥' }[cur] || '$', poNo = 'ORA-PO-' + todayStr().replace(/-/g,'');
   let totalForeign = 0, totalQty = 0;
@@ -9173,16 +9751,16 @@ window.renderIntlPoDoc = function(){
     const amt = Math.round(l.qty * l.fob * 100) / 100; totalForeign += amt; totalQty += Number(l.qty)||0;
     return `<tr>
       <td class="c">${idx+1}</td><td class="b" style="color:#142d4c">${esc(l.model)}</td><td>${esc(l.desc)}</td>
-      <td class="r"><input type="number" class="no-print" value="${l.qty}" style="width:55px;text-align:right;margin-right:4px" oninput="poLines[${idx}].qty=num(this.value);renderIntlPoDoc()"><span class="only-print">${fmt(l.qty)}</span> EA</td>
-      <td class="r">${sym} <input type="number" class="no-print" value="${l.fob}" step="any" style="width:75px;text-align:right" oninput="poLines[${idx}].fob=Number(this.value)||0;renderIntlPoDoc()"><span class="only-print">${l.fob.toLocaleString()}</span></td>
-      <td class="r b">${sym} ${amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td class="r"><input type="number" class="no-print" value="${l.qty}" style="width:55px;text-align:right;margin-right:4px" oninput="updatePoLineField(${idx},'qty',this.value)"><span class="only-print" id="poRowQtyPrint_${idx}">${fmt(l.qty)}</span> EA</td>
+      <td class="r">${sym} <input type="number" class="no-print" value="${l.fob}" step="any" style="width:75px;text-align:right" oninput="updatePoLineField(${idx},'fob',this.value)"><span class="only-print" id="poRowFobPrint_${idx}">${l.fob.toLocaleString()}</span></td>
+      <td class="r b" id="poRowAmt_${idx}">${sym} ${amt.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       <td class="c no-print"><button class="btn-r" style="padding:1px 5px" onclick="poLines.splice(${idx},1);renderIntlPoDoc()">✕</button></td>
     </tr>`;
   }).join('') || `<tr><td colspan="7" class="c" style="padding:20px;color:#888">위 [⚡ 발주필요 품목 자동채우기] 또는 [＋ 품목추가]를 눌러주세요.</td></tr>`;
 
   $('poDocArea').innerHTML = `
     <style>.only-print{display:none}@media print{.only-print{display:inline!important}}</style>
-    <div class="a4-page" style="min-height:245mm">
+    <div class="a4-page${poLines.length > 12 ? ' multi-page' : ''}" style="min-height:245mm">
       <div>
         <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px double #142d4c;padding-bottom:10px;margin-bottom:12px">
           <div><img src="${ORA_LOGO}" alt="ORATECH" style="height:36px;object-fit:contain"><div style="font-size:11px;color:#444;margin-top:2px"><b>ORATECH (오라테크)</b> | Seoul, Republic of Korea</div></div>
@@ -9203,11 +9781,11 @@ window.renderIntlPoDoc = function(){
         <table class="a4-tbl">
           <thead><tr><th style="width:36px">No.</th><th style="width:130px">Model / Item Code</th><th>Description of Goods</th><th style="width:95px">Q'ty</th><th style="width:115px">Unit Price (${cur})</th><th style="width:125px">Amount (${cur})</th><th class="no-print" style="width:42px">Del</th></tr></thead>
           <tbody>${rowsHtml}</tbody>
-          <tfoot><tr style="background:#f1f5f9;font-weight:900;font-size:13px"><td colspan="3" class="c">TOTAL (${poLines.length} Models)</td><td class="r">${fmt(totalQty)} EA</td><td class="r">TOTAL (${cur}):</td><td class="r t-red">${sym} ${totalForeign.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="no-print"></td></tr></tfoot>
+          <tfoot><tr style="background:#f1f5f9;font-weight:900;font-size:13px"><td colspan="3" class="c">TOTAL (${poLines.length} Models)</td><td class="r" id="poTotalQty">${fmt(totalQty)} EA</td><td class="r">TOTAL (${cur}):</td><td class="r t-red" id="poTotalForeign">${sym} ${totalForeign.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td class="no-print"></td></tr></tfoot>
         </table>
       </div>
       <div style="margin-top:12px;border-top:2px solid #142d4c;padding-top:10px;display:flex;justify-content:space-between;align-items:flex-end;font-size:12px">
-        <div><b>Remarks:</b> Please send Proforma Invoice (P/I) and Packing List upon confirmation.<br><span class="no-print" style="color:#0984e3;font-weight:bold">※ 원화 환산 예상 물대 (환율 ${fmt(rate)}원 기준): 약 ₩${fmt(Math.round(totalForeign * rate))} 원</span></div>
+        <div><b>Remarks:</b> Please send Proforma Invoice (P/I) and Packing List upon confirmation.<br><span class="no-print" id="poTotalKrw" style="color:#0984e3;font-weight:bold">※ 원화 환산 예상 물대 (환율 ${fmt(rate)}원${cur==='JPY'&&rate>=50?'/100엔':''} 기준): 약 ₩${fmt(Math.round(totalForeign * unitRate))} 원</span></div>
         <div style="text-align:center;min-width:200px"><div style="margin-bottom:25px;font-weight:bold;color:#142d4c">Confirmed & Authorized by:</div><div style="border-top:1px solid #000;padding-top:4px;font-weight:900"><span class="stamp-wrap">ORATECH / CEO ${esc(comp.ceo)}<span class="stamp">${esc(comp.name)}<br>대표인</span></span></div></div>
       </div>
     </div>`;
@@ -9485,7 +10063,14 @@ window.fetchLiveExchangeRates = async function(manual){
     }
   }catch(e){
     const cached = sGet('ora_cached_fx');
-    if(cached){ try{ liveFxRates = JSON.parse(cached); }catch(err){} }
+    if(cached){
+      try{
+        liveFxRates = JSON.parse(cached);
+        if(liveFxRates && Number(liveFxRates.JPY) > 0 && Number(liveFxRates.JPY) < 50){
+          liveFxRates.JPY = Math.round(Number(liveFxRates.JPY) * 1000) / 10; // 구버전 1엔 캐시 -> 100엔 표준화
+        }
+      }catch(err){}
+    }
   }
   const badge = $('fxTopBadge');
   if(badge){
@@ -9526,17 +10111,19 @@ function renderFxSniperModal(){
   const fxPurs = (db.purchases||[]).filter(p => (p.currency && p.currency !== 'KRW') || (p.rate && Number(p.rate) > 1));
   $('fxUnpaidPurTb').innerHTML = fxPurs.slice(0, 15).map(p => {
     const cur = p.currency || 'USD';
-    const bookR = Number(p.rate) || 1380;
-    const todayR = (cur === 'JPY' ? liveFxRates.JPY / 100 : liveFxRates[cur]) || bookR;
+    const rawBookR = Number(p.rate) || (cur === 'JPY' ? 915 : 1380);
+    const bookUnitR = getUnitFxRate(cur, rawBookR);
+    const rawTodayR = liveFxRates[cur] || rawBookR;
+    const todayUnitR = getUnitFxRate(cur, rawTodayR);
     const remKrw = (Number(p.totalCost)||0) + (Number(p.vat)||0) - (Number(p.paid)||0);
-    const estForeign = bookR > 0 ? (remKrw / bookR) : 0;
-    const diffKrw = Math.round(estForeign * (bookR - todayR));
+    const estForeign = bookUnitR > 0 ? (remKrw / bookUnitR) : 0;
+    const diffKrw = Math.round(estForeign * (bookUnitR - todayUnitR));
     return `<tr>
       <td class="c">${esc(p.date)}</td>
       <td class="b">${esc(p.client)}</td>
       <td class="c"><span class="bg bg-b">${esc(cur)}</span></td>
-      <td class="r">${bookR.toLocaleString()}원</td>
-      <td class="r b">${todayR.toLocaleString()}원</td>
+      <td class="r">${rawBookR.toLocaleString()}원${cur==='JPY'&&rawBookR>=50?'/100엔':''}</td>
+      <td class="r b">${rawTodayR.toLocaleString()}원${cur==='JPY'&&rawTodayR>=50?'/100엔':''}</td>
       <td class="r">${fmt(remKrw)}원</td>
       <td class="r b ${diffKrw>=0?'t-grn':'t-red'}">${remKrw<=0 ? '송금완료' : (diffKrw>=0 ? `🟢 +${fmt(diffKrw)}원 이득` : `🔴 ${fmt(diffKrw)}원 손실`)}</td>
     </tr>`;
@@ -9545,7 +10132,7 @@ function renderFxSniperModal(){
 
 window.onFxSimCurChange = function(){
   const cur = $('fxSimCur').value;
-  const r = cur === 'JPY' ? (liveFxRates.JPY / 100) : (liveFxRates[cur] || 1380);
+  const r = liveFxRates[cur] || { USD:1380, CNY:192, EUR:1490, JPY:915 }[cur] || 1380;
   $('fxSimTodayRate').value = r;
   $('fxSimBookRate').value = Math.round(r * 1.02 * 10) / 10;
   runFxSniperSim();
@@ -9554,11 +10141,11 @@ window.onFxSimCurChange = function(){
 window.runFxSniperSim = function(){
   const cur = $('fxSimCur').value;
   const amt = Number($('fxSimAmt').value) || 0;
-  const bookR = Number($('fxSimBookRate').value) || 0;
-  const todayR = Number($('fxSimTodayRate').value) || 0;
+  const bookUnitR = getUnitFxRate(cur, Number($('fxSimBookRate').value) || 0);
+  const todayUnitR = getUnitFxRate(cur, Number($('fxSimTodayRate').value) || 0);
 
-  const bookKrw = Math.round(amt * bookR);
-  const todayKrw = Math.round(amt * todayR);
+  const bookKrw = Math.round(amt * bookUnitR);
+  const todayKrw = Math.round(amt * todayUnitR);
   const diff = bookKrw - todayKrw; // 양수면 오늘 송금할 때 원화가 덜 들어감(환차익)
 
   $('fxSimResult').innerHTML = diff >= 0
@@ -9573,11 +10160,11 @@ window.runFxSniperSim = function(){
 };
 
 window.applyLiveFxToForms = function(cur, val){
-  const r = cur === 'JPY' ? (val / 100) : val;
-  if($('pCur')){ $('pCur').value = cur; $('pRate').value = r; recalcPurDraft(); }
-  if($('simCur')){ $('simCur').value = cur; $('simRate').value = r; }
-  if($('poCur')){ $('poCur').value = cur; $('poRate').value = r; }
-  alert(`⚡ [${cur}] 실시간 환율(${val}원)이 수입매입전표·원가시뮬레이터·영문발주서에 모두 반영되었습니다!`);
+  const displayVal = (cur === 'JPY' && val > 0 && val < 50) ? Math.round(val * 1000) / 10 : val;
+  if($('pCur')){ $('pCur').value = cur; $('pRate').value = displayVal; recalcPurDraft(); }
+  if($('simCur')){ $('simCur').value = cur; $('simRate').value = displayVal; if(typeof runCostSim === 'function') runCostSim(); }
+  if($('poCur')){ $('poCur').value = cur; $('poRate').value = displayVal; if(typeof renderIntlPoDoc === 'function') renderIntlPoDoc(); }
+  alert(`⚡ [${cur}] 실시간 환율(${displayVal}원${cur==='JPY'?' / 100엔 기준':''})이 수입매입전표·원가시뮬레이터·영문발주서에 모두 반영되었습니다!`);
 };
 
 // ==================== 6. 👨‍👦 [신규 5번] 아버님 ↔ 아드님 실시간 인수인계 포스트잇 & 체크보드 ====================
@@ -10043,6 +10630,7 @@ window.clearDoneFamilyMemos = function(){
       ['GTWY12-200', '200Kg (2인용)', '작업높이 12.0m', '2인용 알루미늄 듀얼마스트 수직 고소작업리프트', 5800000]
     ]}
   ];
+  window.SPLIT_SERIES_GROUPS = SPLIT_SERIES_GROUPS;
 
   // 그룹 데이터를 개별 품목 리스트(ORAWINCH_WEB_CATALOG)로 전개
   window.ORAWINCH_WEB_CATALOG = [];
@@ -10687,7 +11275,8 @@ window.clearDoneFamilyMemos = function(){
       addr:'서울특별시 중구 청계천로 110, 1층(수표동)',
       bank:'우리은행 011-058791-12-001 (예금주: 김향래)'
     };
-    var tgCfg = (typeof getTgConfig === 'function') ? getTgConfig() : { token: DEF_TOK, cid: DEF_CID };
+    // 🔒 보안 보호: ERP 내부 텔레그램 클라우드 봇 토큰(DEF_TOK / getTgConfig().token)은 공개 홈페이지 HTML에 절대 삽입하지 않습니다!
+    var publicInquiryEndpoint = 'https://naver-store-ai-manager-production.up.railway.app/api/public/quote-inquiry';
     var gasUrl = (window.db && window.db.gasQuoteUrl) || '';
     var merged = (window.ORAWINCH_WEB_CATALOG || []).slice();
 
