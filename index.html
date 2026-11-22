@@ -189,8 +189,114 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
 
 <!-- 드래그 앤 드롭 오버레이 -->
 <div id="dropOverlay">
-  <h1>📥 국세청(홈택스) 엑셀 / 백업파일 자동 인식</h1>
-  <p style="font-size:18px">마우스를 놓으시면 <b>매출·매입 세금계산서 / 면세계산서</b>를 스스로 판별하여 1초 만에 자동 전표화합니다!</p>
+  <h1>📥 국세청(홈택스) 엑셀 · XML · PDF/사진 자동 인식</h1>
+  <p style="font-size:18px">마우스를 놓으시면 <b>매출·매입 세금계산서 / 계산서(.xls, .xlsx, .csv, .xml, .pdf, 캡처사진)</b>를 스스로 판별하여 미리보기 후 1초 만에 등록합니다!</p>
+</div>
+
+<!-- 🏛️ 아부지 전용 국세청 홈택스 1초 가져오기 센터 모달 -->
+<div class="modal-bg" id="hometaxImportModal" style="z-index:1280">
+  <div class="modal" style="width:980px;max-width:96vw;max-height:92vh">
+    <div class="mh" style="background:linear-gradient(90deg,#064e3b,#047857,#0f766e);flex-wrap:wrap;gap:6px">
+      <span style="flex:1 1 240px;min-width:0">🏛️ 국세청 홈택스 1초 세금계산서 가져오기 (복사 · 엑셀 · XML · PDF)</span>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+        <a href="https://hometax.go.kr" target="_blank" class="btn-a" style="padding:4px 9px;font-size:11.5px;text-decoration:none;color:#111;white-space:nowrap;flex-shrink:0">🌐 홈택스 ↗</a>
+        <button class="btn-r" style="white-space:nowrap;flex-shrink:0" onclick="closeModal('hometaxImportModal')">✕ 닫기</button>
+      </div>
+    </div>
+    <div class="mb" style="font-size:12.5px;line-height:1.55">
+      <div style="background:#ecfdf5;border:1.5px solid #6ee7b7;padding:10px 12px;border-radius:8px;margin-bottom:10px;color:#064e3b;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <b style="font-size:13.5px">💡 가장 쉬운 3가지 방법 (아무거나 편한 걸로 쓰세요!)</b><br>
+          <span style="font-size:12px">
+            <b>① 복사 붙여넣기(파일 다운 X):</b> 홈택스 조회 표 드래그 복사(<code>Ctrl+C</code>) ➔ 아래 네모칸에 <code>Ctrl+V</code><br>
+            <b>② 파일 올리기(가장 정확):</b> 홈택스 <b>엑셀(.xls/.xlsx/.csv)</b> 또는 <b>전자세금계산서(.xml)</b> 여러 개 동시 선택/드롭<br>
+            <b>③ 사진·PDF 자동인식:</b> 계산서 PDF·캡처 사진을 끌어다 놓거나 <code>Ctrl+V</code> 붙여넣기 ➔ AI 자동 추출
+          </span>
+        </div>
+        <button type="button" class="btn-w" style="font-size:11.5px;border-color:#059669;color:#047857" onclick="var g=$('htxHowToBox');g.style.display=g.style.display==='none'?'block':'none'">❓ 홈택스에서 복사·다운하는 법</button>
+      </div>
+
+      <div id="htxHowToBox" style="display:none;background:#fffbeb;border:1.5px solid #fcd34d;padding:10px 12px;border-radius:8px;margin-bottom:10px;color:#78350f;font-size:12px;line-height:1.7">
+        <b>📌 홈택스에서 데이터 가져오는 순서 (3번 클릭이면 끝!)</b><br>
+        1. 위 <b>[🌐 홈택스 바로가기]</b> 클릭 → 로그인 후 상단 메뉴 <b>[전자(세금)계산서 · 현금영수증 · 신용카드] ➔ [전자(세금)계산서 조회] ➔ [목록조회]</b><br>
+        2. 날짜 선택 후 <b>[조회하기]</b> 클릭 (<b>발급목록 = 매출</b> / <b>수취목록 = 매입</b>)<br>
+        3. <b>방법 A:</b> 화면에 뜬 목록 표를 마우스로 쭉 드래그해 <code>Ctrl+C</code> 후 아래 붙여넣기 칸에 <code>Ctrl+V</code> (파일 다운 필요 없음!)<br>
+        4. <b>방법 B:</b> 목록 오른쪽 위 <b>[엑셀 내려받기]</b> 또는 <b>[XML 내려받기]</b>를 눌러 다운받은 파일을 아래에 끌어다 놓기! (최대 정확도 · 다중 품목 전체 반영)<br>
+        <span style="color:#92400e">※ 참고: 홈택스 파일 다운/복사조차 아예 없이 버튼 1번에 자동 수집하려면, 국세청 공동인증서 보안 구조상 <b>팝빌(Popbill)·바로빌(Barobill)</b> 같은 유료 스크래핑 API 연동만 별도로 필요합니다. 지금 방식은 추가 이용료 <b>0원</b>으로 바로 쓰실 수 있습니다!</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:10px;margin-bottom:10px" id="htxInputGrid">
+        <!-- File Drop Zone -->
+        <div id="htxModalDropZone" onclick="$('htxModalFileIn').click()" ondragover="event.preventDefault();event.stopPropagation();this.style.borderColor='#059669';this.style.background='#d1fae5'" ondragleave="this.style.borderColor='#0284c7';this.style.background='#f0f9ff'" ondrop="event.preventDefault();event.stopPropagation();this.style.borderColor='#0284c7';this.style.background='#f0f9ff';handleHometaxInputs({files:event.dataTransfer.files})" style="background:#f0f9ff;border:2px dashed #0284c7;border-radius:8px;padding:14px 12px;text-align:center;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;min-height:118px">
+          <div style="font-size:24px">📂</div>
+          <div style="font-weight:900;color:#075985;font-size:13px">홈택스 엑셀 · XML · PDF · 사진 파일 올리기</div>
+          <div style="font-size:11px;color:#475569">클릭해서 파일 여러 개 고르거나 여기로 끌어다 놓으세요<br>(<code>.xls</code> · <code>.xlsx</code> · <code>.csv</code> · <code>.xml</code> · <code>.pdf</code> · 이미지)</div>
+          <input type="file" id="htxModalFileIn" multiple accept=".xls,.xlsx,.csv,.xml,.pdf,.jpg,.jpeg,.png,.webp,.txt,.tsv" style="display:none" onchange="handleHometaxInputs({files:this.files});this.value=''">
+        </div>
+
+        <!-- Clipboard Text / Image Paste Box -->
+        <div style="background:#f8fafc;border:1.5px solid #94a3b8;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-weight:900;color:#0f172a;font-size:12.5px">📋 홈택스 화면 복사 붙여넣기 (<code>Ctrl+V</code> 즉시 자동 분석)</span>
+            <span id="htxParseStatus" style="font-size:11px;font-weight:800;color:#059669">대기 중</span>
+          </div>
+          <textarea id="htxPasteInput" rows="3" placeholder="홈택스에서 조회한 표를 마우스로 드래그해 Ctrl+C 복사한 뒤, 여기를 클릭하고 Ctrl+V 붙여넣으세요! (화면 캡처 이미지도 바로 붙여넣기 가능)" style="width:100%;padding:7px;font-size:12px;border:1.5px solid #cbd5e1;border-radius:6px;resize:vertical" onpaste="handleHometaxBoxPaste(event)"></textarea>
+          <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+            <button type="button" class="btn-s" style="padding:5px 10px;font-size:11.5px" onclick="handleHometaxInputs({text:$('htxPasteInput').value,useAiIfNeeded:false})">🔍 붙여넣은 표 즉시 분석</button>
+            <button type="button" class="btn-pur" style="padding:5px 10px;font-size:11.5px" onclick="handleHometaxInputs({text:$('htxPasteInput').value,useAiIfNeeded:true,forceAi:true})">💎 AI 정밀 해독</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Controls -->
+      <div style="background:#eef2ff;border:1px solid #bfdbfe;padding:8px 10px;border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <label style="font-weight:900;color:#1e3a8a;font-size:12px">결제·미수 처리 기준:</label>
+          <select id="htxPayMode" style="padding:4px 8px;font-size:12px;border-color:#2563eb" onchange="renderHometaxPreview()">
+            <option value="AUTO">영수/청구 그대로 반영 (영수=완납 · 청구=미수금)</option>
+            <option value="PAID">전부 완납 처리 (미수금 0원)</option>
+            <option value="UNPAID">전부 미수금(외상) 처리</option>
+          </select>
+          <span id="htxPreviewStats" style="font-size:12px;font-weight:800;color:#1e40af">가져올 세금계산서를 위에서 선택하거나 붙여넣으세요.</span>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button type="button" class="btn-w" style="padding:3px 8px;font-size:11px" onclick="toggleHtxPreviewChecks(true, true)">☑ 미중복 전체선택</button>
+          <button type="button" class="btn-w" style="padding:3px 8px;font-size:11px" onclick="toggleHtxPreviewChecks(false, false)">☐ 선택해제</button>
+          <button type="button" class="btn-r" style="padding:3px 8px;font-size:11px" onclick="clearHtxPreview()">🗑️ 목록 비우기</button>
+        </div>
+      </div>
+
+      <!-- Preview Table -->
+      <div class="tw" style="max-height:280px">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:28px"><input type="checkbox" id="htxPrevChkAll" checked onclick="toggleHtxPreviewChecks(this.checked, false)"></th>
+              <th style="width:68px">구분</th>
+              <th style="width:88px">작성일</th>
+              <th>거래처 (매칭 상태)</th>
+              <th>품목명 · 규격</th>
+              <th style="width:48px">수량</th>
+              <th style="width:92px">공급가액</th>
+              <th style="width:78px">세액</th>
+              <th style="width:64px">영수/청구</th>
+              <th style="width:95px">중복여부</th>
+            </tr>
+          </thead>
+          <tbody id="htxPreviewTb">
+            <tr><td colspan="10" class="c" style="padding:26px;color:#64748b">아직 불러온 내역이 없습니다. 위 <b>파일 올리기</b> 또는 <b>홈택스 표 복사·붙여넣기(Ctrl+V)</b>를 이용해 보세요!</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="mf" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <button type="button" class="btn-w" style="border-color:#059669;color:#047857" onclick="exportHometaxExcel()">📤 반대로 [ERP ➔ 홈택스 일괄발행 엑셀] 내보내기</button>
+      <div style="display:flex;gap:6px">
+        <button type="button" id="htxCommitBtn" class="btn-g" style="padding:9px 18px;font-size:13.5px;font-weight:900" onclick="commitHometaxPreview()">✅ 선택한 전표 ERP에 일괄 등록하기</button>
+        <button type="button" class="btn-w" onclick="closeModal('hometaxImportModal')">닫기</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- 실시간 자동완성 드롭다운 -->
@@ -1025,9 +1131,11 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
     .tw th, .tw td { padding: 7px 6px !important; font-size: 12.5px !important; }
     .kpi-row { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; padding: 6px 8px !important; }
     .kpi-v, .kpi .v { font-size: 15.5px !important; }
-    .modal { width: 100vw !important; max-width: 100vw !important; height: 96vh !important; max-height: 96vh !important; border-radius: 0 !important; }
+    .modal-bg { padding: 0 !important; }
+    .modal { width: 100% !important; max-width: 100% !important; height: 100% !important; max-height: 100% !important; border-radius: 0 !important; box-sizing: border-box !important; border-left: none !important; border-right: none !important; }
+    #htxModalDropZone { min-height: 74px !important; padding: 10px 8px !important; }
     #fxBoardCards { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; }
-    #vatSummaryBox > div, #itxResultBox > div:first-child { grid-template-columns: 1fr !important; gap: 6px !important; }
+    #vatSummaryBox > div, #itxResultBox > div:first-child, #htxInputGrid { grid-template-columns: 1fr !important; gap: 6px !important; }
     .cal-grid { gap: 2px !important; padding: 2px !important; overflow-x: auto; }
     .cal-hdr { padding: 4px 2px !important; font-size: 11px !important; }
     .cal-cell { min-height: 64px !important; padding: 3px !important; font-size: 11px !important; }
@@ -1062,6 +1170,7 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
     <span id="autoBakBadge" onclick="connectAutoBackupFolder()" style="background:#DC2626;cursor:pointer;font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid #FCA5A5;white-space:nowrap;" title="클릭하여 내 컴퓨터의 자동백업 폴더를 지정하세요">📁 자동백업: 미연결</span>
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <button class="btn-g" style="border:1.5px solid #A7F3D0;font-weight:900;padding:6px 11px" onclick="openHometaxImportModal()" title="국세청 홈택스 세금계산서를 복사·엑셀·XML·PDF로 1초 만에 ERP로 가져옵니다">🏛️ 홈택스 1초 가져오기</button>
     <button class="btn-pur" style="border:1.5px solid #BAE6FD;font-weight:900;padding:6px 12px" onclick="openAiModal()">💎 카본 AI 비서</button>
     <button class="btn-a" style="background:#0284C7;color:#fff;border:1.5px solid #BAE6FD;font-weight:900;padding:6px 11px" onclick="openWinchWizard()" title="하중·전원 조건별 윈치 모델 추천">🧙‍♂️ 윈치 사양마법사</button>
     <button id="hideProfitBtn" class="btn-w" style="border:1.5px solid #CBD5E1;font-weight:900;padding:6px 10px" onclick="toggleHideProfit()" title="손님과 함께 화면을 볼 때 원가와 마진 금액을 즉시 숨깁니다">👁️ 마진숨김 OFF</button>
@@ -1102,6 +1211,7 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
         <div class="ph">
           <span id="saleFormTitle">✏️ 매출전표 등록 (다중품목 / 세트출고 / A/S·시리얼)</span>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="btn-g" style="padding:2px 7px;font-size:11px;font-weight:900" onclick="openHometaxImportModal('매출')" title="홈택스 매출 세금계산서를 복사/엑셀/XML로 바로 불러옵니다">🏛️ 홈택스 ➔ 매출 가져오기</button>
             <button class="btn-pur" style="padding:2px 7px;font-size:11px;font-weight:900" onclick="openAiModal('order')">💎 카본 카톡주문인식</button>
             <button class="btn-s" style="padding:2px 6px;font-size:11px;background:#0984e3" onclick="openSpecSheetModal('s')" title="모델별 제원·규격·호환부품 즉시 확인">📖 모델제원표</button>
             <button class="btn-s" style="padding:2px 6px;font-size:11px" onclick="copyLastOrderByClient()" title="선택된 거래처의 직전 주문을 그대로 불러옵니다">🔁 직전주문불러오기</button>
@@ -1480,6 +1590,7 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
         <div class="ph">
           <span id="purFormTitle">🚢 수입(외화)·국내 매입전표 및 부대비용 배부</span>
           <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn-g" style="padding:4px 8px;font-size:11.5px;font-weight:900" onclick="openHometaxImportModal('매입')" title="홈택스 매입 세금계산서를 복사/엑셀/XML로 바로 불러옵니다">🏛️ 홈택스 ➔ 매입 가져오기</button>
             <button class="btn-g" style="background:#0d9488;border-color:#0f766e" onclick="openSourcedItemsModal()">🌏 1688 소싱랩 접수함 불러오기 <span id="sourcedInboxBadge" style="background:#ef4444;color:#fff;padding:0 5px;border-radius:10px;font-size:10px;display:none">0</span></button>
             <button class="btn-a" onclick="openSimModal()">🧮 수입원가·목표마진 시뮬레이터</button>
             <button class="btn-w" onclick="resetPurForm()">🔄 초기화</button>
@@ -1741,12 +1852,15 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
       <div class="panel">
         <div class="ph"><span>🏛️ 국세청 홈택스 엑셀 연동 및 판매관리비(경비) 기장</span></div>
         <div class="pb">
-          <div style="background:#f8fafc;border:2px dashed #0984e3;padding:12px;border-radius:6px;text-align:center;margin-bottom:10px">
-            <div style="font-weight:900;font-size:13.5px;color:var(--pri);margin-bottom:4px">📥 홈택스 전자(세금)계산서 / 면세계산서 엑셀 일괄 업로드</div>
-            <p style="font-size:11.5px;color:#555;margin-bottom:8px">홈택스에서 다운받은 <b>매출·매입 세금계산서 및 계산서 엑셀파일(.xls, .xlsx, .csv)</b>을 여러 개 동시에 선택하거나 화면 아무 곳에나 끌어다 놓으세요!</p>
-            <input type="file" id="htxFileIn" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="importHometaxFiles(this.files);this.value=''">
-            <button class="btn-p" onclick="$('htxFileIn').click()">📂 홈택스 엑셀파일 선택 (다중선택 가능)</button>
-            <button class="btn-g" onclick="exportHometaxExcel()">📤 홈택스 양식으로 매출 내보내기</button>
+          <div style="background:#f8fafc;border:2px dashed #059669;padding:12px;border-radius:6px;text-align:center;margin-bottom:10px">
+            <div style="font-weight:900;font-size:13.5px;color:#065f46;margin-bottom:4px">📥 홈택스 전자(세금)계산서 1초 연동 (복사·엑셀·XML·PDF)</div>
+            <p style="font-size:11.5px;color:#475569;margin-bottom:8px">홈택스 조회 화면을 <b>드래그 복사(Ctrl+C)</b>해 붙여넣거나 <b>엑셀(.xls/.xlsx/.csv)·XML·PDF</b>를 올려 미리보기 후 1클릭 등록하세요!</p>
+            <input type="file" id="htxFileIn" multiple accept=".xls,.xlsx,.csv,.xml,.pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="openHometaxImportModal();handleHometaxInputs({files:this.files});this.value=''">
+            <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+              <button class="btn-g" style="font-weight:900" onclick="openHometaxImportModal()">🏛️ 홈택스 1초 가져오기 센터 열기 (추천)</button>
+              <button class="btn-p" onclick="$('htxFileIn').click()">📂 파일 바로 고르기</button>
+              <button class="btn-s" onclick="exportHometaxExcel()">📤 홈택스 양식으로 매출 내보내기</button>
+            </div>
           </div>
 
           <div class="ph" style="margin:10px -8px 8px -8px"><span>💸 일반 경비 / 판관비 등록 (운반비, 식대, 소모품, 임차료 등)</span></div>
@@ -1821,8 +1935,8 @@ body.hide-profit #k-prof,body.hide-profit #k-prof-s,body.hide-profit #k-pur,body
               <button class="btn-s" style="background:#16a085;border-color:#1abc9c;padding:6px 10px" onclick="tgPull(false)">📥 클라우드 최신복구</button>
               <button class="btn-w" style="padding:6px 10px" onclick="openTgModal()">⚙️ 클라우드 토큰설정</button>
               <button class="btn-w" style="padding:6px 10px;border-color:#c0392b;color:#c0392b" onclick="connectAutoBackupFolder()">📁 PC 자동백업 폴더 지정</button>
-              <input type="file" id="htxQuickIn" multiple accept=".xls,.xlsx,.csv" style="display:none" onchange="importHometaxFiles(this.files);this.value=''">
-              <button class="btn-a" style="padding:6px 10px" onclick="$('htxQuickIn').click()">⚡ 홈택스 엑셀 일괄등록</button>
+              <input type="file" id="htxQuickIn" multiple accept=".xls,.xlsx,.csv,.xml,.pdf,.jpg,.jpeg,.png,.webp" style="display:none" onchange="openHometaxImportModal();handleHometaxInputs({files:this.files});this.value=''">
+              <button class="btn-a" style="padding:6px 10px" onclick="openHometaxImportModal()">🏛️ 홈택스 1초 가져오기 (복사·엑셀·XML)</button>
               <button class="btn-g" style="padding:6px 10px" onclick="exportExcelAll()">📊 전체원장 엑셀백업</button>
               <button class="btn-w" style="padding:6px 10px" onclick="exportJson()">💾 JSON 파일백업</button>
               <input type="file" id="jsonIn" accept=".json" style="display:none" onchange="importJson(event)">
@@ -4834,236 +4948,970 @@ window.goDormantClients = function(){
   renderClients();
 };
 
-// ==================== HOMETAX MULTI-FILE PARSER (v35 다중시트·품목순번 완벽 호환) ====================
+// ==================== HOMETAX 1-SECOND IMPORTER (EXCEL · XML · WEB COPY/PASTE · PDF/IMAGE CARBON AI) ====================
 var isImportingHtx = false;
+var HTX_STAGING = [];
+var HTX_DEFAULT_KIND = 'AUTO';
+
+function getHtxApiBase(){
+  const h = (typeof location !== 'undefined' && location.hostname) || '';
+  if(h === 'localhost' || h === '127.0.0.1' || h.endsWith('.up.railway.app')) return '';
+  return 'https://naver-store-ai-manager-production.up.railway.app';
+}
 function normItemStr(s){
   return String(s||'').replace(/\r|\n/g,' ').replace(/\s+/g,' ').trim();
 }
 function matchStandardItem(iName, spec, price){
   return extractPureCode(iName, spec);
 }
-window.importHometaxFiles = async function(fileList){
-  if(isImportingHtx) return;
-  var files = Array.from(fileList || []);
-  if(!files.length) return;
-  isImportingHtx = true;
+function normalizeHtxDate(val){
+  if(val === null || val === undefined || val === '') return '';
+  if(typeof val === 'number' && val > 25000 && val < 75000){
+    if(typeof XLSX !== 'undefined' && XLSX.SSF && XLSX.SSF.parse_date_code){
+      const d = XLSX.SSF.parse_date_code(val);
+      if(d && d.y && d.m && d.d){
+        return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+      }
+    }
+    const utc = new Date(Math.round((val - 25569) * 86400 * 1000));
+    if(!isNaN(utc.getTime())) return utc.toISOString().slice(0, 10);
+  }
+  const s = String(val).trim();
+  if(/^\d{5}(\.\d+)?$/.test(s)){
+    const n = Number(s);
+    if(n > 25000 && n < 75000) return normalizeHtxDate(Math.floor(n));
+  }
+  const mSep = s.match(/(20\d{2})[.\-/년\s]+(1[0-2]|0?[1-9])[.\-/월\s]+(3[01]|[12]\d|0?[1-9])(?:\D|$)/);
+  if(mSep) return `${mSep[1]}-${String(mSep[2]).padStart(2,'0')}-${String(mSep[3]).padStart(2,'0')}`;
+  const digits = s.replace(/[^0-9]/g, '');
+  if(digits.length >= 8 && /^20\d{6}/.test(digits)){
+    const mm = Number(digits.slice(4,6)), dd = Number(digits.slice(6,8));
+    if(mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31){
+      return `${digits.slice(0,4)}-${digits.slice(4,6)}-${digits.slice(6,8)}`;
+    }
+  }
+  return '';
+}
+function parseHtxNum(val){
+  let s = String(val === null || val === undefined ? '' : val).trim();
+  if(!s) return 0;
+  const isNeg = /^\(.*\)$/.test(s) || /^-\s*[\d,]+/.test(s);
+  s = s.replace(/[^0-9.-]/g, '');
+  const n = Number(s);
+  if(isNaN(n)) return 0;
+  return isNeg && n > 0 ? -n : n;
+}
+function fmtHtxBizNo(val){
+  const d = String(val || '').replace(/[^0-9]/g, '');
+  if(d.length === 10) return d.slice(0,3) + '-' + d.slice(3,5) + '-' + d.slice(5);
+  return String(val || '').trim();
+}
+function parseCsvLineHtx(line, delim){
+  if(delim === '\t') return line.split('\t').map(x => x.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+  const out = [];
+  let cur = '', inQ = false;
+  for(let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if(ch === '"'){
+      if(inQ && line[i+1] === '"'){ cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if(ch === delim && !inQ){
+      out.push(cur.trim());
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur.trim());
+  return out;
+}
+function expandSheetMergesHtx(ws, arr){
+  if(!ws || !Array.isArray(ws['!merges'])) return arr;
+  ws['!merges'].forEach(m => {
+    if(!m || !m.s || !m.e || m.s.r > 20) return;
+    const baseVal = (arr[m.s.r] && arr[m.s.r][m.s.c]) || '';
+    if(!baseVal) return;
+    for(let r = m.s.r; r <= Math.min(m.e.r, 20); r++){
+      if(!arr[r]) arr[r] = [];
+      for(let c = m.s.c; c <= m.e.c; c++){
+        if(!arr[r][c]) arr[r][c] = baseVal;
+      }
+    }
+  });
+  return arr;
+}
+function extractHtmlTableRowsHtx(rawHtml){
   try{
-    var sAdd = 0, pAdd = 0, cAdd = 0, dupSkip = 0;
-    var existKeys = {};
-    (db.sales || []).forEach(function(s){
-      existKeys['FP_S_' + getSaleFp(s)] = true;
-      if(s.htxKey) existKeys['APV_S_' + s.htxKey] = true;
+    const doc = new DOMParser().parseFromString(rawHtml, 'text/html');
+    const tables = Array.from(doc.querySelectorAll('table'));
+    const allGrid = [];
+    tables.forEach(tbl => {
+      const rows = Array.from(tbl.querySelectorAll('tr'));
+      if(rows.length < 2) return;
+      const grid = [];
+      rows.forEach((tr, rIdx) => {
+        if(!grid[rIdx]) grid[rIdx] = [];
+        let cIdx = 0;
+        Array.from(tr.children).forEach(cell => {
+          while(grid[rIdx][cIdx] !== undefined) cIdx++;
+          const txt = normItemStr(cell.textContent || '');
+          const cs = Math.max(1, Number(cell.getAttribute('colspan')) || 1);
+          const rs = Math.max(1, Number(cell.getAttribute('rowspan')) || 1);
+          for(let dr = 0; dr < rs; dr++){
+            if(!grid[rIdx + dr]) grid[rIdx + dr] = [];
+            for(let dc = 0; dc < cs; dc++){
+              grid[rIdx + dr][cIdx + dc] = txt;
+            }
+          }
+          cIdx += cs;
+        });
+      });
+      if(grid.some(r => r.join('|').includes('작성일자') || r.join('|').includes('승인번호') || r.join('|').includes('공급가액'))){
+        allGrid.push(grid);
+      }
     });
-    (db.purchases || []).forEach(function(p){
-      existKeys['FP_P_' + getPurFp(p)] = true;
-      if(p.htxKey) existKeys['APV_P_' + p.htxKey] = true;
+    return allGrid;
+  }catch(_){ return []; }
+}
+function buildHtxExistKeyMap(){
+  const existKeys = {};
+  (db.sales || []).forEach(s => {
+    existKeys['FP_S_' + getSaleFp(s)] = true;
+    if(s.htxKey) existKeys['APV_S_' + s.htxKey] = true;
+  });
+  (db.purchases || []).forEach(p => {
+    existKeys['FP_P_' + getPurFp(p)] = true;
+    if(p.htxKey) existKeys['APV_P_' + p.htxKey] = true;
+  });
+  return existKeys;
+}
+function computeHtxDupFlag(entry, existKeys){
+  const k = entry.kind === '매입' ? 'P' : 'S';
+  if(entry.apv && existKeys['APV_' + k + '_' + entry.apv]) return '승인번호 중복';
+  const sup = Math.round(Number(entry.supply)||0);
+  const vat = Math.round(Number(entry.vat)||0);
+  const lines = entry.lines || [];
+  if(k === 'P'){
+    const fp = getPurFp({ date: entry.date, client: entry.client, totalCost: sup, vat, lines });
+    if(existKeys['FP_P_' + fp]) return '동일매입 중복';
+  } else {
+    const fp = getSaleFp({ date: entry.date, client: entry.client, supply: sup, vat, memo: entry.memo, lines });
+    if(existKeys['FP_S_' + fp]) return '동일매출 중복';
+  }
+  return '';
+}
+function makeStagingEntry(raw, existKeys){
+  const myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
+  const sup = Math.round(Number(raw.supply) || 0);
+  const vat = Math.round(Number(raw.vat) || 0);
+  const kind = raw.kind === '매입' || raw.kind === '매출' ? raw.kind : (HTX_DEFAULT_KIND === '매입' || HTX_DEFAULT_KIND === '매출' ? HTX_DEFAULT_KIND : '매출');
+  const lines = (Array.isArray(raw.lines) && raw.lines.length ? raw.lines : [{
+    item: normItemStr(raw.itemName || (kind === '매입' ? '매입물품' : '매출물품')),
+    spec: normItemStr(raw.spec || '').toUpperCase(),
+    qty: Number(raw.qty) || 1,
+    price: Number(raw.price) || sup,
+    sup, supply: sup, vat, total: sup + vat
+  }]).map(l => {
+    const q = Number(l.qty) || 1;
+    const ls = Number(l.sup || l.supply || sup) || 0;
+    const lp = Number(l.price) || (q ? Math.round(ls / q) : ls);
+    const stdCode = matchStandardItem(l.item, l.spec, lp);
+    const finalName = stdCode || normItemStr(l.item || '물품');
+    const finalSpec = normItemStr(l.spec || stdCode || '').toUpperCase();
+    return {
+      item: finalName,
+      rawItem: normItemStr(l.item || ''),
+      spec: finalSpec,
+      qty: q,
+      price: lp,
+      sup: ls,
+      supply: ls,
+      vat: Number(l.vat) || (vat > 0 && sup > 0 ? Math.round((ls / sup) * vat) : 0),
+      uCost: Math.round(lp * 0.75),
+      profit: ls - Math.round(ls * 0.75)
+    };
+  });
+  const fmtBiz = fmtHtxBizNo(raw.bizNo || '');
+  const rawBizDigits = fmtBiz.replace(/[^0-9]/g, '');
+  let cName = normItemStr(raw.client || (kind === '매입' ? '매입처' : '매출처'));
+  const exCli = (db.clients || []).find(x => (fmtBiz && x.bizNo === fmtBiz && rawBizDigits !== myBiz) || normSearch(x.name) === normSearch(cName));
+  if(exCli) cName = exCli.name;
+  const entry = {
+    uid: 'HTX_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    kind,
+    date: raw.date || todayStr(),
+    apv: normItemStr(raw.apv || ''),
+    client: cName,
+    cliMatched: Boolean(exCli),
+    bizNo: fmtBiz,
+    ceo: normItemStr(raw.ceo || ''),
+    addr: normItemStr(raw.addr || ''),
+    email: normItemStr(raw.email || ''),
+    payType: String(raw.payType || '').includes('청구') ? '청구' : '영수',
+    supply: sup,
+    vat,
+    total: sup + vat,
+    memo: normItemStr(raw.memo || ''),
+    sourceLabel: raw.sourceLabel || '홈택스',
+    lines,
+    dupReason: ''
+  };
+  entry.dupReason = computeHtxDupFlag(entry, existKeys);
+  entry.checked = !entry.dupReason;
+  return entry;
+}
+
+function parseHometaxXmlText(xmlText, existKeys){
+  const list = [];
+  const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+  const byLocal = (root, name) => {
+    const out = [];
+    const walk = n => {
+      if(!n || n.nodeType !== 1) return;
+      if(n.localName === name) out.push(n);
+      for(let c = n.firstElementChild; c; c = c.nextElementSibling) walk(c);
+    };
+    walk(root);
+    return out;
+  };
+  const txtOf = (root, name) => {
+    const el = byLocal(root, name)[0];
+    return el ? normItemStr(el.textContent) : '';
+  };
+  const invNodes = byLocal(doc.documentElement, 'TaxInvoice');
+  const roots = invNodes.length ? invNodes : (doc.documentElement ? [doc.documentElement] : []);
+  const myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
+
+  roots.forEach(root => {
+    const taxDoc = byLocal(root, 'TaxInvoiceDocument')[0] || root;
+    const apv = txtOf(taxDoc, 'IssueID');
+    const rawDt = txtOf(taxDoc, 'IssueDateTime') || txtOf(taxDoc, 'IssueDate');
+    const dt = normalizeHtxDate(rawDt);
+    const purpose = txtOf(taxDoc, 'PurposeCode');
+    const payType = purpose === '02' ? '청구' : '영수';
+    const memo = txtOf(taxDoc, 'DescriptionText');
+
+    const sParty = byLocal(root, 'InvoicerParty')[0];
+    const bParty = byLocal(root, 'InvoiceeParty')[0];
+    const getParty = p => !p ? {} : {
+      biz: fmtHtxBizNo(txtOf(p, 'ID')),
+      name: txtOf(p, 'NameText'),
+      ceo: txtOf(p, 'PersonNameText'),
+      addr: txtOf(p, 'LineOneText'),
+      email: txtOf(p, 'URIID')
+    };
+    const sp = getParty(sParty);
+    const bp = getParty(bParty);
+    const sB = (sp.biz || '').replace(/[^0-9]/g,'');
+    const bB = (bp.biz || '').replace(/[^0-9]/g,'');
+    const isPur = (bB === myBiz && sB !== myBiz) || (HTX_DEFAULT_KIND === '매입' && sB !== myBiz);
+    const partner = isPur ? sp : bp;
+
+    const lineNodes = byLocal(root, 'TaxInvoiceTradeLineItem');
+    const lines = lineNodes.map(ln => {
+      const qty = parseHtxNum(txtOf(ln, 'ChargeableUnitQuantity')) || 1;
+      const prc = parseHtxNum(txtOf(ln, 'UnitAmount'));
+      const supL = parseHtxNum(txtOf(ln, 'InvoiceAmount'));
+      const vatL = parseHtxNum(txtOf(ln, 'TaxAmount') || txtOf(ln, 'TotalTaxAmount'));
+      return {
+        item: txtOf(ln, 'NameText') || '물품',
+        spec: txtOf(ln, 'InformationText') || '',
+        qty,
+        price: prc || (qty ? Math.round(supL / qty) : supL),
+        sup: supL,
+        vat: vatL
+      };
+    }).filter(x => x.item || x.sup !== 0);
+
+    const sumEl = byLocal(root, 'SpecifiedMonetarySummation')[0] || root;
+    let sup = parseHtxNum(txtOf(sumEl, 'ChargeTotalAmount'));
+    let vat = parseHtxNum(txtOf(sumEl, 'TaxTotalAmount'));
+    if(!sup && lines.length) sup = lines.reduce((a, b) => a + b.sup, 0);
+    if(!vat && lines.length) vat = lines.reduce((a, b) => a + b.vat, 0);
+    if(!dt || (sup === 0 && vat === 0)) return;
+
+    list.push(makeStagingEntry({
+      kind: isPur ? '매입' : '매출',
+      date: dt,
+      apv,
+      client: partner.name || (isPur ? '매입처' : '매출처'),
+      bizNo: partner.biz,
+      ceo: partner.ceo,
+      addr: partner.addr,
+      email: partner.email,
+      payType,
+      supply: sup,
+      vat,
+      memo,
+      sourceLabel: 'XML',
+      lines
+    }, existKeys));
+  });
+  return list;
+}
+
+function parseHometaxSheetRows(rows, itemsByApv, existKeys, fileForceKind){
+  let hIdx = -1, sheetKind = fileForceKind || '';
+  const col = {
+    dt:-1, dtAlt:-1, apv:-1,
+    sBiz:-1, sName:-1, sCeo:-1, sAddr:-1, sEm:-1,
+    bBiz:-1, bName:-1, bCeo:-1, bAddr:-1, bEm:-1,
+    pBiz:-1, pName:-1, kind:-1,
+    tot:-1, sup:-1, vat:-1, memo:-1, pay:-1,
+    itm:-1, spec:-1, qty:-1, prc:-1
+  };
+
+  for(let i = 0; i < Math.min(rows.length, 25); i++){
+    const row = rows[i] || [];
+    const rawPrev = i > 0 ? (rows[i - 1] || []) : [];
+    const prevHasGrp = rawPrev.some(x => { const t = String(x||'').replace(/\s+/g,''); return t.includes('공급자') || t.includes('공급받는자'); });
+    let lastGrp = '';
+    const prev = row.map((_, c) => {
+      const v = String(rawPrev[c] || '').replace(/\s+/g, '');
+      if(prevHasGrp && (v.includes('공급자') || v.includes('공급받는자'))) lastGrp = v;
+      return v || (prevHasGrp ? lastGrp : '');
     });
+    const rowTxt = row.join('|').replace(/\s+/g, '');
+    if(rowTxt.includes('매입전자') || rowTxt.includes('매입세금') || rowTxt.includes('매입계산서') || rowTxt.includes('수취목록')) sheetKind = '매입';
+    else if(rowTxt.includes('매출전자') || rowTxt.includes('매출세금') || rowTxt.includes('발급목록')) sheetKind = sheetKind || '매출';
 
-    for(var f=0; f<files.length; f++){
-      var file = files[f], buf = await file.arrayBuffer();
-      showSyncProgress('🏛️ 국세청 홈택스 엑셀 정밀 분석 중...', '(' + (f+1) + '/' + files.length + ') ' + file.name, Math.round(((f+1)/files.length)*85));
-      var invSheets = [], itmSheets = [];
-      var fileForcePur = file.name.indexOf('매입') !== -1;
+    const hasDate = rowTxt.includes('작성일자') || rowTxt.includes('작성일') || rowTxt.includes('발급일자') || rowTxt.includes('거래일자');
+    const hasAmt = rowTxt.includes('공급가액') || rowTxt.includes('공급가') || rowTxt.includes('합계금액');
+    if(hasDate && hasAmt){
+      hIdx = i;
+      let side = 's';
+      for(let c = 0; c < row.length; c++){
+        const kSub = String(row[c] || '').replace(/\s+/g, '');
+        const kTop = String(prev[c] || '').replace(/\s+/g, '');
+        const k = kTop + kSub;
+        if(k.includes('공급받는자')) side = 'b';
+        else if(k.includes('공급자')) side = 's';
 
-      if(typeof XLSX !== 'undefined'){
+        if((kSub === '작성일자' || kSub === '작성일' || kSub === '거래일자') && col.dt === -1) col.dt = c;
+        else if((kSub === '발급일자' || kSub === '발행일자') && col.dtAlt === -1) col.dtAlt = c;
+        else if(kSub.includes('승인번호') && col.apv === -1) col.apv = c;
+        else if((kSub === '매출/매입' || kSub === '구분') && col.kind === -1) col.kind = c;
+        else if(kSub.includes('종사업장')) continue;
+        else if(kSub.includes('등록번호') || kSub.includes('사업자번호')){
+          if(k.includes('공급받는자')) { col.bBiz = c; side = 'b'; }
+          else if(k.includes('공급자')) { col.sBiz = c; side = 's'; }
+          else if(col.sBiz === -1 && side !== 'b') { col.sBiz = c; col.pBiz = c; }
+          else if(col.bBiz === -1) { col.bBiz = c; side = 'b'; }
+        }
+        else if(kSub.includes('거래처') && !kSub.includes('번호')){ col.pName = c; }
+        else if(kSub.includes('상호') || kSub.includes('법인명') || kSub.includes('업체명') || kSub.includes('회사명') || kSub === '공급자명' || kSub === '공급받는자명'){
+          if(k.includes('공급받는자') || kSub.includes('공급받는자')) { col.bName = c; side = 'b'; }
+          else if(k.includes('공급자') || kSub.includes('공급자')) { col.sName = c; side = 's'; }
+          else if(side === 'b' || col.sName !== -1){ if(col.bName === -1) col.bName = c; }
+          else col.sName = c;
+        }
+        else if(kSub.includes('성명') || kSub.includes('대표자')){
+          if(k.includes('공급받는자') || side === 'b') { if(col.bCeo === -1) col.bCeo = c; }
+          else if(col.sCeo === -1) col.sCeo = c;
+        }
+        else if(kSub.includes('주소')){
+          if(k.includes('공급받는자') || side === 'b') { if(col.bAddr === -1) col.bAddr = c; }
+          else if(col.sAddr === -1) col.sAddr = c;
+        }
+        else if(kSub.includes('이메일') || kSub.includes('전자메일')){
+          if(k.includes('공급받는자') || side === 'b') { if(col.bEm === -1) col.bEm = c; }
+          else if(col.sEm === -1) col.sEm = c;
+        }
+        else if(kSub === '합계금액' && col.tot === -1) col.tot = c;
+        else if((kSub === '공급가액' || kSub === '공급가') && col.sup === -1) col.sup = c;
+        else if((kSub === '세액' || kSub === '부가세' || kSub === '부가세액') && col.vat === -1) col.vat = c;
+        else if((kSub === '비고' || kSub === '적요') && col.memo === -1) col.memo = c;
+        else if(kSub.includes('영수/청구') || kSub === '영수청구' || kSub === '청구/영수') col.pay = c;
+        else if(kSub === '품목명' || kSub === '대표품목명' || kSub === '품명' || kSub === '품목') col.itm = c;
+        else if(kSub === '품목규격' || kSub === '규격') col.spec = c;
+        else if(kSub === '품목수량' || kSub === '수량') col.qty = c;
+        else if(kSub === '품목단가' || kSub === '단가') col.prc = c;
+      }
+      if(col.dt === -1) col.dt = col.dtAlt;
+      break;
+    }
+  }
+  if(hIdx === -1 || col.dt === -1 || (col.sup === -1 && col.tot === -1)) return [];
+
+  const myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
+  const myCorpNorm = normSearch((db.comp && db.comp.name) || '오라테크');
+  const entries = [];
+
+  for(let r = hIdx + 1; r < rows.length; r++){
+    const row = rows[r];
+    if(!row || row.length < 4) continue;
+    const dt = normalizeHtxDate(row[col.dt]) || (col.dtAlt !== -1 ? normalizeHtxDate(row[col.dtAlt]) : '');
+    if(!dt) continue;
+
+    let sup = col.sup !== -1 ? parseHtxNum(row[col.sup]) : 0;
+    let vat = col.vat !== -1 ? parseHtxNum(row[col.vat]) : 0;
+    const totCol = col.tot !== -1 ? parseHtxNum(row[col.tot]) : 0;
+    if(sup === 0 && totCol !== 0){ sup = totCol - vat; }
+    if(sup === 0 && vat === 0) continue;
+
+    const sB = col.sBiz !== -1 ? String(row[col.sBiz] || '').replace(/[^0-9]/g, '') : '';
+    const bB = col.bBiz !== -1 ? String(row[col.bBiz] || '').replace(/[^0-9]/g, '') : '';
+    const sNm = col.sName !== -1 ? normItemStr(row[col.sName]) : '';
+    const bNm = col.bName !== -1 ? normItemStr(row[col.bName]) : '';
+    const kTxt = col.kind !== -1 ? String(row[col.kind] || '') : '';
+
+    let isPur = false;
+    if(kTxt.includes('매입')) isPur = true;
+    else if(kTxt.includes('매출')) isPur = false;
+    else if(bB === myBiz && sB !== myBiz) isPur = true;
+    else if(sB === myBiz && bB !== myBiz) isPur = false;
+    else if(bNm && myCorpNorm && normSearch(bNm).includes(myCorpNorm) && sNm && !normSearch(sNm).includes(myCorpNorm)) isPur = true;
+    else if(sheetKind === '매입') isPur = true;
+    else if(HTX_DEFAULT_KIND === '매입') isPur = true;
+
+    let partnerName = col.pName !== -1 ? normItemStr(row[col.pName]) : (isPur ? (sNm || bNm) : (bNm || sNm));
+    if(!partnerName || (myCorpNorm && normSearch(partnerName) === myCorpNorm && sNm && bNm)){
+      const fallbackCli = row.find((cell, ci) => {
+        if(ci === col.itm || ci === col.spec || ci === col.memo || ci === col.apv || ci === col.dt || ci === col.dtAlt || ci === col.pay || ci === col.kind) return false;
+        const v = normItemStr(cell);
+        if(!v || v.length < 2 || /^[\d,\-.\s원()]+$/.test(v) || normalizeHtxDate(v)) return false;
+        if(myCorpNorm && normSearch(v) === myCorpNorm) return false;
+        return /[가-힣a-zA-Z]/.test(v);
+      });
+      if(fallbackCli) partnerName = normItemStr(fallbackCli);
+    }
+    const partnerBiz = col.pBiz !== -1 ? String(row[col.pBiz] || '') : (isPur ? (col.sBiz !== -1 ? row[col.sBiz] : '') : (col.bBiz !== -1 ? row[col.bBiz] : ''));
+    const partnerCeo = isPur ? (col.sCeo !== -1 ? row[col.sCeo] : '') : (col.bCeo !== -1 ? row[col.bCeo] : '');
+    const partnerAddr = isPur ? (col.sAddr !== -1 ? row[col.sAddr] : '') : (col.bAddr !== -1 ? row[col.bAddr] : '');
+    const partnerEm = isPur ? (col.sEm !== -1 ? row[col.sEm] : '') : (col.bEm !== -1 ? row[col.bEm] : '');
+    const apv = col.apv !== -1 ? normItemStr(row[col.apv]) : '';
+    const payTxt = col.pay !== -1 ? String(row[col.pay] || '') : '';
+    const payType = payTxt.includes('청구') || payTxt.includes('02') ? '청구' : '영수';
+    const memoTxt = col.memo !== -1 ? normItemStr(row[col.memo]) : '';
+
+    let lines = apv && itemsByApv && itemsByApv[apv] ? itemsByApv[apv] : null;
+    if(!lines || !lines.length){
+      const itm = normItemStr(col.itm !== -1 && row[col.itm] ? row[col.itm] : (isPur ? '매입물품' : '매출물품'));
+      const spec = normItemStr(col.spec !== -1 && row[col.spec] ? row[col.spec] : '').toUpperCase();
+      const qty = col.qty !== -1 ? (parseHtxNum(row[col.qty]) || 1) : 1;
+      const prc = col.prc !== -1 ? (parseHtxNum(row[col.prc]) || (qty ? Math.round(sup / qty) : sup)) : (qty ? Math.round(sup / qty) : sup);
+      lines = [{ item: itm, spec, qty, price: prc, sup, vat }];
+    }
+
+    entries.push(makeStagingEntry({
+      kind: isPur ? '매입' : '매출',
+      date: dt,
+      apv,
+      client: partnerName || (isPur ? '매입처' : '매출처'),
+      bizNo: partnerBiz,
+      ceo: partnerCeo,
+      addr: partnerAddr,
+      email: partnerEm,
+      payType,
+      supply: sup,
+      vat,
+      memo: memoTxt,
+      sourceLabel: '엑셀',
+      lines
+    }, existKeys));
+  }
+  return entries;
+}
+
+function parseHometaxPastedText(rawText, existKeys){
+  const text = String(rawText || '').trim();
+  if(!text) return [];
+  if(/^\s*</.test(text) && text.includes('TaxInvoice')) return parseHometaxXmlText(text, existKeys);
+
+  const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim());
+  const delim = text.includes('\t') ? '\t' : (lines.some(l => l.includes('  ')) ? null : ',');
+  const rows = lines.map(l => {
+    if(delim) return parseCsvLineHtx(l, delim);
+    return l.trim().split(/\s{2,}/).map(x => x.trim());
+  });
+
+  // 1) Try standard header-driven table parse first
+  const headered = parseHometaxSheetRows(rows, {}, existKeys, '');
+  if(headered.length) return headered;
+
+  // 2) Try headerless Hometax web-table row-by-row copy/paste
+  const myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
+  const myCorpNorm = normSearch((db.comp && db.comp.name) || '오라테크');
+  const noiseRx = /^(일반세금계산서|전자세금계산서|전자계산서|수정세금계산서|과세|영세|면세|발급완료|전송완료|전송성공|영수|청구|정발행|역발행|-)$/;
+  const out = [];
+
+  rows.forEach(cells => {
+    const joined = cells.join(' ');
+    const dtCell = cells.find(c => normalizeHtxDate(c));
+    const dt = normalizeHtxDate(dtCell);
+    if(!dt) return;
+    const apv = (cells.find(c => /^20\d{22}$/.test(c.replace(/-/g,''))) || '').replace(/\s+/g,'');
+    const bizList = cells.map(c => c.replace(/[^0-9]/g,'')).filter(d => d.length === 10);
+    const otherBiz = bizList.find(d => d !== myBiz) || bizList[0] || '';
+    const hasMyBiz = bizList.includes(myBiz);
+    const isPur = (hasMyBiz && bizList.indexOf(myBiz) > 0) || (HTX_DEFAULT_KIND === '매입' && !(hasMyBiz && bizList.indexOf(myBiz) === 0));
+
+    const nums = [];
+    cells.forEach(c => {
+      const clean = c.trim();
+      if(/^-?[\d,]+원?$/.test(clean) || /^\([\d,]+\)$/.test(clean)){
+        const v = parseHtxNum(clean);
+        if(Math.abs(v) >= 100 && clean.replace(/[^0-9]/g,'').length <= 12) nums.push(v);
+      }
+    });
+    if(!nums.length) return;
+    let sup = 0, vat = 0;
+    for(let i = 0; i < nums.length; i++){
+      for(let j = i + 1; j < nums.length; j++){
+        const a = nums[i], b = nums[j], c = nums[j+1];
+        if(c !== undefined && Math.abs(a - (b + c)) <= 5 && Math.abs(b) >= Math.abs(c)){ sup = b; vat = c; break; }
+        if(c !== undefined && Math.abs(c - (a + b)) <= 5 && Math.abs(a) >= Math.abs(b)){ sup = a; vat = b; break; }
+      }
+      if(sup) break;
+    }
+    if(!sup){
+      if(nums.length >= 2 && Math.abs(nums[1] - Math.round(nums[0] * 0.1)) <= 10){ sup = nums[0]; vat = nums[1]; }
+      else if(nums.length >= 2 && Math.abs(nums[0] - (nums[1] + (nums[2]||0))) <= 10){ sup = nums[1]; vat = nums[2]||0; }
+      else { sup = Math.max(...nums.map(Math.abs)); vat = 0; }
+    }
+    const payType = joined.includes('청구') ? '청구' : '영수';
+    const textCandidates = cells.filter(c => {
+      const t = c.trim();
+      if(!t || t.length < 2) return false;
+      if(normalizeHtxDate(t) || /^[\d,\-.\s원()]+$/.test(t) || noiseRx.test(t)) return false;
+      if(t.replace(/[^0-9]/g,'').length === 10 || t.replace(/[^0-9]/g,'').length === 24) return false;
+      if(normSearch(t) === myCorpNorm) return false;
+      return /[가-힣a-zA-Z]/.test(t);
+    });
+    const client = textCandidates[0] || (isPur ? '매입처' : '매출처');
+    const itemName = textCandidates.find((t, idx) => idx > 0 && t.length <= 60) || (isPur ? '매입물품' : '매출물품');
+
+    out.push(makeStagingEntry({
+      kind: isPur ? '매입' : '매출',
+      date: dt,
+      apv,
+      client,
+      bizNo: otherBiz,
+      payType,
+      supply: sup,
+      vat,
+      sourceLabel: '표복사',
+      lines: [{ item: itemName, spec: '', qty: 1, price: sup, sup, vat }]
+    }, existKeys));
+  });
+  if(out.length) return out;
+
+  // 3) Single detail-popup vertical copy fallback
+  const dtM = text.match(/작성일자[^\n\d]*(20\d{2}[.\-/]\d{1,2}[.\-/]\d{1,2}|20\d{6})/);
+  const supM = text.match(/공급가액[^\n\d\-]*([\-\d,]+)/);
+  if(dtM && supM){
+    const dt = normalizeHtxDate(dtM[1]);
+    const sup = parseHtxNum(supM[1]);
+    const vatM = text.match(/(?:세액|부가세)[^\n\d\-]*([\-\d,]+)/);
+    const vat = vatM ? parseHtxNum(vatM[1]) : Math.round(sup * 0.1);
+    const apvM = text.match(/승인번호[^\n\d]*(20\d{20,24}|\d{8}-\d{8}-\d{8})/);
+    const bizMatches = [...text.matchAll(/\b(\d{3}-\d{2}-\d{5})\b/g)].map(m => m[1]);
+    const otherBiz = bizMatches.find(b => b.replace(/[^0-9]/g,'') !== myBiz) || '';
+    const isPur = bizMatches.length >= 2 && bizMatches[1].replace(/[^0-9]/g,'') === myBiz;
+    const clientM = text.match(/(?:상호|법인명)[^\n:]*[:\t ]+([^\t\n]+)/g) || [];
+    const parsedNames = clientM.map(s => normItemStr(s.replace(/^(?:상호|법인명)\s*[:\t ]*/,''))).filter(n => n && normSearch(n) !== myCorpNorm);
+    const itmM = text.match(/(?:품목명|품명)[^\n:]*[:\t ]+([^\t\n]+)/);
+    return [makeStagingEntry({
+      kind: isPur ? '매입' : '매출',
+      date: dt,
+      apv: apvM ? apvM[1].replace(/[^0-9]/g,'') : '',
+      client: parsedNames[0] || (isPur ? '매입처' : '매출처'),
+      bizNo: otherBiz,
+      payType: text.includes('청구') ? '청구' : '영수',
+      supply: sup,
+      vat,
+      sourceLabel: '상세복사',
+      lines: [{ item: itmM ? normItemStr(itmM[1]) : '기계장비', spec: '', qty: 1, price: sup, sup, vat }]
+    }, existKeys)];
+  }
+  return [];
+}
+
+async function parseTaxInvoiceWithAiClientOrServer({ text = '', imageBase64 = '', mimeType = '' }){
+  const myBizNo = (db.comp && db.comp.bizNo) || '104-05-66181';
+  const base = getHtxApiBase();
+  let serverErr = '';
+  try{
+    const res = await fetch(`${base}/api/erp/parse-tax-invoice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, imageBase64, mimeType, myBizNo })
+    });
+    const d = await res.json().catch(() => ({}));
+    if(res.ok && d && d.ok && Array.isArray(d.invoices)) return d.invoices;
+    serverErr = (d && d.error) || `HTTP ${res.status}`;
+  }catch(e){ serverErr = e.message; }
+
+  const gemKey = typeof getGeminiApiKey === 'function' ? getGeminiApiKey() : '';
+  if(gemKey){
+    const parts = [{ text: `국세청 전자(세금)계산서에서 날짜/구분(매출·매입)/거래처/사업자번호/공급가액/세액/영수청구/품목을 JSON {"invoices":[{"kind":"매출","date":"YYYY-MM-DD","apv":"","client":"","bizNo":"","ceo":"","addr":"","email":"","payType":"영수","supply":0,"vat":0,"memo":"","items":[{"item":"","spec":"","qty":1,"price":0,"sup":0,"vat":0}]}]} 으로만 추출하세요. 우리사업자:${myBizNo}\n${text||''}` }];
+    if(imageBase64 && mimeType) parts.push({ inlineData: { mimeType, data: imageBase64 } });
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CARBON_MODEL}:generateContent?key=${encodeURIComponent(gemKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gemKey },
+      body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } })
+    });
+    const d = await res.json();
+    const parsed = parseCarbonJson(d);
+    if(parsed && Array.isArray(parsed.invoices)) return parsed.invoices;
+  }
+  throw new Error(serverErr || 'AI 크레딧/API 키 확인 필요');
+}
+
+window.openHometaxImportModal = function(defKind){
+  HTX_DEFAULT_KIND = defKind === '매입' || defKind === '매출' ? defKind : 'AUTO';
+  const m = $('hometaxImportModal');
+  if(m) m.style.display = 'flex';
+  renderHometaxPreview();
+  setTimeout(() => { if($('htxPasteInput')) $('htxPasteInput').focus(); }, 80);
+};
+window.handleHometaxBoxPaste = function(ev){
+  const clip = ev && ev.clipboardData;
+  if(clip && clip.items){
+    for(let i = 0; i < clip.items.length; i++){
+      const it = clip.items[i];
+      if(it.type && it.type.startsWith('image/')){
+        ev.preventDefault();
+        const blob = it.getAsFile();
+        if(blob) handleHometaxInputs({ files: [blob] });
+        return;
+      }
+    }
+  }
+  setTimeout(() => {
+    const val = $('htxPasteInput') ? $('htxPasteInput').value : '';
+    if(val && val.trim().length > 8) handleHometaxInputs({ text: val, useAiIfNeeded: false });
+  }, 60);
+};
+window.clearHtxPreview = function(){
+  HTX_STAGING = [];
+  if($('htxPasteInput')) $('htxPasteInput').value = '';
+  if($('htxParseStatus')) $('htxParseStatus').innerText = '대기 중';
+  renderHometaxPreview();
+};
+window.toggleHtxPreviewChecks = function(checked, nonDupOnly){
+  HTX_STAGING.forEach(item => {
+    item.checked = nonDupOnly ? (!item.dupReason) : Boolean(checked);
+  });
+  renderHometaxPreview();
+};
+window.renderHometaxPreview = function(){
+  const tb = $('htxPreviewTb');
+  const stEl = $('htxPreviewStats');
+  const btn = $('htxCommitBtn');
+  if(!tb) return;
+  if(!HTX_STAGING.length){
+    tb.innerHTML = '<tr><td colspan="10" class="c" style="padding:26px;color:#64748b">아직 불러온 내역이 없습니다. 위 <b>파일 올리기</b> 또는 <b>홈택스 표 복사·붙여넣기(Ctrl+V)</b>를 이용해 보세요!</td></tr>';
+    if(stEl) stEl.innerText = '가져올 세금계산서를 위에서 선택하거나 붙여넣으세요.';
+    if(btn) btn.innerText = '✅ 선택한 전표 ERP에 일괄 등록하기';
+    return;
+  }
+  const payMode = $('htxPayMode') ? $('htxPayMode').value : 'AUTO';
+  let selCnt = 0, sumTot = 0, dupCnt = 0;
+  tb.innerHTML = HTX_STAGING.map((it, idx) => {
+    if(it.checked){ selCnt++; sumTot += (Number(it.supply)||0) + (Number(it.vat)||0); }
+    if(it.dupReason) dupCnt++;
+    const effectivePay = payMode === 'PAID' ? '완납' : (payMode === 'UNPAID' ? '미수' : it.payType);
+    const l0 = (it.lines && it.lines[0]) || {};
+    const qtySum = (it.lines || []).reduce((a, b) => a + (Number(b.qty)||1), 0);
+    const itemDesc = it.lines && it.lines.length > 1
+      ? `${esc(l0.item)} 외 ${it.lines.length - 1}건`
+      : `${esc(l0.item || '물품')}${l0.spec && l0.spec !== l0.item ? ' (' + esc(l0.spec) + ')' : ''}`;
+    return `<tr style="${it.dupReason ? 'background:#fffbeb;' : ''}">
+      <td class="c"><input type="checkbox" ${it.checked?'checked':''} onchange="HTX_STAGING[${idx}].checked=this.checked;renderHometaxPreview()"></td>
+      <td class="c">
+        <select style="padding:2px 4px;font-size:11.5px;font-weight:900;color:${it.kind==='매입'?'#7c3aed':'#1d4ed8'}" onchange="HTX_STAGING[${idx}].kind=this.value;HTX_STAGING[${idx}].dupReason=computeHtxDupFlag(HTX_STAGING[${idx}],buildHtxExistKeyMap());renderHometaxPreview()">
+          <option value="매출" ${it.kind==='매출'?'selected':''}>매출</option>
+          <option value="매입" ${it.kind==='매입'?'selected':''}>매입</option>
+        </select>
+      </td>
+      <td class="c">${esc(it.date)}</td>
+      <td><b>${esc(it.client)}</b> <span style="font-size:10.5px;color:${it.cliMatched?'#059669':'#0284c7'}">${it.cliMatched?'✓기존':'+신규'}</span>${it.bizNo ? '<div style="font-size:10px;color:#64748b">'+esc(it.bizNo)+'</div>' : ''}</td>
+      <td>${itemDesc}</td>
+      <td class="r">${fmt(qtySum)}</td>
+      <td class="r b">${fmt(it.supply)}</td>
+      <td class="r">${fmt(it.vat)}</td>
+      <td class="c">
+        <select style="padding:2px 4px;font-size:11px" onchange="HTX_STAGING[${idx}].payType=this.value;renderHometaxPreview()">
+          <option value="영수" ${it.payType==='영수'?'selected':''}>영수(완납)</option>
+          <option value="청구" ${it.payType==='청구'?'selected':''}>청구(미수)</option>
+        </select>
+        <div style="font-size:10px;color:${effectivePay==='청구'||effectivePay==='미수'?'#dc2626':'#059669'};font-weight:800">➔ ${effectivePay}</div>
+      </td>
+      <td class="c">${it.dupReason ? `<span class="bg bg-y">${esc(it.dupReason)}</span>` : `<span class="bg bg-g">신규 (${esc(it.sourceLabel)})</span>`}</td>
+    </tr>`;
+  }).join('');
+  if(stEl) stEl.innerHTML = `총 <b>${HTX_STAGING.length}건</b> 분석 · 선택 <b style="color:#059669">${selCnt}건</b> (합계 <b>${fmt(sumTot)}원</b>${dupCnt?` · 중복 ${dupCnt}건 자동제외`:''})`;
+  if(btn) btn.innerText = `✅ 선택한 ${selCnt}건 ERP에 일괄 등록하기`;
+};
+
+window.handleHometaxInputs = async function({ files = null, text = '', useAiIfNeeded = true, forceAi = false } = {}){
+  if(isImportingHtx) return;
+  isImportingHtx = true;
+  const stEl = $('htxParseStatus');
+  const setStatus = msg => { if(stEl) stEl.innerText = msg; };
+  try{
+    const existKeys = buildHtxExistKeyMap();
+    const added = [];
+    const fileArr = files ? Array.from(files) : [];
+
+    for(let f = 0; f < fileArr.length; f++){
+      const file = fileArr[f];
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      setStatus(`⏳ 분석 중 (${f+1}/${fileArr.length}): ${file.name}`);
+
+      if(ext === 'json'){
         try{
-          var wb = XLSX.read(buf, {type:'array'});
-          wb.SheetNames.forEach(function(sn){
-            var arr = XLSX.utils.sheet_to_json(wb.Sheets[sn], {header:1, defval:''});
+          const raw = await file.text();
+          const parsed = JSON.parse(raw);
+          if(parsed && (parsed.sales || parsed.clients)){
+            if(confirm(`📂 [${file.name}] 은(는) 오라테크 ERP 전체 백업파일입니다.\n이 백업파일로 장부를 복원하시겠습니까?`)){
+              db = parsed; normDB(); setPeriod('all'); saveDB('JSON복원'); renderAll();
+              closeModal('hometaxImportModal');
+              alert('✅ JSON 백업 복원이 완료되었습니다!');
+            }
+            continue;
+          }
+        }catch(_){}
+      }
+
+      if(ext === 'xml'){
+        const xmlStr = await file.text();
+        added.push(...parseHometaxXmlText(xmlStr, existKeys));
+        continue;
+      }
+
+      if(['pdf','png','jpg','jpeg','webp'].includes(ext) || (file.type && (file.type.startsWith('image/') || file.type === 'application/pdf'))){
+        try{
+          const b64 = await new Promise((res, rej) => {
+            const rd = new FileReader();
+            rd.onload = () => res(String(rd.result || '').split(',')[1] || '');
+            rd.onerror = rej;
+            rd.readAsDataURL(file);
+          });
+          const mimeType = file.type || (ext === 'pdf' ? 'application/pdf' : 'image/png');
+          const aiRows = await parseTaxInvoiceWithAiClientOrServer({ imageBase64: b64, mimeType });
+          aiRows.forEach(r => added.push(makeStagingEntry({ ...r, sourceLabel: 'AI추출', lines: r.items || r.lines }, existKeys)));
+        }catch(err){
+          alert(`⚠️ [${file.name}] PDF/사진 AI 해독 안내:\n${err.message}\n\n💡 팁: 이미지·PDF AI 해독은 Gemini API 크레딧이 필요합니다.\n국세청 홈택스 화면에서 표를 드래그해 Ctrl+C → 붙여넣기 하시거나 엑셀(.xls)·XML 파일은 API 비용 0원으로 즉시 등록됩니다!`);
+        }
+        continue;
+      }
+
+      // Excel (.xls, .xlsx) / CSV / TSV / HTML-table .xls
+      const buf = await file.arrayBuffer();
+      const forceKind = file.name.includes('매입') ? '매입' : (file.name.includes('매출') ? '매출' : '');
+      let headTxt = new TextDecoder('utf-8').decode(buf.slice(0, Math.min(buf.byteLength, 20000)));
+      if(headTxt.includes('\uFFFD')) headTxt = new TextDecoder('euc-kr').decode(buf.slice(0, Math.min(buf.byteLength, 20000)));
+
+      if(/^\s*<(?:!doctype|html|meta|table)/i.test(headTxt)){
+        let fullHtml = new TextDecoder('utf-8').decode(buf);
+        if(fullHtml.includes('\uFFFD') || /charset\s*=\s*(euc-kr|ks_c_5601)/i.test(fullHtml)){
+          const decKr = new TextDecoder('euc-kr').decode(buf);
+          if(!decKr.includes('\uFFFD')) fullHtml = decKr;
+        }
+        const grids = extractHtmlTableRowsHtx(fullHtml);
+        grids.forEach(g => added.push(...parseHometaxSheetRows(g, {}, existKeys, forceKind)));
+        continue;
+      }
+
+      const invSheets = [], itmSheets = [];
+      if(typeof XLSX !== 'undefined' && ['xls','xlsx','xlsm','xlsb'].includes(ext)){
+        try{
+          const wb = XLSX.read(buf, { type: 'array' });
+          wb.SheetNames.forEach(sn => {
+            const ws = wb.Sheets[sn];
+            const arr = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false, dateNF: 'yyyy-mm-dd' });
             if(!arr || !arr.length) return;
-            for(var r=0; r<Math.min(arr.length, 15); r++){
-              var jn = (arr[r]||[]).join('|').replace(/\s+/g,'');
-              if(jn.indexOf('작성일자')!==-1 && (jn.indexOf('승인번호')!==-1 || jn.indexOf('공급가액')!==-1)){ invSheets.push(arr); break; }
-              else if(jn.indexOf('품목순번')!==-1 && jn.indexOf('승인번호')!==-1){ itmSheets.push(arr); break; }
+            expandSheetMergesHtx(ws, arr);
+            for(let r = 0; r < Math.min(arr.length, 20); r++){
+              const jn = (arr[r] || []).join('|').replace(/\s+/g, '');
+              if(jn.includes('품목순번') && jn.includes('승인번호')){ itmSheets.push(arr); break; }
+              if((jn.includes('작성일자') || jn.includes('작성일') || jn.includes('발급일자')) && (jn.includes('승인번호') || jn.includes('공급가액') || jn.includes('합계금액'))){
+                invSheets.push(arr); break;
+              }
             }
           });
-        }catch(e){}
+        }catch(_){}
       }
       if(!invSheets.length){
-        var txt = new TextDecoder('utf-8').decode(buf);
-        if(txt.indexOf('\uFFFD') !== -1) txt = new TextDecoder('euc-kr').decode(buf);
-        var rows = [];
-        txt.replace(/\r/g,'').split('\n').forEach(function(l){
-          if(l.trim()) rows.push(l.split(l.indexOf('\t')!==-1?'\t':',').map(function(x){ return x.trim().replace(/^"|"$/g,''); }));
-        });
+        let txt = new TextDecoder('utf-8').decode(buf);
+        if(txt.includes('\uFFFD')) txt = new TextDecoder('euc-kr').decode(buf);
+        if(txt.includes('<TaxInvoice')){
+          added.push(...parseHometaxXmlText(txt, existKeys));
+          continue;
+        }
+        const rawLines = txt.replace(/\r/g,'').split('\n').filter(l => l.trim());
+        const dlm = txt.includes('\t') ? '\t' : ',';
+        const rows = rawLines.map(l => parseCsvLineHtx(l, dlm));
         if(rows.length) invSheets.push(rows);
       }
 
-      var itemsByApv = {};
-      itmSheets.forEach(function(rows){
-        var hIdx = -1, hasVatCol = false;
-        for(var i=0; i<Math.min(rows.length, 15); i++){
-          var jn = (rows[i]||[]).join('|');
-          if(jn.indexOf('품목순번') !== -1){
+      const itemsByApv = {};
+      itmSheets.forEach(rows => {
+        let hIdx = -1, hasVatCol = false;
+        const cMap = { apv:0, name:5, spec:6, qty:7, prc:8, sup:9, vat:10 };
+        for(let i = 0; i < Math.min(rows.length, 15); i++){
+          const jn = (rows[i] || []).join('|').replace(/\s+/g,'');
+          if(jn.includes('품목순번')){
             hIdx = i;
-            hasVatCol = (jn.indexOf('세액') !== -1 || jn.indexOf('부가세') !== -1);
+            hasVatCol = jn.includes('세액') || jn.includes('부가세');
+            rows[i].forEach((h, c) => {
+              const k = String(h||'').replace(/\s+/g,'');
+              if(k.includes('승인번호')) cMap.apv = c;
+              else if(k === '품목명' || k === '품명') cMap.name = c;
+              else if(k === '규격' || k === '품목규격') cMap.spec = c;
+              else if(k === '수량' || k === '품목수량') cMap.qty = c;
+              else if(k === '단가' || k === '품목단가') cMap.prc = c;
+              else if(k === '공급가액') cMap.sup = c;
+              else if(k === '세액' || k === '부가세') cMap.vat = c;
+            });
             break;
           }
         }
         if(hIdx === -1) return;
-        for(var r=hIdx+1; r<rows.length; r++){
-          var row = rows[r]; if(!row || row.length < 6) continue;
-          var apv = String(row[0]||'').trim(); if(!apv) continue;
-          var iName = normItemStr(row[5]||'물품'), spec = normItemStr(row[6]||'').toUpperCase();
-          var qty = Number(String(row[7]||'1').replace(/[^0-9.-]/g,'')) || 1;
-          var prc = Number(String(row[8]||'0').replace(/[^0-9.-]/g,'')) || 0;
-          var sup = Number(String(row[9]||'0').replace(/[^0-9.-]/g,'')) || 0;
-          var vat = hasVatCol ? (Number(String(row[10]||'0').replace(/[^0-9.-]/g,'')) || 0) : 0;
+        for(let r = hIdx + 1; r < rows.length; r++){
+          const row = rows[r]; if(!row || row.length < 6) continue;
+          const apv = normItemStr(row[cMap.apv] || ''); if(!apv) continue;
+          const iName = normItemStr(row[cMap.name] || '물품');
+          const spec = normItemStr(row[cMap.spec] || '').toUpperCase();
+          const qty = parseHtxNum(row[cMap.qty]) || 1;
+          let prc = parseHtxNum(row[cMap.prc]);
+          const sup = parseHtxNum(row[cMap.sup]);
+          const vat = hasVatCol ? parseHtxNum(row[cMap.vat]) : 0;
           if(prc === 0 && qty !== 0) prc = Math.round(sup / qty);
           if(!itemsByApv[apv]) itemsByApv[apv] = [];
-          itemsByApv[apv].push({item:iName, spec:spec, qty:qty, price:prc, sup:sup, supply:sup, vat:vat, total:sup+vat, uCost:Math.round(prc*0.75), profit:sup-Math.round(sup*0.75)});
+          itemsByApv[apv].push({ item: iName, spec, qty, price: prc, sup, vat });
         }
       });
 
-      invSheets.forEach(function(rows){
-        var res = parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur);
-        sAdd += res.s; pAdd += res.p; cAdd += res.c; dupSkip += res.d;
-      });
+      invSheets.forEach(rows => added.push(...parseHometaxSheetRows(rows, itemsByApv, existKeys, forceKind)));
     }
-    dedupAllData(false);
-    setPeriod('all');
-    saveDB('홈택스일괄등록');
-    renderAll();
-    hideSyncProgress();
-    alert('🏛️ [국세청 홈택스 ' + files.length + '개 파일 등록 완료!]\n\n'
-      + '• 신규 매출전표 등록: ' + fmt(sAdd) + '건\n'
-      + '• 신규 매입전표 등록: ' + fmt(pAdd) + '건\n'
-      + '• 신규 거래처 자동등록: ' + fmt(cAdd) + '곳\n'
-      + '• 중복 자동 건너뜀: ' + fmt(dupSkip) + '건');
+
+    if(text && text.trim()){
+      const cleanTxt = text.trim();
+      let parsedTextRows = forceAi ? [] : parseHometaxPastedText(cleanTxt, existKeys);
+      if(!parsedTextRows.length && (useAiIfNeeded || forceAi)){
+        setStatus('⏳ AI가 텍스트 분석 중...');
+        try{
+          const aiRows = await parseTaxInvoiceWithAiClientOrServer({ text: cleanTxt });
+          parsedTextRows = aiRows.map(r => makeStagingEntry({ ...r, sourceLabel: 'AI추출', lines: r.items || r.lines }, existKeys));
+        }catch(err){
+          alert('⚠️ AI 해독 안내: ' + err.message);
+        }
+      }
+      added.push(...parsedTextRows);
+    }
+
+    if(added.length){
+      HTX_STAGING = HTX_STAGING.concat(added);
+      setStatus(`✅ ${added.length}건 추출 완료 (아래 표에서 확인 후 등록하세요)`);
+      renderHometaxPreview();
+    } else if(fileArr.length || (text && text.trim())){
+      setStatus('⚠️ 세금계산서 행을 찾지 못했습니다 (날짜·금액 포함 여부 확인)');
+    }
   }finally{
-    hideSyncProgress();
     isImportingHtx = false;
   }
 };
 
-function parseHometaxSheetV35(rows, itemsByApv, existKeys, fileForcePur){
-  var hIdx = -1, sheetIsPur = fileForcePur;
-  var col = {dt:0, apv:1, sBiz:4, sName:6, sCeo:7, sAddr:8, bBiz:9, bName:11, bCeo:12, bAddr:13, tot:14, sup:-1, vat:-1, memo:-1, pay:-1, sEm:-1, bEm:-1, itm:-1, spec:-1, qty:-1, prc:-1};
+window.commitHometaxPreview = function(){
+  const selected = HTX_STAGING.filter(x => x.checked);
+  if(!selected.length){ alert('등록할 전표를 최소 1건 이상 체크해 주세요!'); return; }
+  const payMode = $('htxPayMode') ? $('htxPayMode').value : 'AUTO';
+  const existKeys = buildHtxExistKeyMap();
+  let sAdd = 0, pAdd = 0, cAdd = 0, dupSkip = 0;
 
-  for(var i=0; i<Math.min(rows.length, 20); i++){
-    var rowTxt = (rows[i]||[]).join('|').replace(/\s+/g,'');
-    if(rowTxt.indexOf('매입전자') !== -1 || rowTxt.indexOf('매입세금') !== -1 || rowTxt.indexOf('매입계산서') !== -1) sheetIsPur = true;
-    if(rowTxt.indexOf('작성일자') !== -1 && (rowTxt.indexOf('공급가액') !== -1 || rowTxt.indexOf('합계금액') !== -1)){
-      hIdx = i;
-      rows[i].forEach(function(h, c){
-        var k = String(h||'').replace(/\s+/g,'');
-        if(k === '작성일자') col.dt = c;
-        else if(k === '승인번호') col.apv = c;
-        else if(k.indexOf('공급자사업자') !== -1 || k.indexOf('공급자등록번호') !== -1) col.sBiz = c;
-        else if(k.indexOf('공급받는자사업자') !== -1 || k.indexOf('공급받는자등록번호') !== -1) col.bBiz = c;
-        else if(k === '합계금액') col.tot = c;
-        else if(k === '공급가액' && col.sup === -1) col.sup = c;
-        else if((k === '세액' || k === '부가세') && col.vat === -1) col.vat = c;
-        else if(k === '비고' && col.memo === -1) col.memo = c;
-        else if(k.indexOf('영수/청구') !== -1) col.pay = c;
-        else if(k.indexOf('공급자이메일') !== -1) col.sEm = c;
-        else if(k.indexOf('공급받는자이메일1') !== -1 || (col.bEm === -1 && k.indexOf('공급받는자이메일') !== -1)) col.bEm = c;
-        else if(k === '품목명' || k === '대표품목명') col.itm = c;
-        else if(k === '품목규격' || k === '규격') col.spec = c;
-        else if(k === '품목수량' || k === '수량') col.qty = c;
-        else if(k === '품목단가' || k === '단가') col.prc = c;
-      });
-      if(col.sup === -1) col.sup = 15;
-      col.sName = col.sBiz + 2; col.sCeo = col.sBiz + 3; col.sAddr = col.sBiz + 4;
-      col.bName = col.bBiz + 2; col.bCeo = col.bBiz + 3; col.bAddr = col.bBiz + 4;
-      break;
-    }
-  }
-  if(hIdx === -1) return {s:0, p:0, c:0, d:0};
+  selected.forEach((it, idx) => {
+    const isPur = it.kind === '매입';
+    const targetType = isPur ? '매입처' : '매출처';
+    const myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
+    const cBizDigits = (it.bizNo || '').replace(/[^0-9]/g,'');
+    const usableBiz = cBizDigits && cBizDigits !== myBiz ? it.bizNo : '';
 
-  var myBiz = ((db.comp && db.comp.bizNo) ? db.comp.bizNo : '104-05-66181').replace(/[^0-9]/g,'');
-  var sAdd = 0, pAdd = 0, cAdd = 0, dup = 0;
-
-  for(var r=hIdx+1; r<rows.length; r++){
-    var row = rows[r]; if(!row || row.length < 12) continue;
-    var rawDt = String(row[col.dt]||'').replace(/[^0-9]/g,'');
-    if(rawDt.length !== 8) continue;
-    var dt = rawDt.slice(0,4) + '-' + rawDt.slice(4,6) + '-' + rawDt.slice(6,8);
-    var sup = Number(String(row[col.sup]||'0').replace(/[^0-9.-]/g,'')) || 0;
-    var vat = col.vat !== -1 ? (Number(String(row[col.vat]||'0').replace(/[^0-9.-]/g,'')) || 0) : 0;
-    if(sup === 0 && vat === 0) continue;
-
-    var sB = String(row[col.sBiz]||'').replace(/[^0-9]/g,'');
-    var bB = String(row[col.bBiz]||'').replace(/[^0-9]/g,'');
-    var isPur = sheetIsPur || (bB === myBiz && sB !== myBiz);
-
-    var rawBiz = isPur ? sB : (bB || sB);
-    var fmtBiz = rawBiz.length === 10 ? (rawBiz.slice(0,3)+'-'+rawBiz.slice(3,5)+'-'+rawBiz.slice(5)) : String(isPur ? row[col.sBiz] : row[col.bBiz]).trim();
-    var cName = String(isPur ? (row[col.sName]||'매입처') : (row[col.bName]||'매출처')).trim();
-    var cCeo  = String(isPur ? (row[col.sCeo]||'') : (row[col.bCeo]||'')).trim();
-    var cAddr = String(isPur ? (row[col.sAddr]||'') : (row[col.bAddr]||'')).trim();
-    var cEm   = String(isPur ? (col.sEm!==-1?row[col.sEm]:'') : (col.bEm!==-1?row[col.bEm]:'')).trim();
-    var apv   = String(row[col.apv]||'').trim();
-
-    var exCli = db.clients.find(function(x){ return (fmtBiz && x.bizNo === fmtBiz) || normSearch(x.name) === normSearch(cName); });
-    var targetType = isPur ? '매입처' : '매출처';
-    if(!exCli){
+    let cName = it.client;
+    const exCli = (db.clients || []).find(x => (usableBiz && x.bizNo === usableBiz) || normSearch(x.name) === normSearch(cName));
+    if(!exCli && cName){
       db.clients.push({
-        id: Date.now() + r + Math.random(),
+        id: Date.now() + idx + Math.random(),
         code: 'C-' + String(db.clients.length + 1).padStart(3,'0'),
-        type: targetType, name: cName, bizNo: fmtBiz, ceo: cCeo,
-        bizType: '', bizItem: '', tel: '', email: cEm, addr: cAddr,
+        type: targetType, name: cName, bizNo: usableBiz, ceo: it.ceo || '',
+        bizType: '', bizItem: '', tel: '', email: it.email || '', addr: it.addr || '',
         initAr: 0, initAp: 0, initUnpaid: 0, initPayable: 0, memo: ''
       });
       cAdd++;
-    } else {
+    } else if(exCli){
       cName = exCli.name;
       if(exCli.type && exCli.type !== targetType && exCli.type !== '겸용') exCli.type = '겸용';
-      if(!exCli.bizNo && fmtBiz) exCli.bizNo = fmtBiz;
-      if(!exCli.ceo && cCeo) exCli.ceo = cCeo;
-      if(!exCli.addr && cAddr) exCli.addr = cAddr;
-      if(!exCli.email && cEm) exCli.email = cEm;
+      if(!exCli.bizNo && usableBiz) exCli.bizNo = usableBiz;
+      if(!exCli.ceo && it.ceo) exCli.ceo = it.ceo;
+      if(!exCli.addr && it.addr) exCli.addr = it.addr;
+      if(!exCli.email && it.email) exCli.email = it.email;
     }
 
-    var lines = itemsByApv[apv];
-    if(!lines || !lines.length){
-      var itm = normItemStr(col.itm !== -1 && row[col.itm] ? row[col.itm] : (isPur ? '매입물품' : '매출물품'));
-      var spec = normItemStr(col.spec !== -1 && row[col.spec] ? row[col.spec] : '').toUpperCase();
-      var qty = col.qty !== -1 ? (Number(String(row[col.qty]||'1').replace(/[^0-9.-]/g,'')) || 1) : 1;
-      var prc = col.prc !== -1 ? (Number(String(row[col.prc]||'0').replace(/[^0-9.-]/g,'')) || Math.round(sup/qty)) : Math.round(sup/qty);
-      lines = [{item:itm, spec:spec, qty:qty, price:prc, sup:sup, supply:sup, vat:vat, total:sup+vat, uCost:Math.round(prc*0.75), profit:sup-Math.round(sup*0.75)}];
-    }
+    ensureClientAndItems(cName, targetType, it.lines.map(l => ({ item: l.item, spec: l.spec, price: l.price, uCost: l.uCost })), isPur);
 
-    lines.forEach(function(l){
-      var matched = matchStandardItem(l.item, l.spec, l.price);
-      if(matched) l.item = matched;
-    });
-
-    ensureClientAndItems(cName, targetType, lines.map(function(l){ return {item:l.item, spec:l.spec, price:l.price}; }), isPur);
-
-    var tot = sup + vat;
-    var memoTxt = col.memo !== -1 ? String(row[col.memo]||'').trim() : '';
+    const sup = Math.round(Number(it.supply) || 0);
+    const vat = Math.round(Number(it.vat) || 0);
+    const tot = sup + vat;
+    const isPaid = payMode === 'PAID' ? true : (payMode === 'UNPAID' ? false : it.payType !== '청구');
+    const paidAmt = isPaid ? tot : 0;
 
     if(isPur){
-      var pLines = lines.map(function(l){
-        return {item:l.item, spec:l.spec||'', qty:l.qty, price:l.price, krwAmt:l.supply||l.sup||sup, incAmt:0, uCost:l.price, unitForeign:l.price, foreignAmt:l.supply||l.sup||sup, krwBase:l.supply||l.sup||sup, extraAlloc:0, totalCost:l.supply||l.sup||sup, unitCost:l.price};
-      });
-      var newP = {
-        id: Date.now() + r + Math.random(), htxKey: apv, date: dt,
+      const pLines = it.lines.map(l => ({
+        item: l.item, spec: l.spec || '', qty: l.qty, price: l.price,
+        krwAmt: l.supply || l.sup || sup, incAmt: 0, uCost: l.price,
+        unitForeign: l.price, foreignAmt: l.supply || l.sup || sup,
+        krwBase: l.supply || l.sup || sup, extraAlloc: 0, totalCost: l.supply || l.sup || sup, unitCost: l.price
+      }));
+      const newP = {
+        id: Date.now() + idx + Math.random(), htxKey: it.apv, date: it.date,
         type: '국내매입', client: cName, currency: 'KRW', rate: 1, custom: 0, freight: 0,
-        goodsKrw: sup, totalCost: sup, vat: vat, total: tot, paid: tot, payable: 0, memo: memoTxt, lines: pLines
+        goodsKrw: sup, totalCost: sup, vat, total: tot, paid: paidAmt, payable: tot - paidAmt,
+        memo: it.memo || '', lines: pLines
       };
-      var pFp = getPurFp(newP);
-      if(existKeys['FP_P_' + pFp] || (apv && existKeys['APV_P_' + apv])){ dup++; continue; }
-      existKeys['FP_P_' + pFp] = true; if(apv) existKeys['APV_P_' + apv] = true;
+      const fp = getPurFp(newP);
+      if(existKeys['FP_P_' + fp] || (it.apv && existKeys['APV_P_' + it.apv])){ dupSkip++; return; }
+      existKeys['FP_P_' + fp] = true; if(it.apv) existKeys['APV_P_' + it.apv] = true;
       db.purchases.push(newP);
+      it.lines.forEach(l => recordPriceMem(db.purPriceMem, cName, l.item, l.price, it.date));
       pAdd++;
     } else {
-      var pf = lines.reduce(function(a,b){ return a + (b.profit||0); }, 0);
-      var newS = {
-        id: Date.now() + r + Math.random(), htxKey: apv, date: dt,
-        client: cName, vatType: vat===0 ? 'zero' : 'tax', payMethod: '계좌이체', memo: memoTxt,
-        supply: sup, vat: vat, total: tot, paid: tot, unpaid: 0, profit: pf, lines: lines
+      const pf = it.lines.reduce((a, b) => a + (b.profit || 0), 0);
+      const newS = {
+        id: Date.now() + idx + Math.random(), htxKey: it.apv, date: it.date,
+        client: cName, vatType: vat === 0 ? 'zero' : 'tax', payMethod: isPaid ? '계좌이체' : '외상(청구)',
+        memo: it.memo || '', supply: sup, vat, total: tot, paid: paidAmt, unpaid: tot - paidAmt,
+        profit: pf, lines: it.lines
       };
-      var sFp = getSaleFp(newS);
-      if(existKeys['FP_S_' + sFp] || (apv && existKeys['APV_S_' + apv])){ dup++; continue; }
-      existKeys['FP_S_' + sFp] = true; if(apv) existKeys['APV_S_' + apv] = true;
+      const fp = getSaleFp(newS);
+      if(existKeys['FP_S_' + fp] || (it.apv && existKeys['APV_S_' + it.apv])){ dupSkip++; return; }
+      existKeys['FP_S_' + fp] = true; if(it.apv) existKeys['APV_S_' + it.apv] = true;
       db.sales.push(newS);
+      it.lines.forEach(l => recordPriceMem(db.priceMem, cName, l.item, l.price, it.date));
       sAdd++;
     }
-  }
-  return {s:sAdd, p:pAdd, c:cAdd, d:dup};
-}
+  });
+
+  dedupAllData(false);
+  setPeriod('all');
+  saveDB('홈택스일괄등록');
+  renderAll();
+  HTX_STAGING = HTX_STAGING.filter(x => !x.checked);
+  if($('htxPasteInput')) $('htxPasteInput').value = '';
+  renderHometaxPreview();
+  if(!HTX_STAGING.length) closeModal('hometaxImportModal');
+  alert('🏛️ [국세청 홈택스 전표 반영 완료!]\n\n'
+    + '• 신규 매출전표 등록: ' + fmt(sAdd) + '건\n'
+    + '• 신규 매입전표 등록: ' + fmt(pAdd) + '건\n'
+    + '• 신규 거래처 자동등록: ' + fmt(cAdd) + '곳\n'
+    + '• 중복 자동 건너뜀: ' + fmt(dupSkip) + '건');
+};
+
+window.importHometaxFiles = async function(fileList){
+  openHometaxImportModal();
+  await handleHometaxInputs({ files: fileList });
+};
 
 window.addEventListener('dragover', e => {
   e.preventDefault();
@@ -8469,26 +9317,43 @@ function exportHometaxExcel(){
 
   const rows = list.map(s => {
     const cli = (db.clients||[]).find(c => normSearch(c.name) === normSearch(s.client)) || {};
-    const L = s.lines || [{}];
-    return {
+    const L = (s.lines && s.lines.length ? s.lines : [{}]).slice(0, 4);
+    const dd = String(s.date||'').slice(8,10);
+    const obj = {
       '전자세금계산서종류': s.vat === 0 ? '03(계산서)' : '01(일반)',
       '작성일자': String(s.date||'').replace(/-/g,''),
       '공급자등록번호': String(db.comp.bizNo||'').replace(/[^0-9]/g,''),
-      '공급자상호': db.comp.name,
-      '공급자성명': db.comp.ceo,
-      '공급받는자등록번호': String(cli.bizNo||'').replace(/[^0-9]/g,''),
+      '공급자상호': db.comp.name || '오라테크',
+      '공급자성명': db.comp.ceo || '김향래',
+      '공급자사업장주소': db.comp.addr || '',
+      '공급자업태': db.comp.type || '도소매',
+      '공급자종목': db.comp.item || '기계장비',
+      '공급자이메일': db.comp.email || '',
+      '공급받는자등록번호': String((s.otInfo && s.otInfo.bizNo) || cli.bizNo || '').replace(/[^0-9]/g,''),
       '공급받는자상호': s.otInfo ? s.otInfo.name : s.client,
-      '공급받는자성명': cli.ceo||'',
-      '공급받는자이메일': cli.email||'',
+      '공급받는자성명': (s.otInfo && s.otInfo.ceo) || cli.ceo || '',
+      '공급받는자사업장주소': (s.otInfo && s.otInfo.addr) || cli.addr || '',
+      '공급받는자업태': cli.bizType || '',
+      '공급받는자종목': cli.bizItem || '',
+      '공급받는자이메일1': cli.email || '',
       '공급가액': s.supply,
       '세액': s.vat,
-      '품목일자': String(s.date||'').slice(8,10),
-      '품목명': L[0].item || '기계장비',
-      '규격': L[0].spec || '',
-      '수량': L[0].qty || 1,
-      '단가': L[0].price || s.supply,
+      '비고': s.memo || '',
       '영수/청구': (Number(s.paid)||0) >= (s.supply+s.vat) ? '01(영수)' : '02(청구)'
     };
+    L.forEach((ln, idx) => {
+      const k = idx + 1;
+      const lSup = Number(ln.sup || ln.supply || (idx===0 ? s.supply : 0)) || 0;
+      const lVat = s.vat === 0 ? 0 : (ln.vat !== undefined ? Number(ln.vat) : Math.round(lSup * 0.1));
+      obj[`품목일자${k}`] = dd;
+      obj[`품목명${k}`] = ln.item || (idx===0 ? '기계장비' : '');
+      obj[`품목규격${k}`] = ln.spec || '';
+      obj[`품목수량${k}`] = ln.qty || 1;
+      obj[`품목단가${k}`] = ln.price || lSup;
+      obj[`품목공급가액${k}`] = lSup;
+      obj[`품목세액${k}`] = lVat;
+    });
+    return obj;
   });
 
   const ws = XLSX.utils.json_to_sheet(rows);
